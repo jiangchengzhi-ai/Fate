@@ -23,3 +23,5 @@ knowledge/passages.generated.json
 Thumbs.db
 desktop.ini
 .DS_Store
+detect*.json
+probe*.mjs
