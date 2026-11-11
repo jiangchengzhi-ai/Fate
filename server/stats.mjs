@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = path.join(ROOT, 'data', 'stats.json');
 
-const blankBucket = () => ({ views: {}, events: {}, models: {} });
+const blankBucket = () => ({ views: {}, events: {}, models: {}, users: {} });
 const blank = () => ({ days: {}, totals: blankBucket() });
 
 let state = (() => {
@@ -47,22 +47,34 @@ function bucket(day = dayKey()) {
 
 const bump = (obj, key, n = 1) => { obj[key] = (obj[key] || 0) + n; };
 
-export function recordView(p) {
+export function recordView(p, phone = '') {
   const k = String(p || '/').slice(0, 120);
   bump(bucket().views, k);
   bump(state.totals.views, k);
+  touchUser(phone, (u) => { u.views += 1; });
   schedule();
 }
 
-export function recordEvent(name) {
+export function recordEvent(name, phone = '') {
   const k = String(name || '').slice(0, 120);
   if (!k) return;
   bump(bucket().events, k);
   bump(state.totals.events, k);
+  if (k !== '登录') touchUser(phone, (u) => { u.events += 1; });
   schedule();
 }
 
-export function recordModel(kind, usage) {
+function touchUser(phone, fn) {
+  if (!phone) return;
+  if (!state.totals.users) state.totals.users = {};
+  if (!state.totals.users[phone]) state.totals.users[phone] = { views: 0, events: 0, calls: 0, tokens: 0 };
+  if (!bucket().users) bucket().users = {};
+  if (!bucket().users[phone]) bucket().users[phone] = { views: 0, events: 0, calls: 0, tokens: 0 };
+  fn(state.totals.users[phone]);
+  fn(bucket().users[phone]);
+}
+
+export function recordModel(kind, usage, phone = '') {
   const b = bucket();
   if (!b.models[kind]) b.models[kind] = { calls: 0, in: 0, out: 0 };
   if (!state.totals.models[kind]) state.totals.models[kind] = { calls: 0, in: 0, out: 0 };
@@ -73,11 +85,12 @@ export function recordModel(kind, usage) {
     m.in += inTok;
     m.out += outTok;
   }
+  touchUser(phone, (u) => { u.calls += 1; u.tokens += inTok + outTok; });
   schedule();
 }
 
 export function snapshot(days = 14) {
-  const out = { days: [], totals: state.totals };
+  const out = { days: [], totals: state.totals, users: state.totals.users || {} };
   const now = new Date();
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
@@ -109,6 +122,7 @@ export function today() {
     topViews: Object.entries(b.views || {}).sort((a, b2) => b2[1] - a[1]).slice(0, 8),
     topEvents: Object.entries(b.events || {}).sort((a, b2) => b2[1] - a[1]).slice(0, 10),
     models: b.models || {},
+    users: b.users || {},
   };
 }
 

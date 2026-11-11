@@ -30,7 +30,7 @@ function shell(title, body, dock) {
       ${body}
     </div>
     <div class="dock">
-      <div class="dock-info"><b>本地</b>推演</div>
+      <div class="dock-info"><b>一步</b>出结果</div>
       ${dock}
     </div>`;
 }
@@ -59,7 +59,7 @@ export function finish(result, extra) {
 export function mingView() {
   return {
     html: shell('四柱', `
-      <p class="lead">以公历生日与时辰立四柱，再排起运、大运与流年。年柱以立春为界，月柱以十二节为界，日柱按儒略日推算，时柱由日干起。</p>
+      <p class="lead">填出生日期和时辰，就能排出命盘，看一生的运势起伏。</p>
       <div class="field">
         <label for="md">出生日期 · 公历</label>
         <input class="input" type="date" id="md" data-date max="${today()}" min="1900-01-01">
@@ -178,7 +178,7 @@ export function buView() {
 
   return {
     html: shell('起课', `
-      <p class="lead">小六壬以农历月、日、时辰三个数起课，从大安顺数，落宫断事。默认取此刻的农历与时辰，可以改。</p>
+      <p class="lead">心里想一件事，选好时间，就能起课看眼下顺不顺。</p>
 
       <div class="field">
         <label for="bq">要问的事</label>
@@ -297,7 +297,7 @@ const ZE_GROUPS = [
 export function zeView() {
   return {
     html: shell('择日', `
-      <p class="lead">先说清楚要办什么事，再选一个时间段。以月建与日辰定建除十二神，参宜忌与冲煞，挑出合适的日子。</p>
+      <p class="lead">选要办的事、看多久之内，就能挑出合适的日子。</p>
 
       <div class="field">
         <label>类别</label>

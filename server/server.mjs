@@ -13,7 +13,7 @@ import { interpret, llmStatus } from './llm.mjs';
 import { analyzeImage, visionStatus } from './vision.mjs';
 import {
   readSession, readAdmin, verifyPerson, makeSession, cookie, clearCookie,
-  verifyAdminKey, adminToken, addPerson, removePerson, setEnabled, listPeople,
+  verifyAdminKey, adminToken, addPerson, removePerson, setEnabled, listPeople, regenerateCode, renamePerson,
 } from './auth.mjs';
 import { recordView, recordEvent, recordModel, snapshot, today, flush } from './stats.mjs';
 import { loginPage, adminPage } from './pages.mjs';
@@ -265,12 +265,14 @@ const server = http.createServer(async (req, res) => {
         }
         return redirect(res, '/login');
       }
+      const range = Math.min(90, Math.max(7, Number(url.searchParams.get('range')) || 14));
       const html = adminPage({
         today: today(),
-        snap: snapshot(14),
+        snap: snapshot(range),
         people: listPeople(),
         msg: url.searchParams.get('msg') || '',
         adminKey: adminToken(),
+        range,
       });
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
       return res.end(html);
@@ -288,6 +290,14 @@ const server = http.createServer(async (req, res) => {
         removePerson(phone);
         return redirect(res, '/admin?msg=' + encodeURIComponent('已移除'));
       }
+      if (p === '/admin/people/code') {
+        regenerateCode(phone);
+        return redirect(res, '/admin?msg=' + encodeURIComponent('已换新访问码'));
+      }
+      if (p === '/admin/people/rename') {
+        renamePerson(phone, form.get('name'));
+        return redirect(res, '/admin?msg=' + encodeURIComponent('已改名'));
+      }
       if (p === '/admin/people/toggle') {
         const person = listPeople().find((x) => x.phone === phone);
         setEnabled(phone, !(person?.enabled));
@@ -296,11 +306,33 @@ const server = http.createServer(async (req, res) => {
       return redirect(res, '/admin');
     }
 
+    if (p === '/admin/export.csv') {
+      if (!adminSess) return redirect(res, '/login');
+      const users = snapshot(1).users || {};
+      const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+      const lines = ['手机号,称呼,状态,访问码,访问,点击,模型调用,tokens,最近登录'];
+      for (const person of listPeople()) {
+        const u = users[person.phone] || {};
+        lines.push([
+          person.phone, person.name, person.enabled ? '启用' : '停用', person.code,
+          u.views || 0, u.events || 0, u.calls || 0, u.tokens || 0,
+          person.lastSeen || '',
+        ].map(esc).join(','));
+      }
+      const csv = '\ufeff' + lines.join('\r\n');
+      res.writeHead(200, {
+        'content-type': 'text/csv; charset=utf-8',
+        'content-disposition': 'attachment; filename="fatetell-people.csv"',
+        'cache-control': 'no-store',
+      });
+      return res.end(csv);
+    }
+
     if (p === '/api/stats/event' && req.method === 'POST') {
       if (!session) return json(res, 401, { error: '未登录' });
       const body = await readBody(req);
-      if (body.path) recordView(String(body.path));
-      if (body.name) recordEvent(String(body.name));
+      if (body.path) recordView(String(body.path), session.phone);
+      if (body.name) recordEvent(String(body.name), session.phone);
       return json(res, 200, { ok: true });
     }
 
@@ -366,7 +398,7 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const out = await analyzeImage(kind, image);
-        recordModel('vision', out.usage);
+        recordModel('vision', out.usage, session?.phone);
         return json(res, 200, out);
       } catch (e) {
         const code = e.code === 'BAD_IMAGE' || e.code === 'BAD_KIND' ? 400 : e.code === 'TIMEOUT' ? 504 : 502;
@@ -402,7 +434,7 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const out = await interpret(payload);
-        recordModel('interpret', out.usage);
+        recordModel('interpret', out.usage, session?.phone);
         const rec = { text: out.text, model: out.model, usage: out.usage, at: Date.now() };
         CACHE.set(hash, rec);
         if (CACHE.size > 100) CACHE.delete(CACHE.keys().next().value);

@@ -75,6 +75,24 @@ export function setEnabled(phone, enabled) {
   return true;
 }
 
+export function regenerateCode(phone) {
+  const data = loadAccess();
+  const p = data.people.find((x) => x.phone === phone);
+  if (!p) return null;
+  p.code = String(Math.floor(100000 + Math.random() * 900000));
+  saveAccess(data);
+  return p.code;
+}
+
+export function renamePerson(phone, name) {
+  const data = loadAccess();
+  const p = data.people.find((x) => x.phone === phone);
+  if (!p) return false;
+  p.name = String(name || '').slice(0, 20) || p.name;
+  saveAccess(data);
+  return true;
+}
+
 export function verifyPerson(phone, code) {
   const p = loadAccess().people.find((x) => x.phone === String(phone || '').trim());
   if (!p || !p.enabled) return null;
