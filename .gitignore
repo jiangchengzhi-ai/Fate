@@ -1,0 +1,25 @@
+# 本地配置与密钥
+.env
+.env.cmd
+.env.local
+
+# 运行产物
+server/server.log
+server/certs/
+*.log
+node_modules/
+
+# 测试截图、浏览器缓存
+shots*/
+preview/
+
+# 扫描件与转录稿（可能涉及版权/隐私，不入库）
+knowledge/sources/inbox/*
+!knowledge/sources/inbox/README.md
+knowledge/sources/*.md
+knowledge/passages.generated.json
+
+# 系统文件
+Thumbs.db
+desktop.ini
+.DS_Store

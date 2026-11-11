@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fatetell · 预览</title>
+<style>
+  html,body{margin:0;height:100%;background:#0B1210;color:#E9E4D6;
+    font-family:"Songti SC","STSong","Noto Serif CJK SC",serif;}
+  .wrap{display:flex;flex-direction:column;height:100%}
+  iframe{flex:1;width:100%;border:0;display:block;background:#0B1210}
+  .bar{display:flex;align-items:center;gap:12px;padding:8px 12px;font-size:11px;
+    letter-spacing:.08em;color:rgba(233,228,214,.55);border-top:1px solid rgba(233,228,214,.12)}
+  .bar a{color:#CBA968;text-decoration:none}
+  .dot{width:5px;height:5px;border-radius:50%;background:#A33B2B}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <iframe src="http://127.0.0.1:5173/" title="fatetell 应用"></iframe>
+    <div class="bar">
+      <span class="dot"></span>
+      <span>若上方空白，说明此面板不允许内嵌本地页面</span>
+      <a id="open" href="http://127.0.0.1:5173/" target="_blank" rel="noopener">在新窗口打开 →</a>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var base = location.protocol === 'file:' ? 'http://127.0.0.1:5173/' : '/';
+      var frame = document.querySelector('iframe');
+      var open = document.getElementById('open');
+      if (location.protocol !== 'file:') {
+        frame.src = base;
+        open.href = base;
+      }
+    })();
+  </script>
+</body>
+</html>

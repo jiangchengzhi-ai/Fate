@@ -1,0 +1,16 @@
+{
+  "name": "fatetell",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "传统文化娱乐向 H5：命、卜、相、堪舆、择日五门，典籍检索 + 确定性工具层",
+  "scripts": {
+    "start": "node server/server.mjs",
+    "dev": "node server/server.mjs --port 5173",
+    "ingest": "node scripts/ingest.mjs knowledge/sources",
+    "test": "node tests/tools.test.mjs && node tests/llm.test.mjs",
+    "test:tools": "node tests/tools.test.mjs",
+    "test:llm": "node tests/llm.test.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

@@ -1,0 +1,401 @@
+{
+  "version": "0.2.0",
+  "updated": "2026-10-30",
+  "categories": [
+    {
+      "id": "ming",
+      "name": "命",
+      "glyph": "命",
+      "sub": "四柱",
+      "intro": "以出生年月日时立四柱，看五行强弱与十神格局。命是底色，运是次序。",
+      "methods": [
+        {
+          "id": "bazi",
+          "name": "四柱排盘",
+          "desc": "生日时辰 → 四柱、五行、十神",
+          "href": "#/ming"
+        }
+      ]
+    },
+    {
+      "id": "bu",
+      "name": "卜",
+      "glyph": "卜",
+      "sub": "占断",
+      "intro": "以当下之时起课，问一件具体的事。卜重时机，讲究一事一占。",
+      "methods": [
+        {
+          "id": "xiaoliuren",
+          "name": "小六壬",
+          "desc": "月日时三数 → 六宫吉凶",
+          "href": "#/bu"
+        }
+      ]
+    },
+    {
+      "id": "xiang",
+      "name": "相",
+      "glyph": "相",
+      "sub": "形神",
+      "intro": "相人形神气色，观其骨肉与神态。相不独论，须与命、行合看。",
+      "methods": [
+        {
+          "id": "face",
+          "name": "面相",
+          "desc": "三停五官 → 六维气象",
+          "href": "#/face"
+        },
+        {
+          "id": "palm",
+          "name": "手相",
+          "desc": "掌型三线 → 六维气象",
+          "href": "#/palm"
+        },
+        {
+          "id": "combo",
+          "name": "综合相",
+          "desc": "面 + 掌 + 命 → 合参",
+          "href": "#/combo"
+        }
+      ]
+    },
+    {
+      "id": "kan",
+      "name": "堪舆",
+      "glyph": "堪",
+      "sub": "方位",
+      "intro": "以坐向定宅卦，以生年定命卦。宅有宅气，人有命气，两气相参。",
+      "methods": [
+        {
+          "id": "yangzhai",
+          "name": "阳宅",
+          "desc": "宅向 · 门 · 床 · 灶 · 书桌",
+          "href": "#/compass"
+        },
+        {
+          "id": "yinzha",
+          "name": "阴宅",
+          "desc": "坐向 · 来去水 · 形势",
+          "href": "#/yinzha"
+        }
+      ]
+    },
+    {
+      "id": "ze",
+      "name": "择日",
+      "glyph": "择",
+      "sub": "趋避",
+      "intro": "以月建日辰定建除十二神，参黄道黑道，择可用之日，避所忌之时。",
+      "methods": [
+        {
+          "id": "zeri",
+          "name": "黄历择日",
+          "desc": "日期 → 建除、宜忌、冲煞",
+          "href": "#/ze"
+        }
+      ]
+    }
+  ],
+  "books": [
+    {
+      "id": "yuanhai-ziping",
+      "title": "渊海子平",
+      "author": "宋·徐升 编",
+      "cat": "ming",
+      "edition": "明刻本",
+      "authority": "中",
+      "note": "子平法总汇，托名徐升。明刻本与后世通行本条文互有出入，宜以明嘉靖、万历间刻本参校。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "sanming-tonghui",
+      "title": "三命通会",
+      "author": "明·万民英",
+      "cat": "ming",
+      "edition": "《四库全书》本（十二卷）",
+      "authority": "高",
+      "note": "四库著录，体系最完整，是命理集大成之作；文字以四库本最可信。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 1
+    },
+    {
+      "id": "ditiansui",
+      "title": "滴天髓阐微",
+      "author": "旧题宋·京图 撰，明·刘基 注，清·任铁樵 增注",
+      "cat": "ming",
+      "edition": "清光绪刻本",
+      "authority": "高",
+      "note": "原书简奥，任铁樵注本最详备。读法：先原文，后任注，勿以后人歌诀代原文。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 3
+    },
+    {
+      "id": "ziping-zhenquan",
+      "title": "子平真诠",
+      "author": "清·沈孝瞻",
+      "cat": "ming",
+      "edition": "清刻本；民国徐乐吾评注本",
+      "authority": "高",
+      "note": "论格局取用最精。原书四十七篇，徐注可参，但徐氏掺入己意，需分辨。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 1
+    },
+    {
+      "id": "qiongtong-baojian",
+      "title": "穷通宝鉴",
+      "author": "清·余春台 辑（原名《栏江网》）",
+      "cat": "ming",
+      "edition": "民国徐乐吾评注本",
+      "authority": "中",
+      "note": "按月令论调候，实用性强；徐注本流传最广，原文需与旧本对校。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 1
+    },
+    {
+      "id": "zhouyi",
+      "title": "周易",
+      "author": "旧题伏羲、文王、孔子",
+      "cat": "bu",
+      "edition": "《十三经注疏》本（王弼注、孔颖达疏）",
+      "authority": "高",
+      "note": "经传合编的通行底本。占筮用本卦变卦，义理与象数两路不可偏废。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "meihua-yishu",
+      "title": "梅花易数",
+      "author": "旧题宋·邵雍",
+      "cat": "bu",
+      "edition": "清刻本",
+      "authority": "中",
+      "note": "托名邵雍，实为明人辑录。起卦简捷，最宜初学者体会象数。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "bushi-zhengzong",
+      "title": "卜筮正宗",
+      "author": "清·王洪绪",
+      "cat": "bu",
+      "edition": "清康熙刻本",
+      "authority": "高",
+      "note": "六爻纳甲体系完备，条理清楚，是六爻入门与进阶的常用底本。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "zengshan-buyi",
+      "title": "增删卜易",
+      "author": "清·野鹤老人",
+      "cat": "bu",
+      "edition": "清乾隆刻本",
+      "authority": "高",
+      "note": "以实占案例立论，重验证，少空谈，宜与《卜筮正宗》对读。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "liuren-da-quan",
+      "title": "六壬大全",
+      "author": "明·佚名 辑",
+      "cat": "bu",
+      "edition": "《四库全书》本（十二卷）",
+      "authority": "高",
+      "note": "四库著录，六壬课式与神将最全，是六壬的骨干文献。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "xiaoliuren-ben",
+      "title": "小六壬（掐指一算）",
+      "author": "民间口诀，无单一作者",
+      "cat": "bu",
+      "edition": "通行口诀本",
+      "authority": "中",
+      "note": "六宫（大安、留连、速喜、赤口、小吉、空亡）依月日时顺数。口诀流派多，取最通行的一套。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 2
+    },
+    {
+      "id": "shenxiang-quanbian",
+      "title": "神相全编",
+      "author": "旧题宋·陈抟，明人增补",
+      "cat": "xiang",
+      "edition": "明万历刻本（《四库全书存目丛书》影印）",
+      "authority": "高",
+      "note": "十二卷，集相法之大成。托名陈抟，实际成书于明。明刻本最全，清《图书集成》本有删节。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 6
+    },
+    {
+      "id": "mayi-shenxiang",
+      "title": "麻衣神相",
+      "author": "旧题宋·麻衣道者",
+      "cat": "xiang",
+      "edition": "明刊本",
+      "authority": "中",
+      "note": "流传最广的相书，坊刻极多，讹误亦多。宜取明刊足本，勿用晚近删改本。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 5
+    },
+    {
+      "id": "taiqing-shenjian",
+      "title": "太清神鉴",
+      "author": "旧题后周·王朴",
+      "cat": "xiang",
+      "edition": "《四库全书》本（六卷）",
+      "authority": "高",
+      "note": "四库自《永乐大典》辑出，是现存体系较古的相书，文字可信度高。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 2
+    },
+    {
+      "id": "liuzhuang-xiangfa",
+      "title": "柳庄相法",
+      "author": "明·袁珙",
+      "cat": "xiang",
+      "edition": "明刻本",
+      "authority": "中",
+      "note": "袁珙（柳庄）以相术名于永乐朝。书多后人附益，需与《明史》本传参看。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 2
+    },
+    {
+      "id": "xiangli-hengzhen",
+      "title": "相理衡真",
+      "author": "清·陈钊",
+      "cat": "xiang",
+      "edition": "清道光刻本",
+      "authority": "中",
+      "note": "清代相法总结性著作，条理清晰，附图较多。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 1
+    },
+    {
+      "id": "zangshu",
+      "title": "葬书",
+      "author": "旧题晋·郭璞",
+      "cat": "kan",
+      "edition": "《四库全书》本",
+      "authority": "高",
+      "note": "风水理论的源头文本。「乘生气」三字是全书纲领。后人注本极多，宜以四库本原文为准。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 5
+    },
+    {
+      "id": "bazhai-mingjing",
+      "title": "八宅明镜",
+      "author": "旧题明·顾吾庐",
+      "cat": "kan",
+      "edition": "清乾隆刻本",
+      "authority": "中",
+      "note": "八宅法最流行的读本。作者与成书年代有争议，用法以东西四宅、大游年歌为骨干。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 3
+    },
+    {
+      "id": "yangzhai-sanyao",
+      "title": "阳宅三要",
+      "author": "清·赵九峰",
+      "cat": "kan",
+      "edition": "清道光刻本",
+      "authority": "高",
+      "note": "以门、主、灶为三要，重实用，是阳宅法的入门正书。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 1
+    },
+    {
+      "id": "shenshi-xuankong",
+      "title": "沈氏玄空学",
+      "author": "清·沈竹礽（沈绍勋）",
+      "cat": "kan",
+      "edition": "民国铅印本",
+      "authority": "高",
+      "note": "玄空飞星的集成之作。沈氏自述得章仲山传本，书出较晚，理论完整。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "dili-wujue",
+      "title": "地理五诀",
+      "author": "清·赵九峰",
+      "cat": "kan",
+      "edition": "清道光刻本",
+      "authority": "中",
+      "note": "龙、穴、砂、水、向五诀，是峦头法的普及读本。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "xieji-bianfang",
+      "title": "协纪辨方书",
+      "author": "清·允禄 等奉敕撰",
+      "cat": "ze",
+      "edition": "《四库全书》本（三十六卷）",
+      "authority": "高",
+      "note": "择日的官修总汇，神煞、宜忌、建除的权威依据。乾隆四年武英殿本最善。",
+      "source": "public-domain",
+      "status": "excerpts",
+      "passageCount": 5
+    },
+    {
+      "id": "xiangji-tongshu",
+      "title": "象吉通书",
+      "author": "清·魏鉴",
+      "cat": "ze",
+      "edition": "清刻本",
+      "authority": "中",
+      "note": "民间择日常用通书，内容庞杂，宜与《协纪辨方书》对校后使用。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "aotou-tongshu",
+      "title": "鳌头通书",
+      "author": "清·佚名",
+      "cat": "ze",
+      "edition": "清刻本",
+      "authority": "中",
+      "note": "通书类汇编，实用条目多，理论性弱。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    },
+    {
+      "id": "yuxia-ji",
+      "title": "玉匣记",
+      "author": "旧题晋·许真君",
+      "cat": "ze",
+      "edition": "清刻本",
+      "authority": "低",
+      "note": "民俗择日手册，托名许逊。流传广而来源杂，只宜作民俗材料，不宜作术理依据。",
+      "source": "public-domain",
+      "status": "metadata",
+      "passageCount": 0
+    }
+  ]
+}

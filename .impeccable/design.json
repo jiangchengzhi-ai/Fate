@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T07:10:00.000Z",
+  "title": "Design System: fatetell",
+  "extensions": {
+    "colorMeta": {
+      "ink-jade": {
+        "role": "neutral",
+        "displayName": "Ink Jade",
+        "canonical": "#0B1210",
+        "tonalRamp": ["#050807", "#0B1210", "#15211D", "#1F2E28", "#2B3D35", "#3A4E45", "#4C6158", "#61776D"]
+      },
+      "compass-brass": {
+        "role": "secondary",
+        "displayName": "Compass Brass",
+        "canonical": "#A98A4E",
+        "tonalRamp": ["#2A2114", "#3F321C", "#554426", "#6B572F", "#836B3B", "#9C7F47", "#B79A5F", "#CDB47C"]
+      },
+      "cinnabar": {
+        "role": "primary",
+        "displayName": "Cinnabar",
+        "canonical": "#A33B2B",
+        "tonalRamp": ["#2B0F0A", "#4A1A12", "#661F17", "#7F2A1F", "#9C3325", "#B5473A", "#C96658", "#DC8C80"]
+      },
+      "rice-paper": {
+        "role": "neutral",
+        "displayName": "Rice Paper",
+        "canonical": "#EDE7D8",
+        "tonalRamp": ["#8F8878", "#A7A08F", "#BDB6A4", "#D2CBB8", "#E5DDCB", "#EDE7D8", "#F3EEE2", "#F9F5EC"]
+      },
+      "paper-ink": {
+        "role": "neutral",
+        "displayName": "Paper Ink",
+        "canonical": "#241F17",
+        "tonalRamp": ["#0E0B08", "#1A1610", "#241F17", "#39322A", "#51483E", "#6B6154", "#887D6C", "#A89C89"]
+      },
+      "bone": {
+        "role": "neutral",
+        "displayName": "Bone White",
+        "canonical": "#E9E4D6",
+        "tonalRamp": ["#5C594F", "#787467", "#949081", "#B0AC9C", "#CCC7B7", "#E9E4D6", "#F2EEE3", "#FAF7EF"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "批注标题、门名，只出现在结果页。" },
+      "headline": { "displayName": "Headline", "purpose": "页面标题：观面、择日、定盘。" },
+      "title": { "displayName": "Title", "purpose": "表单题目与报告小节标题。" },
+      "body": { "displayName": "Body", "purpose": "正文、报告段落；纸面行宽约 34em。" },
+      "label": { "displayName": "Label", "purpose": "字段标签、表头、引文出处；9.5px 为下限。" }
+    },
+    "shadows": [
+      { "name": "paper-lift", "value": "0 30px 70px -34px rgba(0,0,0,0.95)", "purpose": "宣纸批注的唯一投影。" },
+      { "name": "primary-cta", "value": "0 10px 30px -16px rgba(163,59,43,0.9)", "purpose": "主按钮的微弱上浮，不用于其它元素。" }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.22,0.61,0.36,1)", "purpose": "所有状态过渡。" },
+      { "name": "dial-in", "value": "1100ms", "purpose": "命盘首次入场：-7° 旋转 + 缩放。" },
+      { "name": "paper-in", "value": "700ms", "purpose": "批注纸落定：上移 10px + -0.35° 旋转。" },
+      { "name": "state", "value": "220ms", "purpose": "hover / 选中 / 焦点。" }
+    ],
+    "breakpoints": [
+      { "name": "narrow", "value": "379px" },
+      { "name": "phone", "value": "390px" },
+      { "name": "desktop-frame", "value": "900px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "唯一的主行动：起盘、起课、挑日子、生成批注。",
+      "html": "<button class=\"ds-btn-primary\">挑 日 子</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;height:50px;padding:0 22px;border:1px solid rgba(245,235,214,.14);border-radius:1px;background:var(--cinnabar,#A33B2B);color:#F5EBD6;font-family:'Songti SC',STSong,serif;font-size:15px;letter-spacing:.22em;text-indent:.22em;box-shadow:0 10px 30px -16px rgba(163,59,43,.9);transition:background .25s cubic-bezier(.22,.61,.36,1)}.ds-btn-primary:hover{background:#BE4C39}.ds-btn-primary:active{background:#8B2F22}.ds-btn-primary:focus-visible{outline:2px solid #CBA968;outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "次级操作：返回、重试、复制、取消。",
+      "html": "<button class=\"ds-btn-ghost\">复 制</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border:1px solid rgba(233,228,214,.18);border-radius:1px;background:transparent;color:rgba(233,228,214,.72);font-family:'PingFang SC',system-ui,sans-serif;font-size:13.5px;letter-spacing:.14em;transition:all .22s cubic-bezier(.22,.61,.36,1)}.ds-btn-ghost:hover{border-color:rgba(169,138,78,.4);color:#E9E4D6}"
+    },
+    {
+      "name": "Option",
+      "kind": "chip",
+      "refersTo": "option",
+      "description": "单选与筛选的最小单位；选中由边框、底色和朱砂角点三重表达。",
+      "html": "<div class=\"ds-opts\"><button class=\"ds-opt\" aria-pressed=\"true\">入宅搬家</button><button class=\"ds-opt\" aria-pressed=\"false\">出行赴任</button></div>",
+      "css": ".ds-opts{display:flex;flex-wrap:wrap;gap:8px}.ds-opt{position:relative;min-height:44px;padding:9px 14px;border:1px solid rgba(233,228,214,.18);border-radius:1px;background:rgba(233,228,214,.018);color:rgba(233,228,214,.72);font-size:13.5px;letter-spacing:.05em;transition:all .22s cubic-bezier(.22,.61,.36,1)}.ds-opt[aria-pressed=\"true\"]{border-color:#CBA968;background:rgba(169,138,78,.13);color:#E9E4D6;box-shadow:inset 0 0 0 1px rgba(203,169,104,.22)}.ds-opt[aria-pressed=\"true\"]::after{content:'';position:absolute;top:-3px;right:-3px;width:5px;height:5px;background:#BE4C39}"
+    },
+    {
+      "name": "Paper Report",
+      "kind": "custom",
+      "refersTo": "paper-report",
+      "description": "结果唯一的容器：双层版框、竖排题签、朱砂钤印。",
+      "html": "<article class=\"ds-paper\"><div class=\"ds-paper-inner\"><div class=\"ds-kicker\">2026年11月3日 · 传统文化 · 娱乐参考</div><h2 class=\"ds-title\">择日</h2><p class=\"ds-sub\">求婚 · 未来 30 天</p><div class=\"ds-rule\"></div><p class=\"ds-body\">按「求婚」看未来 30 天：建议 11-04（成）、11-15（成）、11-19（定）。</p></div></article>",
+      "css": ".ds-paper{padding:7px;background:linear-gradient(155deg,#F0EADB,#E2D9C4);border:1px solid rgba(36,31,23,.42);box-shadow:0 30px 70px -34px rgba(0,0,0,.95);color:#241F17}.ds-paper-inner{border:1px solid rgba(36,31,23,.3);padding:22px 20px}.ds-kicker{font-size:10.5px;letter-spacing:.16em;color:rgba(36,31,23,.62)}.ds-title{margin:6px 0 0;font-family:'Songti SC',STSong,serif;font-weight:400;font-size:27px;letter-spacing:.16em}.ds-sub{margin:5px 0 0;font-family:'Songti SC',STSong,serif;font-size:12px;letter-spacing:.1em;color:rgba(36,31,23,.66)}.ds-rule{height:1px;background:rgba(36,31,23,.2);margin:15px 0 0}.ds-body{margin:12px 0 0;font-size:13px;line-height:1.95;color:rgba(36,31,23,.86)}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "option",
+      "description": "日期、年份、提问的唯一输入形制。",
+      "html": "<label class=\"ds-field\"><span>出生日期 · 公历</span><input type=\"date\" value=\"1994-08-12\"></label>",
+      "css": ".ds-field{display:block;font-family:'PingFang SC',system-ui,sans-serif}.ds-field span{display:block;margin-bottom:8px;font-size:11.5px;letter-spacing:.16em;color:rgba(233,228,214,.54)}.ds-field input{width:100%;height:46px;padding:0 13px;border:1px solid rgba(233,228,214,.18);border-radius:1px;background:rgba(233,228,214,.02);color:#E9E4D6;font-size:14px;letter-spacing:.04em;color-scheme:dark}.ds-field input:focus{outline:none;border-color:#A98A4E;background:rgba(169,138,78,.06)}"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "description": "2.4 秒提示；带撤销时 6 秒，动作在右。",
+      "html": "<div class=\"ds-toast\"><span>已删除这页批注</span><button>撤销</button></div>",
+      "css": ".ds-toast{display:inline-flex;align-items:center;gap:14px;padding:10px 18px;border:1px solid rgba(169,138,78,.26);background:rgba(21,33,29,.96);color:#E9E4D6;font-size:12.5px;letter-spacing:.06em}.ds-toast button{border-bottom:1px solid rgba(169,138,78,.26);color:#CBA968;font-size:12px;letter-spacing:.04em}"
+    }
+  ],
+  "narrative": {
+    "northStar": "铜镜与宣纸",
+    "overview": "界面只承认两种物质：一块墨玉底上的黄铜罗盘，和一张写满批注的宣纸。罗盘是尺，负责输入与方位；宣纸是纸，负责结论。所有设计判断都回到这两个比喻：它是不是刻在铜上的一根线，还是落在纸上的一笔字。这套系统拒绝深色科技风的默认装饰：没有渐变文字，没有发光卡片，没有圆角浮层。深度靠色阶与发丝线，不靠阴影堆叠；强调靠字重与字号，不靠第二套亮色。唯一的暖色行动色是朱砂，且只出现在钤印与主操作上——它的稀有是刻意的。",
+    "keyCharacteristics": [
+      "墨玉三阶铺底，黄铜发丝线勾结构，宣纸只承载结果。",
+      "直角优先（0–1px），圆只属于罗盘与印。",
+      "宋体作显示与标题，黑体作正文；小字不低 9.5px，且必须过 4.5:1。",
+      "动效只服务两处：盘面入场、纸面落定。"
+    ],
+    "rules": [
+      { "name": "The Paper-Only Rule", "body": "宣纸色只用于结果：批注、印章、报告里的表格。导航、表单、设置永远留在墨玉上。", "section": "colors" },
+      { "name": "The Seal Rule", "body": "朱砂的用量以一枚印为上限：主按钮、钤印、区块标记。它不做背景、不做正文、不做图标填充色。", "section": "colors" },
+      { "name": "The Label Floor Rule", "body": "小于 9.5px 的字不存在。9.5–12px 的字必须达到 4.5:1，否则提亮，不靠加粗补偿。", "section": "typography" },
+      { "name": "The Two Faces Rule", "body": "宋体只做标题、题目、批语与数字；黑体只做正文、按钮、表单与提示。不新增第三种字体。", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "静止状态没有阴影；阴影只属于被拿起来的一张纸和挡住页面的一层幕。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 用 1px 发丝线与明度阶表达结构，阴影只给纸与幕。",
+      "Do 把结果放进宣纸，把操作留在墨玉。",
+      "Do 保持 0–1px 圆角；圆只给罗盘、印与状态点。",
+      "Do 主操作固定在拇指区，并在报告底部给再算一次 / 复制 / 存图。",
+      "Do 单选组用 radiogroup + aria-checked，点击目标 ≥44×44。",
+      "Do 所有小字过 4.5:1；9.5px 是下限。",
+      "Do 数字由工具层算，模型只负责叙述；分数必须有单位。"
+    ],
+    "donts": [
+      "Don't 用原生 optgroup 做分组选择：暗色下标签会白字白底。",
+      "Don't 用渐变文字、发光卡片、圆角浮层、卡片套卡片。",
+      "Don't 把朱砂用于正文或大面积背景。",
+      "Don't 用 emoji 或 Unicode 字符当图标。",
+      "Don't 在标题上方加 kicker/eyebrow 小标签。",
+      "Don't 让删除按钮默认获得焦点，或把 16px 的 × 放在拇指热区。",
+      "Don't 用颜色单独承载状态（吉/凶必须同时有文字）。",
+      "Don't 在 390px 下让表格首列换行或页面横向滚动。"
+    ]
+  }
+}
