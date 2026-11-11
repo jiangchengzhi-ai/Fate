@@ -2,6 +2,7 @@
    app.js — 路由与装配
    ========================================================================== */
 import { $, esc, installFrame, upgradeChoices, toast, go, goBack } from './ui.js';
+import { track } from './track.js';
 import { homeView } from './views/home.js';
 import { faceView, palmView } from './views/reading.js';
 import { comboView } from './views/combo.js';
@@ -111,6 +112,7 @@ function renderPage(target) {
   upgradeChoices(app);
   if (store.takeTrimNotice()) toast('批注簿最多存 24 页，最旧的一页已移出', { ms: 4000 });
   installFrame();
+  track('view', { path: hash });
 }
 
 /* 渲染失败时给出可见提示，不让页面变成一片黑 */
@@ -155,10 +157,20 @@ document.addEventListener('click', (e) => {
     return;
   }
 
+  const submit = e.target.closest('[data-go],[data-submit]');
+  if (submit) {
+    const label = (submit.textContent || '').trim().replace(/\s+/g, '').slice(0, 12);
+    track('click', { name: `${location.hash || '#/'} · ${label || '提交'}` });
+  }
+
   const a = e.target.closest('a[href^="#/"]');
   if (!a) return;
   const href = a.getAttribute('href');
   e.preventDefault();
+
+  const label = (a.querySelector('.gate-name')?.textContent || a.querySelector('.method-name')?.textContent || '')
+    .trim().replace(/\s+/g, '').slice(0, 24);
+  track('click', { name: label ? `入口:${label}` : `链接:${href}` });
 
   try { location.hash = href; } catch { /* 面板限制时忽略 */ }
   mount(href);

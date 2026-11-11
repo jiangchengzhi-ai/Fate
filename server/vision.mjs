@@ -137,7 +137,7 @@ export async function analyzeImage(kind, dataUrl) {
       throw err;
     }
     const parsed = parseFeatures(text, kind);
-    return { ...parsed, kind, model: data.model || CFG.model, ms: Date.now() - started };
+    return { ...parsed, kind, model: data.model || CFG.model, usage: data.usage || null, ms: Date.now() - started };
   } catch (e) {
     if (e.name === 'AbortError') {
       const err = new Error('视觉模型超时');

@@ -25,3 +25,5 @@ desktop.ini
 .DS_Store
 detect*.json
 probe*.mjs
+
+data/

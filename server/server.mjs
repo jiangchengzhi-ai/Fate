@@ -11,6 +11,12 @@ import { fileURLToPath } from 'node:url';
 import { TOOLS, TOOL_MANIFEST } from './tools.mjs';
 import { interpret, llmStatus } from './llm.mjs';
 import { analyzeImage, visionStatus } from './vision.mjs';
+import {
+  readSession, readAdmin, verifyPerson, makeSession, cookie, clearCookie,
+  verifyAdminKey, adminToken, addPerson, removePerson, setEnabled, listPeople,
+} from './auth.mjs';
+import { recordView, recordEvent, recordModel, snapshot, today, flush } from './stats.mjs';
+import { loginPage, adminPage } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.argv.find((a, i, arr) => arr[i - 1] === '--port') || process.env.PORT || 5173);
@@ -199,6 +205,21 @@ const readBody = (req, max = 1e6) => new Promise((resolve, reject) => {
   req.on('error', reject);
 });
 
+const readForm = (req, max = 1e4) => new Promise((resolve, reject) => {
+  let raw = '';
+  req.on('data', (c) => {
+    raw += c;
+    if (raw.length > max) reject(new Error('payload too large'));
+  });
+  req.on('end', () => resolve(new URLSearchParams(raw)));
+  req.on('error', reject);
+});
+
+const redirect = (res, to, headers = {}) => {
+  res.writeHead(302, { location: to, ...headers });
+  res.end();
+};
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
@@ -206,6 +227,86 @@ const server = http.createServer(async (req, res) => {
   try {
     if (p === '/api/health') {
       return json(res, 200, { ok: true, books: BOOKS.books.length, passages: PASSAGES.length, version: BOOKS.version });
+    }
+
+    /* ---------------- 访问控制 ---------------- */
+    const session = readSession(req);
+    const adminSess = readAdmin(req);
+
+    if (p === '/login' && req.method === 'GET') {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+      return res.end(loginPage());
+    }
+
+    if (p === '/login' && req.method === 'POST') {
+      const form = await readForm(req);
+      const phone = String(form.get('phone') || '').trim();
+      const code = String(form.get('code') || '').trim();
+      const person = verifyPerson(phone, code);
+      if (!person) {
+        res.writeHead(401, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+        return res.end(loginPage({ error: '手机号或访问码不对', phone }));
+      }
+      recordEvent('登录');
+      return redirect(res, '/', { 'set-cookie': cookie('ft_session', makeSession(person)) });
+    }
+
+    if (p === '/logout') {
+      return redirect(res, '/login', { 'set-cookie': [clearCookie('ft_session'), clearCookie('ft_admin')] });
+    }
+
+    if (p === '/admin' || p === '/admin/') {
+      if (!adminSess) {
+        const key = url.searchParams.get('key');
+        if (key && verifyAdminKey(key)) {
+          return redirect(res, '/admin', {
+            'set-cookie': cookie('ft_admin', makeSession({ phone: 'admin', name: '后台', admin: true })),
+          });
+        }
+        return redirect(res, '/login');
+      }
+      const html = adminPage({
+        today: today(),
+        snap: snapshot(14),
+        people: listPeople(),
+        msg: url.searchParams.get('msg') || '',
+        adminKey: adminToken(),
+      });
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+      return res.end(html);
+    }
+
+    if (p.startsWith('/admin/people/') && req.method === 'POST') {
+      if (!adminSess) return redirect(res, '/login');
+      const form = await readForm(req);
+      const phone = String(form.get('phone') || '').trim();
+      if (p === '/admin/people/add') {
+        const r = addPerson({ phone, name: form.get('name'), admin: form.get('admin') === 'on' });
+        return redirect(res, '/admin?msg=' + encodeURIComponent(r.error || '已添加'));
+      }
+      if (p === '/admin/people/remove') {
+        removePerson(phone);
+        return redirect(res, '/admin?msg=' + encodeURIComponent('已移除'));
+      }
+      if (p === '/admin/people/toggle') {
+        const person = listPeople().find((x) => x.phone === phone);
+        setEnabled(phone, !(person?.enabled));
+        return redirect(res, '/admin?msg=' + encodeURIComponent('已更新'));
+      }
+      return redirect(res, '/admin');
+    }
+
+    if (p === '/api/stats/event' && req.method === 'POST') {
+      if (!session) return json(res, 401, { error: '未登录' });
+      const body = await readBody(req);
+      if (body.path) recordView(String(body.path));
+      if (body.name) recordEvent(String(body.name));
+      return json(res, 200, { ok: true });
+    }
+
+    if (!session && !p.startsWith('/assets/') && p !== '/favicon.ico') {
+      if (p.startsWith('/api/')) return json(res, 401, { error: '未登录' });
+      return redirect(res, '/login');
     }
 
     if (p === '/api/kb/categories') {
@@ -265,6 +366,7 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const out = await analyzeImage(kind, image);
+        recordModel('vision', out.usage);
         return json(res, 200, out);
       } catch (e) {
         const code = e.code === 'BAD_IMAGE' || e.code === 'BAD_KIND' ? 400 : e.code === 'TIMEOUT' ? 504 : 502;
@@ -300,6 +402,7 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const out = await interpret(payload);
+        recordModel('interpret', out.usage);
         const rec = { text: out.text, model: out.model, usage: out.usage, at: Date.now() };
         CACHE.set(hash, rec);
         if (CACHE.size > 100) CACHE.delete(CACHE.keys().next().value);
@@ -377,6 +480,9 @@ const server = http.createServer(async (req, res) => {
 /* 可选 HTTPS：手机端定位/方向传感器要求安全上下文。证书放 server/certs/{cert,key}.pem，可用 mkcert 生成并信任。 */
 const useHttps = process.argv.includes('--https');
 const handle = server.listeners('request')[0];
+
+process.on('SIGINT', () => { flush(); process.exit(0); });
+process.on('SIGTERM', () => { flush(); process.exit(0); });
 
 const onListen = (scheme) => () => {
   console.log(`fatetell server → ${scheme}://${HOST}:${PORT}  (${BOOKS.books.length} 部典籍 / ${PASSAGES.length} 条片段)`);
