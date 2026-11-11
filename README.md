@@ -6,7 +6,8 @@
 
 前端是零依赖的原生 ES Module，后端是一个零依赖的 Node 服务：静态站点 + 典籍检索 + 确定性工具层。
 
-![首页命盘](preview/home.jpg)
+![首页](docs/screens/home.jpg)
+![批注](docs/screens/report.jpg)
 
 ---
 
