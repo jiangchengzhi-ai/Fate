@@ -27,3 +27,5 @@ detect*.json
 probe*.mjs
 
 data/
+
+tmp-*
