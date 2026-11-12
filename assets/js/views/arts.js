@@ -1,5 +1,5 @@
 import { api } from '../api.js';
-import { HOURS } from '../data.js';
+import { HOURS, CITIES } from '../data.js';
 import { lunarParts, zhiIndexNow, nowLabel } from '../lunar.js';
 import { makeRecord, levelOf } from '../engine.js';
 import { store } from '../store.js';
@@ -70,6 +70,16 @@ export function mingView() {
           ${HOURS.map((h) => `<button class="hour" type="button" data-hour="${h.v}" aria-pressed="${h.v === '午'}">
             <b>${h.label}</b><span>${h.range}</span></button>`).join('')}
         </div>
+        <div class="cp-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-unknown aria-pressed="false">时辰不清楚</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="mc">出生地（用于真太阳时校正，可不填）</label>
+        <select class="input" id="mc" data-city>
+          <option value="">不校正</option>
+          ${CITIES.map((c) => `<option value="${c}">${c}</option>`).join('')}
+        </select>
       </div>
       <div class="field">
         <label>性别</label>
@@ -84,10 +94,19 @@ export function mingView() {
       const root = $('#app .view');
       let hour = '午';
       let gender = 'male';
+      let unknownHour = false;
       root.addEventListener('click', (e) => {
+        const unk = e.target.closest('[data-unknown]');
+        if (unk) {
+          unknownHour = !unknownHour;
+          unk.setAttribute('aria-pressed', String(unknownHour));
+          return;
+        }
         const h = e.target.closest('[data-hour]');
         if (h) {
           hour = h.dataset.hour;
+          unknownHour = false;
+          root.querySelector('[data-unknown]')?.setAttribute('aria-pressed', 'false');
           root.querySelectorAll('[data-hour]').forEach((b) => b.setAttribute('aria-pressed', String(b === h)));
           return;
         }
@@ -107,7 +126,8 @@ export function mingView() {
         btn.disabled = true;
         btn.textContent = '排 盘 中';
         try {
-          const r = await api.tool('paipan', { date, hour, gender });
+          const city = $('[data-city]', root)?.value || '';
+          const r = await api.tool('paipan', { date, hour, gender, city, hourUnknown: unknownHour });
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
           finish(r, {
             title: '命盘批注',
@@ -123,6 +143,14 @@ export function mingView() {
                 ['日主', `${r.dayMaster}${r.dayMasterElem}`],
                 ['身强弱', r.strong ? '身旺' : '身弱'],
                 ['喜用', r.yong.filter(Boolean).join('、')],
+              ] },
+              { kind: 'kv', title: '排盘约定', rows: [
+                ['换年', '立春'],
+                ['换日', '23:00 起算子时'],
+                ['真太阳时', r.resolved?.trueSolarApplied
+                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.baseClock}→${r.resolved.correctedClock}`
+                  : '未校正（没选出出生地）'],
+                ['时辰', `${r.resolved?.hour || hour}时${r.resolved?.hourAssumed ? ' · 不清楚，按正午暂排' : ''}`],
               ] },
               { kind: 'kv', title: '起运', rows: [
                 ['顺逆', r.luck.forward ? '顺行' : '逆行'],

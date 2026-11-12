@@ -5,6 +5,8 @@
 import { elementsOf, buildCompass, ganzhi, mountainAt } from '../assets/js/engine.js';
 import { GUAS, BAZHAI } from '../assets/js/data.js';
 import { fortuneSheet } from './fortune.mjs';
+import { solarCorrection, toMinutes, fromMinutes, zhiOfMinutes, midMinutesOfZhi } from './solar.mjs';
+import { cityByName } from './cities.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -117,12 +119,55 @@ function shishen(dayGan, otherGan) {
   return SHISHEN[rel][sameYinYang ? 0 : 1];
 }
 
-export function paipan({ date, hour = '午', gender = 'male' }) {
-  const [y, m, d] = String(date).split('-').map(Number);
+export function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, hourUnknown = false }) {
+  let [y, m, d] = String(date).split('-').map(Number);
   if (!y || !m || !d) throw new Error('date 需要 YYYY-MM-DD');
-  const hZhiIdx = ZHI.indexOf(hour);
+
+  const lng = Number.isFinite(Number(longitude)) && longitude !== undefined
+    ? Number(longitude)
+    : (cityByName(city)?.lng ?? null);
+
+  /* 起算时刻：有钟点用钟点；时辰未知用正午；否则取所报时辰的中点 */
+  let baseMinutes = null;
+  if (typeof clock === 'string' && toMinutes(clock) !== null) baseMinutes = toMinutes(clock);
+  else if (hourUnknown) baseMinutes = 12 * 60;
+  else baseMinutes = midMinutesOfZhi(hour);
+  if (baseMinutes === null) throw new Error('hour 需要地支');
+
+  const correction = lng === null ? 0 : solarCorrection(y, m, d, lng);
+  const adjMinutes = Math.round(baseMinutes + correction);
+  const { clock: correctedClock, dayShift } = fromMinutes(adjMinutes);
+
+  if (dayShift !== 0) {
+    const shifted = new Date(Date.UTC(y, m - 1, d + dayShift));
+    y = shifted.getUTCFullYear();
+    m = shifted.getUTCMonth() + 1;
+    d = shifted.getUTCDate();
+  }
+
+  const effectiveHour = zhiOfMinutes(adjMinutes);
+  const hZhiIdx = ZHI.indexOf(effectiveHour);
   if (hZhiIdx < 0) throw new Error('hour 需要地支');
-  const hourMid = (hZhiIdx * 2) % 24;
+  const hourMid = Math.floor((((adjMinutes % 1440) + 1440) % 1440) / 60);
+
+  const notes = [];
+  if (hourUnknown) notes.push('hour_assumed');
+  if (lng === null) notes.push('true_solar_skipped_no_longitude');
+  else notes.push('true_solar_applied');
+
+  const resolved = {
+    calendar: 'solar',
+    city: city || null,
+    longitude: lng,
+    baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,
+    correctedClock,
+    correctionMinutes: Number(correction.toFixed(1)),
+    adjustedDate: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    hour: effectiveHour,
+    hourAssumed: Boolean(hourUnknown),
+    trueSolarApplied: lng !== null,
+    notes,
+  };
 
   const bYear = yearOf(y, m, d, hourMid);
   const yGanIdx = ((bYear - 4) % 10 + 10) % 10;
@@ -217,7 +262,15 @@ export function paipan({ date, hour = '午', gender = 'male' }) {
 
   return {
     type: 'ming',
-    date, hour, gender,
+    date, hour: effectiveHour, gender,
+    resolved,
+    conventions: {
+      yearBoundary: 'lichun',
+      hourBoundary: 'day_changes_at_23',
+      trueSolarApplied: resolved.trueSolarApplied,
+      hourAssumed: resolved.hourAssumed,
+    },
+    notes,
     pillars,
     tenGods,
     dayMaster: day.gan,

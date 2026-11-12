@@ -1335,6 +1335,8 @@ function fortuneSheet(yong = [], dom = '') {
 
 
 
+
+
 const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const GAN_E = ['木', '木', '火', '火', '土', '土', '金', '金', '水', '水'];
@@ -1446,12 +1448,55 @@ function shishen(dayGan, otherGan) {
   return SHISHEN[rel][sameYinYang ? 0 : 1];
 }
 
-function paipan({ date, hour = '午', gender = 'male' }) {
-  const [y, m, d] = String(date).split('-').map(Number);
+function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, hourUnknown = false }) {
+  let [y, m, d] = String(date).split('-').map(Number);
   if (!y || !m || !d) throw new Error('date 需要 YYYY-MM-DD');
-  const hZhiIdx = ZHI.indexOf(hour);
+
+  const lng = Number.isFinite(Number(longitude)) && longitude !== undefined
+    ? Number(longitude)
+    : (cityByName(city)?.lng ?? null);
+
+  /* 起算时刻：有钟点用钟点；时辰未知用正午；否则取所报时辰的中点 */
+  let baseMinutes = null;
+  if (typeof clock === 'string' && toMinutes(clock) !== null) baseMinutes = toMinutes(clock);
+  else if (hourUnknown) baseMinutes = 12 * 60;
+  else baseMinutes = midMinutesOfZhi(hour);
+  if (baseMinutes === null) throw new Error('hour 需要地支');
+
+  const correction = lng === null ? 0 : solarCorrection(y, m, d, lng);
+  const adjMinutes = Math.round(baseMinutes + correction);
+  const { clock: correctedClock, dayShift } = fromMinutes(adjMinutes);
+
+  if (dayShift !== 0) {
+    const shifted = new Date(Date.UTC(y, m - 1, d + dayShift));
+    y = shifted.getUTCFullYear();
+    m = shifted.getUTCMonth() + 1;
+    d = shifted.getUTCDate();
+  }
+
+  const effectiveHour = zhiOfMinutes(adjMinutes);
+  const hZhiIdx = ZHI.indexOf(effectiveHour);
   if (hZhiIdx < 0) throw new Error('hour 需要地支');
-  const hourMid = (hZhiIdx * 2) % 24;
+  const hourMid = Math.floor((((adjMinutes % 1440) + 1440) % 1440) / 60);
+
+  const notes = [];
+  if (hourUnknown) notes.push('hour_assumed');
+  if (lng === null) notes.push('true_solar_skipped_no_longitude');
+  else notes.push('true_solar_applied');
+
+  const resolved = {
+    calendar: 'solar',
+    city: city || null,
+    longitude: lng,
+    baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,
+    correctedClock,
+    correctionMinutes: Number(correction.toFixed(1)),
+    adjustedDate: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    hour: effectiveHour,
+    hourAssumed: Boolean(hourUnknown),
+    trueSolarApplied: lng !== null,
+    notes,
+  };
 
   const bYear = yearOf(y, m, d, hourMid);
   const yGanIdx = ((bYear - 4) % 10 + 10) % 10;
@@ -1546,7 +1591,15 @@ function paipan({ date, hour = '午', gender = 'male' }) {
 
   return {
     type: 'ming',
-    date, hour, gender,
+    date, hour: effectiveHour, gender,
+    resolved,
+    conventions: {
+      yearBoundary: 'lichun',
+      hourBoundary: 'day_changes_at_23',
+      trueSolarApplied: resolved.trueSolarApplied,
+      hourAssumed: resolved.hourAssumed,
+    },
+    notes,
     pillars,
     tenGods,
     dayMaster: day.gan,
@@ -2898,6 +2951,8 @@ const DIRS8 = [
   { v: '兑', label: '西', angle: 270 },
   { v: '乾', label: '西北', angle: 315 },
 ];
+
+const CITIES = ['北京','上海','广州','深圳','天津','重庆','成都','杭州','南京','武汉','西安','沈阳','哈尔滨','长春','石家庄','太原','济南','郑州','合肥','长沙','南昌','福州','厦门','昆明','贵阳','南宁','海口','兰州','西宁','银川','乌鲁木齐','呼和浩特','拉萨','香港','澳门','台北'];
 
 
 /* ===== assets/js/engine.js ===== */
@@ -5812,6 +5867,16 @@ function mingView() {
           ${HOURS.map((h) => `<button class="hour" type="button" data-hour="${h.v}" aria-pressed="${h.v === '午'}">
             <b>${h.label}</b><span>${h.range}</span></button>`).join('')}
         </div>
+        <div class="cp-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-unknown aria-pressed="false">时辰不清楚</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="mc">出生地（用于真太阳时校正，可不填）</label>
+        <select class="input" id="mc" data-city>
+          <option value="">不校正</option>
+          ${CITIES.map((c) => `<option value="${c}">${c}</option>`).join('')}
+        </select>
       </div>
       <div class="field">
         <label>性别</label>
@@ -5826,10 +5891,19 @@ function mingView() {
       const root = $('#app .view');
       let hour = '午';
       let gender = 'male';
+      let unknownHour = false;
       root.addEventListener('click', (e) => {
+        const unk = e.target.closest('[data-unknown]');
+        if (unk) {
+          unknownHour = !unknownHour;
+          unk.setAttribute('aria-pressed', String(unknownHour));
+          return;
+        }
         const h = e.target.closest('[data-hour]');
         if (h) {
           hour = h.dataset.hour;
+          unknownHour = false;
+          root.querySelector('[data-unknown]')?.setAttribute('aria-pressed', 'false');
           root.querySelectorAll('[data-hour]').forEach((b) => b.setAttribute('aria-pressed', String(b === h)));
           return;
         }
@@ -5849,7 +5923,8 @@ function mingView() {
         btn.disabled = true;
         btn.textContent = '排 盘 中';
         try {
-          const r = await api.tool('paipan', { date, hour, gender });
+          const city = $('[data-city]', root)?.value || '';
+          const r = await api.tool('paipan', { date, hour, gender, city, hourUnknown: unknownHour });
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
           finish(r, {
             title: '命盘批注',
@@ -5865,6 +5940,14 @@ function mingView() {
                 ['日主', `${r.dayMaster}${r.dayMasterElem}`],
                 ['身强弱', r.strong ? '身旺' : '身弱'],
                 ['喜用', r.yong.filter(Boolean).join('、')],
+              ] },
+              { kind: 'kv', title: '排盘约定', rows: [
+                ['换年', '立春'],
+                ['换日', '23:00 起算子时'],
+                ['真太阳时', r.resolved?.trueSolarApplied
+                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.baseClock}→${r.resolved.correctedClock}`
+                  : '未校正（没选出出生地）'],
+                ['时辰', `${r.resolved?.hour || hour}时${r.resolved?.hourAssumed ? ' · 不清楚，按正午暂排' : ''}`],
               ] },
               { kind: 'kv', title: '起运', rows: [
                 ['顺逆', r.luck.forward ? '顺行' : '逆行'],
