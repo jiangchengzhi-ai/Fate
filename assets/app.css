@@ -1248,3 +1248,7 @@ body{font-size:15px}
 .rep-foot .meta{font-size:11px;line-height:1.8}
 
 .legal-rail{display:none}
+
+.row3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
+.leap{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--text-2)}
+.leap input{width:auto;height:auto}

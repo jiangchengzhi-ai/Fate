@@ -61,8 +61,33 @@ export function mingView() {
     html: shell('四柱', `
       <p class="lead">填出生日期和时辰，就能排出命盘，看一生的运势起伏。</p>
       <div class="field">
+        <label>生日用哪种历</label>
+        <div class="opts">
+          <button class="opt" type="button" data-cal="solar" aria-pressed="true">公历</button>
+          <button class="opt" type="button" data-cal="lunar" aria-pressed="false">农历</button>
+        </div>
+      </div>
+
+      <div class="field" data-solar-only>
         <label for="md">出生日期 · 公历</label>
         <input class="input" type="date" id="md" data-date max="${today()}" min="1900-01-01">
+      </div>
+
+      <div class="field" data-lunar-only hidden>
+        <label>出生日期 · 农历</label>
+        <div class="row3">
+          <select class="input" data-ly aria-label="农历年">
+            ${Array.from({ length: 201 }, (_, i) => 1900 + i).map((y) => `<option value="${y}"${y === 1990 ? ' selected' : ''}>${y} 年</option>`).join('')}
+          </select>
+          <select class="input" data-lm aria-label="农历月">
+            ${Array.from({ length: 12 }, (_, i) => i + 1).map((m) => `<option value="${m}"${m === 1 ? ' selected' : ''}>${m} 月</option>`).join('')}
+          </select>
+          <select class="input" data-ld aria-label="农历日">
+            ${Array.from({ length: 30 }, (_, i) => i + 1).map((d) => `<option value="${d}"${d === 1 ? ' selected' : ''}>${d} 日</option>`).join('')}
+          </select>
+        </div>
+        <label class="leap"><input type="checkbox" data-leap> 闰月</label>
+        <p class="q-hint" style="margin-left:0">农历生日会先换算成公历，再排盘。</p>
       </div>
       <div class="field">
         <label>出生时辰</label>
@@ -95,7 +120,16 @@ export function mingView() {
       let hour = '午';
       let gender = 'male';
       let unknownHour = false;
+      let cal = 'solar';
       root.addEventListener('click', (e) => {
+        const cbtn = e.target.closest('[data-cal]');
+        if (cbtn) {
+          cal = cbtn.dataset.cal;
+          root.querySelectorAll('[data-cal]').forEach((b) => b.setAttribute('aria-pressed', String(b === cbtn)));
+          $('[data-solar-only]', root).hidden = cal !== 'solar';
+          $('[data-lunar-only]', root).hidden = cal !== 'lunar';
+          return;
+        }
         const unk = e.target.closest('[data-unknown]');
         if (unk) {
           unknownHour = !unknownHour;
@@ -120,14 +154,17 @@ export function mingView() {
       });
 
       const submit = async () => {
-        const date = $('[data-date]', root).value;
-        if (!date) return toast('先选出生日期');
+        const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
+        if (cal === 'solar' && !date) return toast('先选出生日期');
         const btn = $('[data-go]', root);
         btn.disabled = true;
         btn.textContent = '排 盘 中';
         try {
           const city = $('[data-city]', root)?.value || '';
-          const r = await api.tool('paipan', { date, hour, gender, city, hourUnknown: unknownHour });
+          const payload = cal === 'lunar'
+            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, hourUnknown: unknownHour }
+            : { date, hour, gender, city, hourUnknown: unknownHour };
+          const r = await api.tool('paipan', payload);
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
           finish(r, {
             title: '命盘批注',
@@ -145,6 +182,7 @@ export function mingView() {
                 ['喜用', r.yong.filter(Boolean).join('、')],
               ] },
               { kind: 'kv', title: '排盘约定', rows: [
+                ['历法', r.resolved?.calendar === 'lunar' ? `农历 ${r.resolved.lunar?.year} 年${r.resolved.lunar?.leap ? '闰' : ''}${r.resolved.lunar?.month} 月${r.resolved.lunar?.day} 日 → 公历 ${r.resolved.adjustedDate}` : '公历'],
                 ['换年', '立春'],
                 ['换日', '23:00 起算子时'],
                 ['真太阳时', r.resolved?.trueSolarApplied

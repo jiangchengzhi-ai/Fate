@@ -7,6 +7,7 @@ import { GUAS, BAZHAI } from '../assets/js/data.js';
 import { fortuneSheet } from './fortune.mjs';
 import { solarCorrection, toMinutes, fromMinutes, zhiOfMinutes, midMinutesOfZhi } from './solar.mjs';
 import { cityByName } from './cities.mjs';
+import { lunarToSolar } from './lunar.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -119,7 +120,17 @@ function shishen(dayGan, otherGan) {
   return SHISHEN[rel][sameYinYang ? 0 : 1];
 }
 
-export function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, hourUnknown = false }) {
+export function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, hourUnknown = false, calendar = 'solar', lunar = null }) {
+  let lunarConverted = false;
+  let lunarInfo = null;
+  if (calendar === 'lunar') {
+    if (!lunar) throw new Error('农历输入需要 lunar: { year, month, day, leap }');
+    const c = lunarToSolar(lunar.year, lunar.month, lunar.day, Boolean(lunar.leap));
+    date = c.date;
+    lunarConverted = true;
+    lunarInfo = { year: Number(lunar.year), month: Number(lunar.month), day: Number(lunar.day), leap: Boolean(lunar.leap) };
+  }
+
   let [y, m, d] = String(date).split('-').map(Number);
   if (!y || !m || !d) throw new Error('date 需要 YYYY-MM-DD');
 
@@ -151,12 +162,14 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
   const hourMid = Math.floor((((adjMinutes % 1440) + 1440) % 1440) / 60);
 
   const notes = [];
+  if (lunarConverted) notes.push('lunar_converted');
   if (hourUnknown) notes.push('hour_assumed');
   if (lng === null) notes.push('true_solar_skipped_no_longitude');
   else notes.push('true_solar_applied');
 
   const resolved = {
-    calendar: 'solar',
+    calendar: lunarConverted ? 'lunar' : 'solar',
+    lunar: lunarInfo,
     city: city || null,
     longitude: lng,
     baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,
