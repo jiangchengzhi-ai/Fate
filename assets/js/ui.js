@@ -507,3 +507,29 @@ function wrapText(g, text, x, y, maxW, lineH, maxLines) {
   }
   if (line && lines < maxLines) g.fillText(line, x, y);
 }
+
+
+/* 微信内置浏览器：提示改用浏览器打开 */
+export function maybeWechatHint() {
+  if (!/MicroMessenger/i.test(navigator.userAgent)) return;
+  if (document.getElementById('wx-tip')) return;
+  const el = document.createElement('div');
+  el.id = 'wx-tip';
+  el.className = 'wx-tip';
+  el.innerHTML = '<span>微信里可能显示不全或打不开：点右上角 ··· → 在浏览器打开</span>'
+    + '<button type="button" data-wx-copy>复制网址</button>'
+    + '<button type="button" data-wx-close aria-label="关闭">×</button>';
+  el.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-wx-close]')) { el.remove(); return; }
+    if (e.target.closest('[data-wx-copy]')) {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        e.target.textContent = '已复制';
+      } catch {
+        e.target.textContent = '长按地址栏复制';
+      }
+      setTimeout(() => { e.target.textContent = '复制网址'; }, 2000);
+    }
+  });
+  document.body.appendChild(el);
+}
