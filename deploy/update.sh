@@ -12,7 +12,17 @@ echo "$PREV" > "$APP/.prev-rev"
 echo "==> 当前 $PREV，目标 $REF"
 
 git fetch --all --tags --prune
-git reset --hard "$REF"
+
+# tag 或 commit 直接用；分支名优先用 origin/ 上的最新提交
+if git rev-parse --verify --quiet "refs/tags/$REF" >/dev/null; then
+  TARGET="$REF"
+elif git rev-parse --verify --quiet "origin/$REF" >/dev/null; then
+  TARGET="origin/$REF"
+else
+  TARGET="$REF"
+fi
+
+git reset --hard "$TARGET"
 chmod +x deploy/*.sh 2>/dev/null || true
 
 systemctl restart wenhe
