@@ -3983,7 +3983,7 @@ async function copyText(text) {
 
 function recordToText(r) {
   const lines = [
-    `fatetell ／ ${r.title}`,
+    `问鹤 ／ ${r.title}`,
     `${r.dateLabel || ''}　${r.level?.name || ''}　${r.overall} 分`,
     '',
     r.summary,
@@ -4027,7 +4027,7 @@ function saveCard(r) {
 
   g.fillStyle = 'rgba(36,31,23,.55)';
   g.font = `20px ${sans}`;
-  g.fillText('FATETELL · 相与盘', 100, 132);
+  g.fillText('WENHE · 问鹤', 100, 132);
   g.fillStyle = 'rgba(36,31,23,.9)';
   g.font = `54px ${serif}`;
   g.fillText(r.heading || r.title, 100, 214);
@@ -4111,7 +4111,7 @@ function saveCard(r) {
   g.fillText('传统文化趣味解读 · 不构成任何决策依据', 100, H - 92);
 
   const a = document.createElement('a');
-  a.download = `fatetell-${r.type}-${Date.now()}.png`;
+  a.download = `wenhe-${r.type}-${Date.now()}.png`;
   a.href = cv.toDataURL('image/png');
   a.click();
   toast('已生成图片，请查看下载');
@@ -5697,7 +5697,7 @@ const STATIC_CATS = [
 
 const head = `
   <header class="topbar">
-    <a class="brand" href="#/">fatetell</a>
+    <a class="brand" href="#/">问鹤</a>
     <a class="tb-link" href="#/about">关于</a>
   </header>`;
 
@@ -6769,20 +6769,20 @@ function yinzhaView() {
 
 
 const routes = [
-  { re: /^#\/?$/, view: homeView, title: 'fatetell · 相与盘' },
-  { re: /^#\/c\/(ming|bu|xiang|kan|ze)$/, view: categoryView, title: '门 · fatetell', params: (m) => [m[1]] },
-  { re: /^#\/ming$/, view: mingView, title: '四柱 · fatetell' },
-  { re: /^#\/bu$/, view: buView, title: '起课 · fatetell' },
-  { re: /^#\/ze$/, view: zeView, title: '择日 · fatetell' },
-  { re: /^#\/hepan$/, view: hepanView, title: '合盘 · fatetell' },
-  { re: /^#\/yinzha$/, view: yinzhaView, title: '阴宅 · fatetell' },
-  { re: /^#\/face$/, view: faceView, title: '面相 · fatetell' },
-  { re: /^#\/palm$/, view: palmView, title: '手相 · fatetell' },
-  { re: /^#\/combo$/, view: comboView, title: '综合相 · fatetell' },
-  { re: /^#\/compass$/, view: compassView, title: '罗盘风水 · fatetell' },
-  { re: /^#\/report\/([\w-]+)$/, view: reportView, title: '批注 · fatetell', params: (m) => [m[1]] },
-  { re: /^#\/history$/, view: historyView, title: '批注簿 · fatetell' },
-  { re: /^#\/about$/, view: aboutView, title: '关于 · fatetell' },
+  { re: /^#\/?$/, view: homeView, title: '问鹤 · 五门问事' },
+  { re: /^#\/c\/(ming|bu|xiang|kan|ze)$/, view: categoryView, title: '门 · 问鹤', params: (m) => [m[1]] },
+  { re: /^#\/ming$/, view: mingView, title: '四柱 · 问鹤' },
+  { re: /^#\/bu$/, view: buView, title: '起课 · 问鹤' },
+  { re: /^#\/ze$/, view: zeView, title: '择日 · 问鹤' },
+  { re: /^#\/hepan$/, view: hepanView, title: '合盘 · 问鹤' },
+  { re: /^#\/yinzha$/, view: yinzhaView, title: '阴宅 · 问鹤' },
+  { re: /^#\/face$/, view: faceView, title: '面相 · 问鹤' },
+  { re: /^#\/palm$/, view: palmView, title: '手相 · 问鹤' },
+  { re: /^#\/combo$/, view: comboView, title: '综合相 · 问鹤' },
+  { re: /^#\/compass$/, view: compassView, title: '罗盘风水 · 问鹤' },
+  { re: /^#\/report\/([\w-]+)$/, view: reportView, title: '批注 · 问鹤', params: (m) => [m[1]] },
+  { re: /^#\/history$/, view: historyView, title: '批注簿 · 问鹤' },
+  { re: /^#\/about$/, view: aboutView, title: '关于 · 问鹤' },
 ];
 
 function notFoundView() {
@@ -6853,7 +6853,7 @@ function renderPage(target) {
   if (!matched) {
     if (hash && hash !== '#' && hash !== '#/') {
       console.warn('[fatetell] 未匹配的路由：', hash);
-      matched = { route: { view: notFoundView, title: '未找到 · fatetell' }, args: [] };
+      matched = { route: { view: notFoundView, title: '未找到 · 问鹤' }, args: [] };
     } else {
       matched = { route: routes[0], args: [] };
     }

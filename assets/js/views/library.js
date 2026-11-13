@@ -41,7 +41,7 @@ const STATIC_CATS = [
 
 const head = `
   <header class="topbar">
-    <a class="brand" href="#/">fatetell</a>
+    <a class="brand" href="#/">问鹤</a>
     <a class="tb-link" href="#/about">关于</a>
   </header>`;
 

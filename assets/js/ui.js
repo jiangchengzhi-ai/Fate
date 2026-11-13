@@ -355,7 +355,7 @@ export async function copyText(text) {
 
 export function recordToText(r) {
   const lines = [
-    `fatetell ／ ${r.title}`,
+    `问鹤 ／ ${r.title}`,
     `${r.dateLabel || ''}　${r.level?.name || ''}　${r.overall} 分`,
     '',
     r.summary,
@@ -399,7 +399,7 @@ export function saveCard(r) {
 
   g.fillStyle = 'rgba(36,31,23,.55)';
   g.font = `20px ${sans}`;
-  g.fillText('FATETELL · 相与盘', 100, 132);
+  g.fillText('WENHE · 问鹤', 100, 132);
   g.fillStyle = 'rgba(36,31,23,.9)';
   g.font = `54px ${serif}`;
   g.fillText(r.heading || r.title, 100, 214);
@@ -483,7 +483,7 @@ export function saveCard(r) {
   g.fillText('传统文化趣味解读 · 不构成任何决策依据', 100, H - 92);
 
   const a = document.createElement('a');
-  a.download = `fatetell-${r.type}-${Date.now()}.png`;
+  a.download = `wenhe-${r.type}-${Date.now()}.png`;
   a.href = cv.toDataURL('image/png');
   a.click();
   toast('已生成图片，请查看下载');

@@ -44,14 +44,14 @@ const baseCss = `
 const page = (title, body) => `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)} · fatetell</title>
+<title>${esc(title)} · 问鹤</title>
 <style>${baseCss}</style></head>
 <body><div class="wrap">${body}</div></body></html>`;
 
 export function loginPage({ error = '', phone = '' } = {}) {
   return page('访问受限', `
     <div class="login">
-      <h1>fatetell</h1>
+      <h1>问鹤</h1>
       <p class="sub">这个站点只对受邀的人开放。请输入管理员给你的手机号和访问码。</p>
       <form method="post" action="/login">
         <label for="phone">手机号</label>

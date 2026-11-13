@@ -1,0 +1,15 @@
+[Unit]
+Description=Wenhe AI (fatetell) server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/wenhe
+EnvironmentFile=/opt/wenhe/.env
+ExecStart=/usr/bin/node server/server.mjs --port 5173 --host 127.0.0.1
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
