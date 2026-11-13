@@ -1264,6 +1264,14 @@ body{font-size:15px}
 .step b{font-family:var(--serif);color:var(--brass-hi);font-weight:400;font-size:22px}
 .dir-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0 0}
 .dir-quick .opt{min-height:50px}
+
+.wx-tip{position:fixed;left:0;right:0;top:0;z-index:9999;display:flex;gap:10px;align-items:center;
+  padding:10px 12px;background:#1b1b1f;color:#f0ead8;font-size:13px;line-height:1.4;
+  border-bottom:1px solid rgba(203,169,104,.5);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.wx-tip span{flex:1;min-width:0}
+.wx-tip button{border:1px solid rgba(203,169,104,.6);background:transparent;color:#CBA968;
+  border-radius:8px;padding:6px 10px;font-size:13px;white-space:nowrap}
+.wx-tip button[data-wx-close]{border:0;font-size:18px;padding:0 4px;color:#9a948a}
 </style>
 </head>
 <body>
@@ -4137,6 +4145,32 @@ function wrapText(g, text, x, y, maxW, lineH, maxLines) {
 }
 
 
+/* 微信内置浏览器：提示改用浏览器打开 */
+function maybeWechatHint() {
+  if (!/MicroMessenger/i.test(navigator.userAgent)) return;
+  if (document.getElementById('wx-tip')) return;
+  const el = document.createElement('div');
+  el.id = 'wx-tip';
+  el.className = 'wx-tip';
+  el.innerHTML = '<span>微信里可能显示不全或打不开：点右上角 ··· → 在浏览器打开</span>'
+    + '<button type="button" data-wx-copy>复制网址</button>'
+    + '<button type="button" data-wx-close aria-label="关闭">×</button>';
+  el.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-wx-close]')) { el.remove(); return; }
+    if (e.target.closest('[data-wx-copy]')) {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        e.target.textContent = '已复制';
+      } catch {
+        e.target.textContent = '长按地址栏复制';
+      }
+      setTimeout(() => { e.target.textContent = '复制网址'; }, 2000);
+    }
+  });
+  document.body.appendChild(el);
+}
+
+
 /* ===== assets/js/lunar.js ===== */
 /* 农历与时辰：用浏览器内置的中国历法（ICU），不引第三方库 */
 function lunarParts(date = new Date()) {
@@ -6939,9 +6973,10 @@ document.addEventListener('click', (e) => {
 });
 
 if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', () => mount());
+  window.addEventListener('DOMContentLoaded', () => { mount(); maybeWechatHint(); });
 } else {
   mount();
+  maybeWechatHint();
 }
 
 /* 键盘：Esc 关闭弹层 */

@@ -62,6 +62,10 @@ export function loginPage({ error = '', phone = '' } = {}) {
         <div class="row" style="margin-top:20px"><button type="submit" style="width:100%">进 入</button></div>
       </form>
       <p class="muted" style="margin-top:22px">没有访问码？联系把这个链接发给你的人。</p>
+      <div id="wx-tip" hidden style="margin-top:18px;padding:10px 12px;border:1px solid rgba(203,169,104,.45);border-radius:10px;font-size:13px;color:#e9e4d6;line-height:1.5">
+        微信里可能打不开或显示不全：点右上角 <b>···</b> → <b>在浏览器打开</b>。也可以复制网址到浏览器访问。
+      </div>
+      <script>if(/MicroMessenger/i.test(navigator.userAgent)){document.getElementById('wx-tip').hidden=false;}</script>
     </div>`);
 }
 

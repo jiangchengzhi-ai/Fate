@@ -1,7 +1,7 @@
 /* ==========================================================================
    app.js — 路由与装配
    ========================================================================== */
-import { $, esc, installFrame, upgradeChoices, toast, go, goBack } from './ui.js';
+import { $, esc, installFrame, upgradeChoices, toast, go, goBack , maybeWechatHint } from './ui.js';
 import { track } from './track.js';
 import { homeView } from './views/home.js';
 import { faceView, palmView } from './views/reading.js';
@@ -178,9 +178,10 @@ document.addEventListener('click', (e) => {
 });
 
 if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', () => mount());
+  window.addEventListener('DOMContentLoaded', () => { mount(); maybeWechatHint(); });
 } else {
   mount();
+  maybeWechatHint();
 }
 
 /* 键盘：Esc 关闭弹层 */

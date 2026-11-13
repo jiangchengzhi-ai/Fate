@@ -1257,3 +1257,11 @@ body{font-size:15px}
 .step b{font-family:var(--serif);color:var(--brass-hi);font-weight:400;font-size:22px}
 .dir-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0 0}
 .dir-quick .opt{min-height:50px}
+
+.wx-tip{position:fixed;left:0;right:0;top:0;z-index:9999;display:flex;gap:10px;align-items:center;
+  padding:10px 12px;background:#1b1b1f;color:#f0ead8;font-size:13px;line-height:1.4;
+  border-bottom:1px solid rgba(203,169,104,.5);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.wx-tip span{flex:1;min-width:0}
+.wx-tip button{border:1px solid rgba(203,169,104,.6);background:transparent;color:#CBA968;
+  border-radius:8px;padding:6px 10px;font-size:13px;white-space:nowrap}
+.wx-tip button[data-wx-close]{border:0;font-size:18px;padding:0 4px;color:#9a948a}
