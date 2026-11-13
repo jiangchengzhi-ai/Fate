@@ -287,6 +287,18 @@ export function go(hash) {
   if (typeof window.__route === 'function') window.__route(hash);
 }
 
+/* 替换当前历史记录再跳转：用于“算完出结果”，返回时回到输入页而不是上一个结果 */
+export function goReplace(hash) {
+  try {
+    const h = String(hash).replace(/^#/, '');
+    history.replaceState(null, '', '#' + h);
+    if (typeof window.__route === 'function') window.__route('#' + h);
+    else window.dispatchEvent(new Event('hashchange'));
+  } catch {
+    go(hash);
+  }
+}
+
 /* 返回上一页；优先走 app.js 的站内足迹，直接打开链接时退回 fallback */
 export function goBack(fallback = '#/') {
   if (typeof window.__back === 'function') {

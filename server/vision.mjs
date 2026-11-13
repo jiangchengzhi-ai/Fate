@@ -34,15 +34,28 @@ const buildFields = (mod) => {
 const FIELDS = { face: buildFields(FACE), palm: buildFields(PALM) };
 
 const SYSTEM = {
-  face: `你是面相特征的标注员，不是算命先生。
-看照片，为每一道题选一个最接近的选项值，只输出 JSON，不要解释。
+  face: `你是面相测量标注员，不是算命先生。先量比例，再按比例归类，只输出 JSON。
+
+第一步，估测这张正面照的比例（用 0-1 之间的小数或比值表示，看不清就省略该项）：
+- faceWH：脸长 ÷ 脸宽（常见 1.2–1.7）
+- upper / middle / lower：三庭占比，发际到眉心 / 眉心到鼻底 / 鼻底到下巴，三项相加约等于 1
+- eyeWidth：单眼宽度 ÷ 脸宽
+- eyeGap：两眼间距 ÷ 单眼宽度
+- noseWidth：鼻翼宽 ÷ 脸宽
+- mouthWidth：口宽 ÷ 脸宽
+- jawWidth：下颌角宽 ÷ 脸宽
+
+第二步，按下面的硬规则归类（优先于你的直觉）：
+- shape：faceWH ≥ 1.5 → wood；jawWidth ≥ 0.82 → earth；faceWH ≤ 1.3 且 jawWidth < 0.78 → water；upper ≥ 0.37 且 jawWidth < 0.75 → fire；其余 → metal
+- forehead：upper ≥ 0.375 → broad；upper ≤ 0.315 → narrow；否则按发际线形态在 broad / even / narrow / lines / peak 里选
+- nose：noseWidth ≥ 0.28 → flare；noseWidth ≤ 0.19 → small；其余按鼻梁高低选
+- 其余字段（brow/eye/cheek/mouth/chin/mole）按可见形态选，看不清就省略
 
 规则：
 1. 只能使用给定的 value，不能自造。
-2. 看不清或照片角度不对的字段，直接省略，不要猜。
-3. 不评价美丑、年龄、性别、种族、健康；只描述题目要求的形态。
-4. 输出格式：{"features":{"shape":"wood","forehead":"broad"},"confidence":72}
-   confidence 是整体置信度 0-100，低于 45 就返回空 features。`,
+2. 测量项与归类必须一致；照片不是正面、模糊、遮挡严重时，confidence 低于 45 并少给字段。
+3. 不评价美丑、年龄、性别、种族、健康。
+4. 输出格式：{"measures":{"faceWH":1.38,"upper":0.36,"middle":0.34,"lower":0.30,"eyeWidth":0.21,"eyeGap":1.1,"noseWidth":0.23,"mouthWidth":0.36,"jawWidth":0.76},"features":{"shape":"metal","forehead":"even","nose":"high"},"confidence":70}`,
   palm: `你是手相特征的标注员，不是算命先生。
 照片是掌心（手掌内侧）。看照片，为每一道题选一个最接近的选项值，只输出 JSON，不要解释。
 
@@ -65,14 +78,64 @@ function userContent(kind, dataUrl) {
   ];
 }
 
+/* ---------------- 面相：测量值 → 归类（硬规则，保证同一张照片结果稳定） ---------------- */
+const n = (v, min, max) => {
+  const x = Number(v);
+  return Number.isFinite(x) && x >= min && x <= max ? x : null;
+};
+
+function sanitizeMeasures(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const m = {
+    faceWH: n(raw.faceWH, 0.9, 2.2),
+    upper: n(raw.upper, 0.15, 0.5),
+    middle: n(raw.middle, 0.15, 0.5),
+    lower: n(raw.lower, 0.15, 0.5),
+    eyeWidth: n(raw.eyeWidth, 0.08, 0.4),
+    eyeGap: n(raw.eyeGap, 0.5, 2.2),
+    noseWidth: n(raw.noseWidth, 0.1, 0.45),
+    mouthWidth: n(raw.mouthWidth, 0.15, 0.6),
+    jawWidth: n(raw.jawWidth, 0.4, 1.05),
+  };
+  const out = {};
+  for (const [k, v] of Object.entries(m)) if (v != null) out[k] = Math.round(v * 1000) / 1000;
+  return Object.keys(out).length ? out : null;
+}
+
+function applyMeasureRules(features, measures) {
+  if (!measures) return features;
+  const f = { ...features };
+  const m = measures;
+
+  if (m.faceWH != null || m.jawWidth != null || m.upper != null) {
+    if (m.faceWH != null && m.faceWH >= 1.5) f.shape = 'wood';
+    else if (m.jawWidth != null && m.jawWidth >= 0.82) f.shape = 'earth';
+    else if (m.faceWH != null && m.faceWH <= 1.3 && (m.jawWidth == null || m.jawWidth < 0.78)) f.shape = 'water';
+    else if (m.upper != null && m.upper >= 0.37 && (m.jawWidth == null || m.jawWidth < 0.75)) f.shape = 'fire';
+    else if (m.faceWH != null) f.shape = 'metal';
+  }
+
+  if (m.upper != null) {
+    if (m.upper >= 0.375) f.forehead = 'broad';
+    else if (m.upper <= 0.315) f.forehead = 'narrow';
+  }
+
+  if (m.noseWidth != null) {
+    if (m.noseWidth >= 0.28) f.nose = 'flare';
+    else if (m.noseWidth <= 0.19) f.nose = 'small';
+  }
+
+  return f;
+}
+
 export function parseFeatures(text, kind = 'face') {
   const fields = FIELDS[kind] || FIELDS.face;
   const m = String(text).match(/\{[\s\S]*\}/);
-  if (!m) return { features: {}, confidence: 0, dropped: [] };
+  if (!m) return { features: {}, confidence: 0, dropped: [], measures: null };
   let raw;
-  try { raw = JSON.parse(m[0]); } catch { return { features: {}, confidence: 0, dropped: [] }; }
+  try { raw = JSON.parse(m[0]); } catch { return { features: {}, confidence: 0, dropped: [], measures: null }; }
 
-  const features = {};
+  let features = {};
   const dropped = [];
   const src = raw.features && typeof raw.features === 'object' ? raw.features : {};
   for (const [id, v] of Object.entries(src)) {
@@ -81,9 +144,13 @@ export function parseFeatures(text, kind = 'face') {
     if (typeof v !== 'string' || !f.options.some((o) => o.v === v)) { dropped.push(`${id}:${v}`); continue; }
     features[id] = v;
   }
+
+  const measures = kind === 'face' ? sanitizeMeasures(raw.measures) : null;
+  if (measures) features = applyMeasureRules(features, measures);
+
   const confidence = Number(raw.confidence);
-  if (Number.isFinite(confidence) && confidence < 45) return { features: {}, confidence, dropped };
-  return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped };
+  if (Number.isFinite(confidence) && confidence < 45) return { features: {}, confidence, dropped, measures };
+  return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures };
 }
 
 export async function analyzeImage(kind, dataUrl) {
