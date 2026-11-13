@@ -3,7 +3,7 @@ import { HOURS, CITIES } from '../data.js';
 import { lunarParts, zhiIndexNow, nowLabel } from '../lunar.js';
 import { makeRecord, levelOf } from '../engine.js';
 import { store } from '../store.js';
-import { $, esc, toast, go } from '../ui.js';
+import { $, esc, toast, go, goReplace } from '../ui.js';
 
 const today = () => {
   const d = new Date();
@@ -52,7 +52,7 @@ export function finish(result, extra) {
     verdict: pickLine(VERDICT[result.type] || VERDICT.bu),
   });
   store.addReport(rec);
-  go(`#/report/${rec.id}`);
+  goReplace(`#/report/${rec.id}`);
 }
 
 /* ---------------- 命 · 四柱 ---------------- */

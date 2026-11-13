@@ -1,7 +1,7 @@
 import { FACE, PALM } from '../data.js';
 import { buildFace, buildPalm, makeRecord } from '../engine.js';
 import { store } from '../store.js';
-import { $, esc, pickImage, toast, go, openSheet, closeSheet } from '../ui.js';
+import { $, esc, pickImage, toast, go, goReplace, openSheet, closeSheet } from '../ui.js';
 import { api } from '../api.js';
 
 function photoHtml(photo, kind) {
@@ -188,7 +188,7 @@ function readingView(cfg) {
       rec.meta = { ...(rec.meta || {}), auto: Boolean(auto) };
       if (visionMeta) rec.meta.vision = visionMeta;
       store.addReport(rec);
-      go(`#/report/${rec.id}`);
+      goReplace(`#/report/${rec.id}`);
     };
 
     const look = () => {
@@ -228,6 +228,7 @@ function readingView(cfg) {
           await finish({ ...draft.answers }, true, {
             confidence: out.confidence ?? null,
             model: out.model || null,
+            measures: out.measures || null,
             items,
           });
         } catch (err) {

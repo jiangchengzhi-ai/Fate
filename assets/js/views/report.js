@@ -39,7 +39,7 @@ function chartText(rec) {
 
 const llmInner = (llm) => `
   ${String(llm.text).split(/\n+/).filter(Boolean).map((p) => `<p class="llm-text">${esc(p)}</p>`).join('')}
-  <p class="llm-note">由 ${esc(llm.model || '模型')} 生成，可能出错；排盘数字与引文以上文为准。<b>AI 建议，仅供娱乐。</b></p>`;
+  <p class="llm-note">AI 解读，可能出错；排盘数字与引文以上文为准。<b>AI 建议，仅供娱乐。</b></p>`;
 
 const llmBlock = (llm) => `<section class="rep-sec llm"><h3>模型解读 · AI 建议</h3>${llmInner(llm)}</section>`;
 
@@ -280,11 +280,22 @@ function visionBlock(rec) {
   const v = rec.meta?.vision;
   if (!v?.items?.length) return '';
   const conf = Number.isFinite(v.confidence) ? ` · 置信度 ${v.confidence}` : '';
+  const mm = v.measures;
+  const mline = mm
+    ? `<p class="vision-measure">测量：${[
+        mm.faceWH != null ? `脸长宽比 ${mm.faceWH}` : '',
+        mm.upper != null ? `三庭 ${Math.round(mm.upper * 100)}/${Math.round((mm.middle || 0) * 100)}/${Math.round((mm.lower || 0) * 100)}` : '',
+        mm.eyeGap != null ? `眼距 ${mm.eyeGap} 眼宽` : '',
+        mm.noseWidth != null ? `鼻宽比 ${mm.noseWidth}` : '',
+        mm.jawWidth != null ? `下颌比 ${mm.jawWidth}` : '',
+      ].filter(Boolean).join(' · ')}</p>`
+    : '';
   return `
   <details class="vision-note">
     <summary>识别依据 · 模型看到的 ${v.items.length} 项${conf}</summary>
     <dl>${v.items.map((i) => `<div><dt>${esc(i.t)}</dt><dd>${esc(i.v)}</dd></div>`).join('')}</dl>
-    <p>由 ${esc(v.model || '视觉模型')} 识别，仅作预填；可在「相」页点「自己逐项选」修改后重出批注。</p>
+    <p>由照片识别得到，仅作预填；可在「相」页点「自己逐项选」修改后重出批注。</p>
+    ${mline}
   </details>`;
 }
 
@@ -317,11 +328,13 @@ export function reportView(id) {
 
   const scoreLabel = SCORE_LABEL[rec.type] || '气象';
   const again = AGAIN[rec.type] || '#/';
+  const parent = { ming: '#/ming', bu: '#/bu', ze: '#/ze', compass: '#/compass', kan: '#/yinzha', hepan: '#/hepan', face: '#/c/xiang', palm: '#/c/xiang', combo: '#/combo' }[rec.type] || '#/';
 
   return {
     html: `
     <header class="topbar">
       <a class="brand" href="#/"><span>问鹤</span></a>
+      <a class="tb-link" data-back data-parent="${parent}" href="${parent}">返回</a>
       <a class="tb-link" href="#/history">我的记录</a>
     </header>
 

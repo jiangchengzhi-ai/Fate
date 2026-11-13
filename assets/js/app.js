@@ -154,6 +154,8 @@ document.addEventListener('click', (e) => {
   const back = e.target.closest('[data-back]');
   if (back) {
     e.preventDefault();
+    const parent = back.getAttribute('data-parent');
+    if (parent) { go(parent); return; }
     goBack(back.getAttribute('data-fallback') || '#/');
     return;
   }
