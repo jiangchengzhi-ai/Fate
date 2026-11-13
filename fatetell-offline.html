@@ -6973,15 +6973,28 @@ document.addEventListener('click', (e) => {
 window.addEventListener('hashchange', () => mount());
 window.addEventListener('popstate', () => mount());
 
+/* 返回哪一级：按页面层级，不走浏览历史，避免在多个结果页之间来回跳 */
+const parentFor = (hash) => {
+  const h = String(hash || '');
+  const map = {
+    '#/ming': '#/', '#/bu': '#/', '#/ze': '#/', '#/hepan': '#/',
+    '#/history': '#/', '#/about': '#/', '#/library': '#/',
+    '#/combo': '#/c/xiang', '#/face': '#/c/xiang', '#/palm': '#/c/xiang',
+    '#/compass': '#/c/kan', '#/yinzha': '#/c/kan',
+  };
+  if (map[h]) return map[h];
+  if (/^#\/c\//.test(h)) return '#/';
+  return '#/';
+};
+
 /* 自己接管站内跳转：内嵌预览面板常禁用链接默认行为，甚至锁住 location，
    所以不让跳转依赖浏览器，直接按目标 hash 重挂。 */
 document.addEventListener('click', (e) => {
   const back = e.target.closest('[data-back]');
   if (back) {
     e.preventDefault();
-    const parent = back.getAttribute('data-parent');
-    if (parent) { go(parent); return; }
-    goBack(back.getAttribute('data-fallback') || '#/');
+    const target = back.getAttribute('data-parent') || parentFor(location.hash);
+    go(target || back.getAttribute('data-fallback') || '#/');
     return;
   }
 
