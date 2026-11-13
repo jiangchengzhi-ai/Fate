@@ -38,7 +38,7 @@ ok('paipan 带出深化字段', () => {
   const r = paipan({ date: '1994-08-12', hour: '未', city: '北京' });
   assert.equal(r.deep.nayin[2].name, '天河水');
   assert.equal(r.deep.stages[2].stage, '帝旺');
-  assert.equal(r.deep.pattern.name, '偏财格');
+  assert.equal(r.deep.pattern.name, '七杀格');
   assert.equal(r.deep.months.length, 12);
 });
 

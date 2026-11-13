@@ -475,16 +475,18 @@ const server = http.createServer(async (req, res) => {
       if (!fn) return json(res, 404, { error: 'unknown tool' });
       const body = await readBody(req);
       const result = fn(body);
-      const cat = { paipan: 'ming', xiaoliuren: 'bu', zeri: 'ze', bazhai: 'kan', yangzhai: 'kan', yinzha: 'kan' }[name];
+      const cat = { paipan: 'ming', daily: 'ming', hepan: 'ming', xiaoliuren: 'bu', zeri: 'ze', bazhai: 'kan', yangzhai: 'kan', yinzha: 'kan' }[name];
       const topic = {
         paipan: '月令 用神 调候 十神',
+        daily: '流日 十神 冲合',
+        hepan: '合婚 日柱 五行',
         xiaoliuren: '小六壬 六宫 口诀',
         zeri: '建除 择日 月建',
         bazhai: '八宅 命卦 生气',
         yangzhai: '八宅 命卦 床位 灶',
         yinzha: '葬书 乘生气 水法',
       }[name];
-      result.citations = citationsFor(cat, topic, 3);
+      result.citations = cat && topic ? citationsFor(cat, topic, 3) : [];
       return json(res, 200, result);
     }
 

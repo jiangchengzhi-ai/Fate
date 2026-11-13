@@ -11,7 +11,7 @@ import { reportView } from './views/report.js';
 import { historyView, aboutView } from './views/misc.js';
 import { store } from './store.js';
 import { categoryView } from './views/library.js';
-import { mingView, buView, zeView } from './views/arts.js';
+import { mingView, buView, zeView, hepanView } from './views/arts.js';
 import { yinzhaView } from './views/yinzha.js';
 
 const routes = [
@@ -20,6 +20,7 @@ const routes = [
   { re: /^#\/ming$/, view: mingView, title: '四柱 · fatetell' },
   { re: /^#\/bu$/, view: buView, title: '起课 · fatetell' },
   { re: /^#\/ze$/, view: zeView, title: '择日 · fatetell' },
+  { re: /^#\/hepan$/, view: hepanView, title: '合盘 · fatetell' },
   { re: /^#\/yinzha$/, view: yinzhaView, title: '阴宅 · fatetell' },
   { re: /^#\/face$/, view: faceView, title: '面相 · fatetell' },
   { re: /^#\/palm$/, view: palmView, title: '手相 · fatetell' },

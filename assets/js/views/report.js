@@ -4,9 +4,9 @@ import { $, esc, radarSVG, copyText, saveCard, recordToText, toast } from '../ui
 
 const SEAL = ['相', '由', '心', '生'];
 
-const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', ming: '四柱', bu: '小六壬', ze: '择日' };
-const AGAIN = { face: '#/face', palm: '#/palm', combo: '#/combo', compass: '#/compass', ming: '#/ming', bu: '#/bu', ze: '#/ze', kan: '#/yinzha' };
-const SCORE_LABEL = { compass: '宅运', kan: '地气', ming: '命格', bu: '课象', ze: '日课' };
+const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
+const AGAIN = { face: '#/face', palm: '#/palm', combo: '#/combo', compass: '#/compass', ming: '#/ming', bu: '#/bu', ze: '#/ze', kan: '#/yinzha', hepan: '#/hepan' };
+const SCORE_LABEL = { compass: '宅运', kan: '地气', ming: '命格', bu: '课象', ze: '日课', hepan: '合盘' };
 
 /* 把已算好的结果压成一段给模型看的上下文；模型只读不写 */
 function chartText(rec) {

@@ -110,19 +110,21 @@ export function shenshaOf(pillars, dayGan) {
 }
 
 /* 格局：以月令本气十神取 */
-export function patternOf(dayGan, monthZhi) {
-  const main = HIDDEN[monthZhi]?.[0];
-  if (!main) return { name: '', note: '' };
-  const god = tenGod(dayGan, main);
-  const map = {
-    正官: '正官格', 七杀: '七杀格', 正财: '正财格', 偏财: '偏财格',
-    食神: '食神格', 伤官: '伤官格', 正印: '正印格', 偏印: '偏印格',
-  };
+export function patternOf(dayGan, monthZhi, stems = []) {
+  const hidden = HIDDEN[monthZhi] || [];
+  if (!hidden.length) return { name: '', note: '', basis: '' };
+  const gods = hidden.map((g) => tenGod(dayGan, g));
+  const idx = hidden.findIndex((g) => stems.includes(g));
+  const use = idx >= 0 ? idx : 0;
+  const god = gods[use];
+  const basis = idx >= 0 ? `${hidden[use]} 透干` : `${hidden[0]} 本气`;
+
   if (god === '比肩' || god === '劫财') {
     const lu = { 甲: '寅', 乙: '卯', 丙: '巳', 丁: '午', 戊: '巳', 己: '午', 庚: '申', 辛: '酉', 壬: '亥', 癸: '子' }[dayGan];
-    return { name: monthZhi === lu ? '建禄格' : '月劫格', note: `月令 ${monthZhi} 本气 ${main}（${god}）` };
+    return { name: monthZhi === lu ? '建禄格' : '月劫格', note: `月令 ${monthZhi} ${basis}（${god}）`, basis };
   }
-  return { name: map[god] || '', note: `月令 ${monthZhi} 本气 ${main}（${god}）` };
+  const map = { 正官: '正官格', 七杀: '七杀格', 正财: '正财格', 偏财: '偏财格', 食神: '食神格', 伤官: '伤官格', 正印: '正印格', 偏印: '偏印格' };
+  return { name: map[god] || '', note: `月令 ${monthZhi} ${basis}（${god}）`, basis };
 }
 
 /* 流月：给定流年干支，排十二个月（寅月起） */
@@ -145,7 +147,7 @@ export function deepen(pillars, dayGan, yearGan) {
   const nayin = pillars.map((p) => ({ label: p.label, name: nayinOf(p.gan, p.zhi) }));
   const stages = pillars.map((p) => ({ label: p.label, stage: lifeStage(dayGan, p.zhi) }));
   const shensha = shenshaOf(pillars, dayGan);
-  const pattern = patternOf(dayGan, pillars[1].zhi);
+  const pattern = patternOf(dayGan, pillars[1].zhi, [pillars[0].gan, pillars[1].gan, pillars[3].gan]);
   const months = monthsOfYear(yearGan, pillars[0].zhi).map((m) => ({ ...m, tenGod: tenGod(dayGan, m.gan) }));
   return { hidden, nayin, stages, shensha, pattern, months };
 }

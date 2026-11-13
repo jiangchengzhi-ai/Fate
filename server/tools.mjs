@@ -10,6 +10,7 @@ import { cityByName } from './cities.mjs';
 import { lunarToSolar } from './lunar.mjs';
 import { deepen } from './bazi.mjs';
 import { inChinaDST } from './dst-cn.mjs';
+import { isClash, isHe, isStemHe, dayRelations, dayEnergy, dayAdvice } from './relations.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -632,6 +633,71 @@ export function yinzha({ heading, laishui, qushui, backing = true, mingtang = tr
   };
 }
 
+/* ---------------- 流日 ---------------- */
+export function daily({ birth = {}, days = 7, from } = {}) {
+  const chart = paipan(birth);
+  const n = Math.min(14, Math.max(1, Number(days) || 7));
+  const start = from ? new Date(`${from}T00:00:00+08:00`) : new Date();
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(start.getTime() + i * 86400000);
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const dd = d.getDate();
+    const gz = dayGanzhi(y, m, dd);
+    const rel = dayRelations(gz.gan, gz.zhi, chart.pillars);
+    const god = shishen(chart.dayMaster, gz.gan);
+    const adv = dayAdvice(rel, god);
+    out.push({
+      date: `${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}`,
+      ganzhi: gz.gan + gz.zhi,
+      tenGod: god,
+      relations: rel,
+      energy: dayEnergy(rel),
+      do: adv.do,
+      avoid: adv.avoid,
+    });
+  }
+  const avg = Math.round(out.reduce((a, x) => a + x.energy, 0) / out.length);
+  return {
+    type: 'daily',
+    natal: chart.pillars.map((p) => p.gan + p.zhi),
+    dayMaster: chart.dayMaster,
+    days: out,
+    overall: avg,
+    summary: `未来 ${n} 天，按 ${chart.dayMaster} 日主看：${out.map((x) => x.date.slice(5) + ' ' + x.ganzhi).join('、')}。`,
+  };
+}
+
+/* ---------------- 合盘 ---------------- */
+export function hepan({ a = {}, b = {} }) {
+  const A = paipan(a);
+  const B = paipan(b);
+  const rel = [];
+  let score = 60;
+
+  if (isStemHe(A.dayMaster, B.dayMaster)) { score += 12; rel.push({ type: '干合', text: `${A.dayMaster} 与 ${B.dayMaster} 相合` }); }
+  if (isHe(A.pillars[2].zhi, B.pillars[2].zhi)) { score += 12; rel.push({ type: '支合', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相合` }); }
+  if (isClash(A.pillars[2].zhi, B.pillars[2].zhi)) { score -= 15; rel.push({ type: '支冲', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相冲` }); }
+
+  const topA = [...A.elems].sort((x, y) => y.v - x.v)[0].e;
+  const topB = [...B.elems].sort((x, y) => y.v - x.v)[0].e;
+  if (A.yong.includes(topB)) { score += 8; rel.push({ type: '五行', text: `对方以 ${topB} 为主，正是你的喜用` }); }
+  if (B.yong.includes(topA)) { score += 8; rel.push({ type: '五行', text: `你以 ${topA} 为主，正是对方的喜用` }); }
+  score = clamp(score, 20, 96);
+
+  return {
+    type: 'hepan',
+    a: { pillars: A.pillars, dayMaster: A.dayMaster, yong: A.yong, elems: A.elems },
+    b: { pillars: B.pillars, dayMaster: B.dayMaster, yong: B.yong, elems: B.elems },
+    relations: rel,
+    overall: score,
+    summary: rel.length
+      ? `${rel.map((r) => r.text).join('；')}。`
+      : '两人日柱无直接冲合，按五行互补来看。',
+  };
+}
+
 export const TOOLS = {
   paipan,
   xiaoliuren,
@@ -639,6 +705,8 @@ export const TOOLS = {
   bazhai,
   yangzhai,
   yinzha,
+  daily,
+  hepan,
 };
 
 export const TOOL_MANIFEST = [
