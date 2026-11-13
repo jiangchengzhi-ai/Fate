@@ -19,8 +19,9 @@ export function yinzhaView() {
           <a class="tb-link right" href="#/about">关于</a>
         </header>
 
-        <p class="lead">拖动罗盘定坐向，再看水从哪来、往哪去。三合水法只论方位：来水宜长生、冠带、临官、帝旺，去水宜衰、病、死、墓、绝。</p>
+        <p class="lead">拖动罗盘定坐向，选来水、去水方向，再勾选能确认的形势。</p>
 
+        <h2 class="step"><b>一</b>定坐向</h2>
         <div class="compass-stage" data-stage>
           ${compassSVG(MOUNTAINS, GUAS)}
         </div>
@@ -37,22 +38,26 @@ export function yinzhaView() {
         </div>
         <div class="cp-read"><div class="hint" data-loc-text></div></div>
 
+        <h2 class="step"><b>二</b>水从哪来、往哪去</h2>
         <div class="field">
-          <label>来水方位（可不填）</label>
-          <div class="opts" data-lai>
-            ${ZHI12.map((z) => `<button class="opt" type="button" data-lai-z="${z}" aria-pressed="false">${z}</button>`).join('')}
-          </div>
+          <label for="ylai">来水方位（可不填）</label>
+          <select class="input" id="ylai" data-lai>
+            <option value="">不填</option>
+            ${ZHI12.map((z) => `<option value="${z}">${z}</option>`).join('')}
+          </select>
         </div>
 
         <div class="field">
-          <label>去水方位（可不填）</label>
-          <div class="opts" data-qu>
-            ${ZHI12.map((z) => `<button class="opt" type="button" data-qu-z="${z}" aria-pressed="false">${z}</button>`).join('')}
-          </div>
+          <label for="yqu">去水方位（可不填）</label>
+          <select class="input" id="yqu" data-qu>
+            <option value="">不填</option>
+            ${ZHI12.map((z) => `<option value="${z}">${z}</option>`).join('')}
+          </select>
         </div>
 
+        <h2 class="step"><b>三</b>看形势（能确认就勾）</h2>
         <div class="field">
-          <label>形势</label>
+          <label>这三样，确认了再勾</label>
           <div class="opts">
             <button class="opt" type="button" data-t="backing" aria-pressed="false">后有靠山</button>
             <button class="opt" type="button" data-t="mingtang" aria-pressed="false">前有明堂</button>
@@ -138,6 +143,9 @@ export function yinzhaView() {
       stage.addEventListener('pointercancel', stop);
 
       paint();
+
+      $('[data-lai]', root)?.addEventListener('change', (e) => { lai = e.target.value; });
+      $('[data-qu]', root)?.addEventListener('change', (e) => { qu = e.target.value; });
 
       const sensorBtn = $('[data-sensor]', root);
       sensorBtn?.addEventListener('click', async () => {

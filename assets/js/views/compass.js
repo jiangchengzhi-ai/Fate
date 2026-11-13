@@ -33,6 +33,7 @@ export function compassView() {
 
       <p class="lead">先定房屋坐向，再看门、床、灶、书桌各在何方。站在屋内中心，让手机顶部指向大门方向；没有传感器就拖动转盘。</p>
 
+      <h2 class="step"><b>一</b>定朝向</h2>
       <div class="compass-stage" data-stage>
         ${compassSVG(MOUNTAINS, GUAS)}
       </div>
@@ -48,8 +49,20 @@ export function compassView() {
         <button class="btn btn-line btn-sm" type="button" data-lock>定盘</button>
       </div>
 
+      <div class="dir-quick" data-quick aria-label="直接选朝向">
+        <button class="opt" type="button" data-face="0">北</button>
+        <button class="opt" type="button" data-face="45">东北</button>
+        <button class="opt" type="button" data-face="90">东</button>
+        <button class="opt" type="button" data-face="135">东南</button>
+        <button class="opt" type="button" data-face="180">南</button>
+        <button class="opt" type="button" data-face="225">西南</button>
+        <button class="opt" type="button" data-face="270">西</button>
+        <button class="opt" type="button" data-face="315">西北</button>
+      </div>
+      <p class="q-hint" style="margin-left:0">不想转罗盘，就直接点上面的大字。</p>
+
       <section class="sec" style="margin-top:26px">
-        <div class="sec-head"><h2>宅与命</h2></div>
+        <h2 class="step"><b>二</b>填宅主</h2>
 
         <div class="field">
           <label for="byear">出生年 · 公历</label>
@@ -65,8 +78,9 @@ export function compassView() {
           </div>
         </div>
 
+        <h2 class="step"><b>三</b>选入户门</h2>
         <div class="field">
-          <label>入户门所在的方位</label>
+          <label>门开在哪一边</label>
           <div class="dir-grid" role="group" aria-label="入户门方位">
             <button class="dir-btn" type="button" data-door="乾" aria-pressed="${door === '乾'}"><b>西北</b><span>乾</span></button>
             <button class="dir-btn" type="button" data-door="坎" aria-pressed="${door === '坎'}"><b>北</b><span>坎</span></button>
@@ -148,6 +162,15 @@ export function compassView() {
 
     paint();
     refreshDock();
+
+    $$('[data-face]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        if (locked) return;
+        setHeading(Number(b.dataset.face));
+        $$('[data-face]', root).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        hint.textContent = '已按所选方向定盘，可再微调';
+      });
+    });
 
     /* --- 拖动转盘 --- */
     const angleAt = (e) => {

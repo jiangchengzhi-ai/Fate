@@ -1252,3 +1252,8 @@ body{font-size:15px}
 .row3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
 .leap{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--text-2)}
 .leap input{width:auto;height:auto}
+
+.step{display:flex;align-items:baseline;gap:10px;margin:30px 0 12px;font-size:19px;letter-spacing:.08em;color:var(--text);font-weight:400}
+.step b{font-family:var(--serif);color:var(--brass-hi);font-weight:400;font-size:22px}
+.dir-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0 0}
+.dir-quick .opt{min-height:50px}
