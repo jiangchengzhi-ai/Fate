@@ -3,6 +3,7 @@
    照片只在本次请求里传给模型，不落盘、不写进批注。
    ========================================================================== */
 import { FACE, PALM } from '../assets/js/data.js';
+import { applyFaceRules } from './rules.mjs';
 
 const CFG = {
   base: (process.env.FATETELL_VISION_BASE || process.env.FATETELL_LLM_BASE || 'https://api.deepseek.com/v1').replace(/\/+$/, ''),
@@ -182,11 +183,19 @@ export function parseFeatures(text, kind = 'face', clientMeasures = null) {
   const measures = cm
     ? { ...cm, source: 'mediapipe-468' }
     : (kind === 'face' ? sanitizeMeasures(raw.measures) : null);
-  if (measures) features = applyMeasureRules(features, measures);
+
+  let applied = [];
+  let basis = [];
+  if (measures && kind === 'face') {
+    const r = applyFaceRules(measures);
+    features = { ...features, ...r.features };
+    applied = r.applied;
+    basis = r.basis;
+  }
 
   const confidence = Number(raw.confidence);
   if (Number.isFinite(confidence) && confidence < 45) return { features: {}, confidence, dropped, measures };
-  return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures };
+  return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures, applied, basis };
 }
 
 export async function analyzeImage(kind, dataUrl, clientMeasures = null) {

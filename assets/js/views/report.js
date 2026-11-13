@@ -293,12 +293,17 @@ function visionBlock(rec) {
         mm.cheekWidth != null ? `颧宽比 ${mm.cheekWidth}` : '',
       ].filter(Boolean).join(' · ')}</p>`
     : '';
+  const basis = (v.basis || []).slice(0, 3);
+  const basisLine = basis.length
+    ? `<p class="vision-basis">依据：${basis.map((b) => `${esc(b.book)}·${esc(b.chapter)}`).join('；')}</p>`
+    : '';
   return `
   <details class="vision-note">
     <summary>识别依据 · 模型看到的 ${v.items.length} 项${conf}</summary>
     <dl>${v.items.map((i) => `<div><dt>${esc(i.t)}</dt><dd>${esc(i.v)}</dd></div>`).join('')}</dl>
     <p>由照片识别得到，仅作预填；可在「相」页点「自己逐项选」修改后重出批注。</p>
     ${mline}
+    ${basisLine}
   </details>`;
 }
 

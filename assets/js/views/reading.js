@@ -240,6 +240,8 @@ function readingView(cfg) {
             confidence: out.confidence ?? null,
             model: out.model || null,
             measures: out.measures || null,
+            applied: out.applied || [],
+            basis: out.basis || [],
             items,
           });
         } catch (err) {
