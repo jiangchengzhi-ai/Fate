@@ -303,6 +303,7 @@ function visionBlock(rec) {
     <dl>${v.items.map((i) => `<div><dt>${esc(i.t)}</dt><dd>${esc(i.v)}</dd></div>`).join('')}</dl>
     <p>由照片识别得到，仅作预填；可在「相」页点「自己逐项选」修改后重出批注。</p>
     ${mline}
+    ${v.quality ? `<p class="vision-measure">拍摄质量：${v.quality.ok ? '良好' : esc((v.quality.issues || []).join('；'))}</p>` : ''}
     ${basisLine}
     <p class="vision-limit">照片只能看形：神态、气色、举止无法从一张照片判断；相不独论，结论只作参考。</p>
   </details>`;
