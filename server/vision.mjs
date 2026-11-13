@@ -96,6 +96,12 @@ function sanitizeMeasures(raw) {
     noseWidth: n(raw.noseWidth, 0.1, 0.45),
     mouthWidth: n(raw.mouthWidth, 0.15, 0.6),
     jawWidth: n(raw.jawWidth, 0.4, 1.05),
+    eyeTilt: n(raw.eyeTilt, -0.15, 0.15),
+    eyeOpen: n(raw.eyeOpen, 0.1, 0.9),
+    cheekWidth: n(raw.cheekWidth, 0.5, 1.1),
+    lipThick: n(raw.lipThick, 0.01, 0.25),
+    noseLen: n(raw.noseLen, 0.2, 0.6),
+    chinHeight: n(raw.chinHeight, 0.15, 0.5),
   };
   const out = {};
   for (const [k, v] of Object.entries(m)) if (v != null) out[k] = Math.round(v * 1000) / 1000;
@@ -107,6 +113,7 @@ function applyMeasureRules(features, measures) {
   const f = { ...features };
   const m = measures;
 
+  /* 脸型：长宽比 + 下颌宽 + 上停占比 */
   if (m.faceWH != null || m.jawWidth != null || m.upper != null) {
     if (m.faceWH != null && m.faceWH >= 1.5) f.shape = 'wood';
     else if (m.jawWidth != null && m.jawWidth >= 0.82) f.shape = 'earth';
@@ -115,20 +122,46 @@ function applyMeasureRules(features, measures) {
     else if (m.faceWH != null) f.shape = 'metal';
   }
 
+  /* 上停：发际到眉心占脸长 */
   if (m.upper != null) {
     if (m.upper >= 0.375) f.forehead = 'broad';
     else if (m.upper <= 0.315) f.forehead = 'narrow';
   }
 
+  /* 眼：外眼角高低（正=下垂，负=上扬）+ 开合度 */
+  if (m.eyeTilt != null) {
+    if (m.eyeTilt <= -0.012) f.eye = 'uplift';
+    else if (m.eyeTilt >= 0.012) f.eye = 'droop';
+  }
+  if (m.eyeOpen != null && m.eyeOpen >= 0.42) f.eye = 'big';
+  if (m.eyeGap != null && m.eyeGap >= 1.35) f.eye = 'sanbai';
+
+  /* 鼻：鼻翼宽占脸宽 */
   if (m.noseWidth != null) {
     if (m.noseWidth >= 0.28) f.nose = 'flare';
     else if (m.noseWidth <= 0.19) f.nose = 'small';
   }
 
+  /* 颧：颧宽占脸宽 */
+  if (m.cheekWidth != null) {
+    if (m.cheekWidth >= 0.88) f.cheek = 'full';
+    else if (m.cheekWidth <= 0.72) f.cheek = 'thin';
+  }
+
+  /* 口：口宽、唇厚 */
+  if (m.mouthWidth != null) {
+    if (m.mouthWidth >= 0.42) f.mouth = 'wide';
+    else if (m.mouthWidth <= 0.30) f.mouth = 'narrow';
+  }
+  if (m.lipThick != null) {
+    if (m.lipThick >= 0.09) f.mouth = 'thick';
+    else if (m.lipThick <= 0.05) f.mouth = 'thin';
+  }
+
   return f;
 }
 
-export function parseFeatures(text, kind = 'face') {
+export function parseFeatures(text, kind = 'face', clientMeasures = null) {
   const fields = FIELDS[kind] || FIELDS.face;
   const m = String(text).match(/\{[\s\S]*\}/);
   if (!m) return { features: {}, confidence: 0, dropped: [], measures: null };
@@ -145,7 +178,10 @@ export function parseFeatures(text, kind = 'face') {
     features[id] = v;
   }
 
-  const measures = kind === 'face' ? sanitizeMeasures(raw.measures) : null;
+  const cm = kind === 'face' ? sanitizeMeasures(clientMeasures) : null;
+  const measures = cm
+    ? { ...cm, source: 'mediapipe-468' }
+    : (kind === 'face' ? sanitizeMeasures(raw.measures) : null);
   if (measures) features = applyMeasureRules(features, measures);
 
   const confidence = Number(raw.confidence);
@@ -153,7 +189,7 @@ export function parseFeatures(text, kind = 'face') {
   return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures };
 }
 
-export async function analyzeImage(kind, dataUrl) {
+export async function analyzeImage(kind, dataUrl, clientMeasures = null) {
   if (!FIELDS[kind]) {
     const err = new Error('未知的识别类型');
     err.code = 'BAD_KIND';
@@ -203,7 +239,7 @@ export async function analyzeImage(kind, dataUrl) {
       err.code = 'EMPTY';
       throw err;
     }
-    const parsed = parseFeatures(text, kind);
+    const parsed = parseFeatures(text, kind, clientMeasures);
     return { ...parsed, kind, model: data.model || CFG.model, usage: data.usage || null, ms: Date.now() - started };
   } catch (e) {
     if (e.name === 'AbortError') {

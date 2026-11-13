@@ -1,5 +1,6 @@
 import { FACE, PALM } from '../data.js';
 import { buildFace, buildPalm, makeRecord } from '../engine.js';
+import { measureFace } from '../facemesh.js';
 import { store } from '../store.js';
 import { $, esc, pickImage, toast, go, goReplace, openSheet, closeSheet } from '../ui.js';
 import { api } from '../api.js';
@@ -213,7 +214,17 @@ function readingView(cfg) {
         scan.scrollIntoView({ behavior: 'smooth', block: 'center' });
         toast('识别中，约 5–15 秒');
         try {
-          const out = await api.vision(type, draft.photo);
+          let local = null;
+          if (type === 'face') {
+            try {
+              const m = await measureFace(draft.photo);
+              if (m.ok) {
+                local = m.measures;
+                draft.measures = local;
+              }
+            } catch { /* 关键点不可用就走模型估测 */ }
+          }
+          const out = await api.vision(type, draft.photo, local);
           const entries = Object.entries(out.features || {});
           if (!entries.length) {
             toast('模型没看清，可以换张照片，或自己逐项选');
