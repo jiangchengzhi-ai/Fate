@@ -52,7 +52,7 @@ export function finish(result, extra) {
     verdict: pickLine(VERDICT[result.type] || VERDICT.bu),
   });
   store.addReport(rec);
-  goReplace(`#/report/${rec.id}`);
+  go(`#/report/${rec.id}`);
 }
 
 /* ---------------- 命 · 四柱 ---------------- */
