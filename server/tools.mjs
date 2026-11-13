@@ -8,6 +8,7 @@ import { fortuneSheet } from './fortune.mjs';
 import { solarCorrection, toMinutes, fromMinutes, zhiOfMinutes, midMinutesOfZhi } from './solar.mjs';
 import { cityByName } from './cities.mjs';
 import { lunarToSolar } from './lunar.mjs';
+import { deepen } from './bazi.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -211,6 +212,7 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
   const weak = [...elems].sort((a, b) => a.v - b.v)[0].e;
 
   const tenGods = pillars.map((p) => (p === pillars[2] ? '日主' : shishen(day.gan, p.gan)));
+  const deep = deepen(pillars, day.gan, pillars[0].gan);
   const me = GAN_E[GAN.indexOf(day.gan)];
   const same = elems.find((x) => x.e === me)?.v || 0;
   const support = elems.find((x) => x.e === Object.keys(SHENG).find((k) => SHENG[k] === me))?.v || 0;
@@ -286,6 +288,7 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
     notes,
     pillars,
     tenGods,
+    deep,
     dayMaster: day.gan,
     dayMasterElem: me,
     elems,

@@ -166,6 +166,9 @@ export function mingView() {
             : { date, hour, gender, city, hourUnknown: unknownHour };
           const r = await api.tool('paipan', payload);
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
+          const hiddenRow = (r.deep?.hidden || []).map((h) => h.stems.map((x) => x.gan).join(''));
+          const nayinRow = (r.deep?.nayin || []).map((n) => n.name);
+          const stageRow = (r.deep?.stages || []).map((x) => x.stage);
           finish(r, {
             title: '命盘批注',
             heading: '命',
@@ -174,7 +177,13 @@ export function mingView() {
             overall: r.overall,
             level: levelOf(r.overall),
             blocks: [
-              { kind: 'table', title: '四柱', head: r.pillars.map((p) => p.label), rows: [rows, r.tenGods] },
+              { kind: 'table', title: '四柱', head: ['', ...r.pillars.map((p) => p.label)], rows: [
+                ['干支', ...rows],
+                ['十神', ...r.tenGods],
+                ['藏干', ...hiddenRow],
+                ['纳音', ...nayinRow],
+                ['长生', ...stageRow],
+              ] },
               { kind: 'elems', title: '五行', items: r.elems },
               { kind: 'kv', title: '判读', rows: [
                 ['日主', `${r.dayMaster}${r.dayMasterElem}`],
@@ -190,6 +199,13 @@ export function mingView() {
                   : '未校正（没选出出生地）'],
                 ['时辰', `${r.resolved?.hour || hour}时${r.resolved?.hourAssumed ? ' · 不清楚，按正午暂排' : ''}`],
               ] },
+              { kind: 'kv', title: '格局', rows: [
+                ['格局', r.deep?.pattern?.name || '未取'],
+                ['取法', r.deep?.pattern?.note || ''],
+              ] },
+              { kind: 'kv', title: '神煞', rows: (r.deep?.shensha || []).slice(0, 8).map((x) => [x.name, x.where + (x.basis ? `（${x.basis}）` : '')]) },
+              { kind: 'table', title: '流月', head: ['月', '干支', '十神'],
+                rows: (r.deep?.months || []).map((m) => [m.label, m.ganZhi, m.tenGod]) },
               { kind: 'kv', title: '起运', rows: [
                 ['顺逆', r.luck.forward ? '顺行' : '逆行'],
                 ['起运', `${r.luck.startAge.years}岁${r.luck.startAge.months ? `${r.luck.startAge.months}个月` : ''}`],
