@@ -1,6 +1,6 @@
 import { FACE, PALM } from '../data.js';
 import { buildFace, buildPalm, makeRecord } from '../engine.js';
-import { measureFace } from '../facemesh.js';
+import { measureFace, drawOverlay } from '../facemesh.js';
 import { store } from '../store.js';
 import { $, esc, pickImage, toast, go, goReplace, openSheet, closeSheet } from '../ui.js';
 import { api } from '../api.js';
@@ -215,12 +215,20 @@ function readingView(cfg) {
         toast('识别中，约 5–15 秒');
         try {
           let local = null;
+          let quality = null;
           if (type === 'face') {
             try {
               const m = await measureFace(draft.photo);
               if (m.ok) {
                 local = m.measures;
+                quality = m.quality || null;
                 draft.measures = local;
+                if (m.quality?.issues?.length) toast(`${m.quality.issues[0]}（仍可继续）`);
+                try {
+                  const ov = await drawOverlay(draft.photo, m.landmarks);
+                  const slot = $('[data-slot]');
+                  if (slot) slot.innerHTML = `<img class="ph" src="${ov}" alt="468 点测量预览">`;
+                } catch { /* 预览失败不影响识别 */ }
               }
             } catch { /* 关键点不可用就走模型估测 */ }
           }
@@ -242,6 +250,7 @@ function readingView(cfg) {
             measures: out.measures || null,
             applied: out.applied || [],
             basis: out.basis || [],
+            quality,
             items,
           });
         } catch (err) {
