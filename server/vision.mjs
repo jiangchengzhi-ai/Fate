@@ -181,7 +181,7 @@ export async function analyzeImage(kind, dataUrl) {
       body: JSON.stringify({
         model: CFG.model,
         temperature: 0,
-        max_tokens: 2200,
+        max_tokens: 3000,
         reasoning_effort: CFG.effort,
         messages: [
           { role: 'system', content: SYSTEM[kind] },
