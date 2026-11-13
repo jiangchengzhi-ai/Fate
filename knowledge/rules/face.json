@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "kind": "face",
+  "notes": "面相规则的判据全部来自本项目 knowledge/passages.json 中的公版相法条文；measure 为 468 点关键点测量值（0-1 比例或比值）。规则按顺序匹配，先命中先采用。",
+  "rules": [
+    {
+      "id": "shape-wood",
+      "field": "shape",
+      "value": "wood",
+      "title": "面长而秀，木气为主",
+      "when": { "faceWH": { "min": 1.5 } },
+      "basis": ["sx-st-01", "sx-wy-03"],
+      "reason": "脸长宽比 ≥ 1.5，三停偏长"
+    },
+    {
+      "id": "shape-earth",
+      "field": "shape",
+      "value": "earth",
+      "title": "骨相方正，土气厚",
+      "when": { "jawWidth": { "min": 0.82 } },
+      "basis": ["sx-st-01", "sx-wyue-13"],
+      "reason": "下颌宽比 ≥ 0.82，腮部有力"
+    },
+    {
+      "id": "shape-water",
+      "field": "shape",
+      "value": "water",
+      "title": "面圆而润，水气足",
+      "when": { "faceWH": { "max": 1.3 }, "jawWidth": { "max": 0.78 } },
+      "basis": ["sx-st-01", "sx-wy-03"],
+      "reason": "脸长宽比 ≤ 1.3 且下颌收"
+    },
+    {
+      "id": "shape-fire",
+      "field": "shape",
+      "value": "fire",
+      "title": "上宽下收，火气明",
+      "when": { "upper": { "min": 0.37 }, "jawWidth": { "max": 0.75 } },
+      "basis": ["sx-st-01", "sx-wyue-13"],
+      "reason": "上停 ≥ 0.37、下颌窄，呈上宽下收"
+    },
+    {
+      "id": "shape-metal",
+      "field": "shape",
+      "value": "metal",
+      "title": "轮廓分明，金气刚",
+      "when": { "faceWH": { "min": 1.3, "max": 1.5 } },
+      "basis": ["sx-st-01"],
+      "reason": "脸长宽比介于 1.3–1.5，骨相清楚"
+    },
+
+    {
+      "id": "forehead-broad",
+      "field": "forehead",
+      "value": "broad",
+      "title": "上停高阔",
+      "when": { "upper": { "min": 0.375 } },
+      "basis": ["sx-st-01", "sxqb-01"],
+      "reason": "上停占脸长 ≥ 0.375"
+    },
+    {
+      "id": "forehead-narrow",
+      "field": "forehead",
+      "value": "narrow",
+      "title": "上停偏窄",
+      "when": { "upper": { "max": 0.315 } },
+      "basis": ["sx-st-01"],
+      "reason": "上停占脸长 ≤ 0.315"
+    },
+
+    {
+      "id": "eye-uplift",
+      "field": "eye",
+      "value": "uplift",
+      "title": "眼角上扬",
+      "when": { "eyeTilt": { "max": -0.012 } },
+      "basis": ["sx-wg-02"],
+      "reason": "外眼角高于内眼角"
+    },
+    {
+      "id": "eye-droop",
+      "field": "eye",
+      "value": "droop",
+      "title": "眼角微垂",
+      "when": { "eyeTilt": { "min": 0.012 } },
+      "basis": ["sx-wg-02"],
+      "reason": "外眼角低于内眼角"
+    },
+    {
+      "id": "eye-big",
+      "field": "eye",
+      "value": "big",
+      "title": "眼大而开",
+      "when": { "eyeOpen": { "min": 0.42 } },
+      "basis": ["sx-wg-02", "tq-gx-08"],
+      "reason": "眼睛开合度 ≥ 0.42（眼高/眼宽）"
+    },
+    {
+      "id": "eye-sanbai",
+      "field": "eye",
+      "value": "sanbai",
+      "title": "三白之目",
+      "when": { "eyeGap": { "min": 1.35 } },
+      "basis": ["sx-wg-02"],
+      "reason": "眼距 ≥ 1.35 倍眼宽"
+    },
+
+    {
+      "id": "nose-flare",
+      "field": "nose",
+      "value": "flare",
+      "title": "鼻翼宽张",
+      "when": { "noseWidth": { "min": 0.28 } },
+      "basis": ["sx-wg-02", "sx-wy-03"],
+      "reason": "鼻宽 ≥ 0.28 脸宽"
+    },
+    {
+      "id": "nose-small",
+      "field": "nose",
+      "value": "small",
+      "title": "鼻形偏小",
+      "when": { "noseWidth": { "max": 0.19 } },
+      "basis": ["sx-wg-02"],
+      "reason": "鼻宽 ≤ 0.19 脸宽"
+    },
+    {
+      "id": "nose-high",
+      "field": "nose",
+      "value": "high",
+      "title": "鼻梁高起",
+      "when": { "noseLen": { "min": 0.34 } },
+      "basis": ["sx-wy-03", "sx-wyue-13"],
+      "reason": "鼻长占脸长 ≥ 0.34，中岳不陷"
+    },
+
+    {
+      "id": "cheek-full",
+      "field": "cheek",
+      "value": "full",
+      "title": "两颧丰满",
+      "when": { "cheekWidth": { "min": 0.88 } },
+      "basis": ["sx-wyue-13"],
+      "reason": "颧宽 ≥ 0.88 脸宽，东西岳辅而不逼"
+    },
+    {
+      "id": "cheek-thin",
+      "field": "cheek",
+      "value": "thin",
+      "title": "两颧偏薄",
+      "when": { "cheekWidth": { "max": 0.72 } },
+      "basis": ["sx-wyue-13"],
+      "reason": "颧宽 ≤ 0.72 脸宽"
+    },
+
+    {
+      "id": "mouth-wide",
+      "field": "mouth",
+      "value": "wide",
+      "title": "口形开阔",
+      "when": { "mouthWidth": { "min": 0.42 } },
+      "basis": ["sx-wg-02"],
+      "reason": "口宽 ≥ 0.42 脸宽"
+    },
+    {
+      "id": "mouth-narrow",
+      "field": "mouth",
+      "value": "narrow",
+      "title": "口形偏窄",
+      "when": { "mouthWidth": { "max": 0.3 } },
+      "basis": ["sx-wg-02"],
+      "reason": "口宽 ≤ 0.30 脸宽"
+    },
+    {
+      "id": "mouth-thick",
+      "field": "mouth",
+      "value": "thick",
+      "title": "唇厚",
+      "when": { "lipThick": { "min": 0.09 } },
+      "basis": ["sx-wg-02"],
+      "reason": "上下唇总厚 ≥ 0.09 脸长"
+    },
+    {
+      "id": "mouth-thin",
+      "field": "mouth",
+      "value": "thin",
+      "title": "唇薄",
+      "when": { "lipThick": { "max": 0.05 } },
+      "basis": ["sx-wg-02"],
+      "reason": "上下唇总厚 ≤ 0.05 脸长"
+    }
+  ],
+  "modelOnlyFields": ["brow", "chin", "mole"],
+  "modelOnlyNote": "眉、下巴、痣无法由关键点稳定测量，交由视觉模型判断；痣只作提醒，不作吉凶断语。",
+  "modelOnlyBasis": ["lz-zhi-09", "xl-ht-10"]
+}
