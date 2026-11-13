@@ -295,7 +295,7 @@ export function reportView(id) {
     return {
       html: `
       <header class="topbar">
-        <a class="brand" href="#/">fatetell</a>
+        <a class="brand" href="#/">问鹤</a>
         <a class="tb-link" href="#/history">我的记录</a>
       </header>
       <div class="empty"><span class="glyph">空</span>找不到这页批注，可能已被删除。<br><a class="tb-link" href="#/history" style="color:var(--brass-hi)">去批注簿看看</a></div>`,
@@ -321,7 +321,7 @@ export function reportView(id) {
   return {
     html: `
     <header class="topbar">
-      <a class="brand" href="#/"><span>fatetell</span></a>
+      <a class="brand" href="#/"><span>问鹤</span></a>
       <a class="tb-link" href="#/history">我的记录</a>
     </header>
 
