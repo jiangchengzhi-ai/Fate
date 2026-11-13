@@ -532,4 +532,8 @@ export function maybeWechatHint() {
     }
   });
   document.body.appendChild(el);
+  document.body.style.paddingTop = el.offsetHeight + 'px';
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('[data-wx-close]')) document.body.style.paddingTop = '';
+  });
 }
