@@ -107,6 +107,10 @@ export function mingView() {
         </select>
       </div>
       <div class="field">
+        <label for="mlng">经度（选不到城市就填这里，可不填）</label>
+        <input class="input" id="mlng" type="number" step="0.1" min="73" max="135" placeholder="例如 116.4" data-lng>
+      </div>
+      <div class="field">
         <label>性别</label>
         <div class="opts">
           <button class="opt" type="button" data-gender="male" aria-pressed="true">男</button>
@@ -161,9 +165,11 @@ export function mingView() {
         btn.textContent = '排 盘 中';
         try {
           const city = $('[data-city]', root)?.value || '';
+          const lngRaw = ($('[data-lng]', root)?.value || '').trim();
+          const lng = lngRaw && Number(lngRaw) >= 73 && Number(lngRaw) <= 135 ? Number(lngRaw) : undefined;
           const payload = cal === 'lunar'
-            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, hourUnknown: unknownHour }
-            : { date, hour, gender, city, hourUnknown: unknownHour };
+            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, longitude: lng, hourUnknown: unknownHour }
+            : { date, hour, gender, city, longitude: lng, hourUnknown: unknownHour };
           const r = await api.tool('paipan', payload);
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
           const hiddenRow = (r.deep?.hidden || []).map((h) => h.stems.map((x) => x.gan).join(''));
@@ -194,8 +200,9 @@ export function mingView() {
                 ['历法', r.resolved?.calendar === 'lunar' ? `农历 ${r.resolved.lunar?.year} 年${r.resolved.lunar?.leap ? '闰' : ''}${r.resolved.lunar?.month} 月${r.resolved.lunar?.day} 日 → 公历 ${r.resolved.adjustedDate}` : '公历'],
                 ['换年', '立春'],
                 ['换日', '23:00 起算子时'],
+                ['夏令时', r.resolved?.dstApplied ? '1986–1991 夏令时 · 已减 60 分钟' : '未涉及'],
                 ['真太阳时', r.resolved?.trueSolarApplied
-                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.baseClock}→${r.resolved.correctedClock}`
+                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.inputClock || r.resolved.baseClock}→${r.resolved.correctedClock}`
                   : '未校正（没选出出生地）'],
                 ['时辰', `${r.resolved?.hour || hour}时${r.resolved?.hourAssumed ? ' · 不清楚，按正午暂排' : ''}`],
               ] },

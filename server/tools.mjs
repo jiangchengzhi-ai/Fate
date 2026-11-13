@@ -9,6 +9,7 @@ import { solarCorrection, toMinutes, fromMinutes, zhiOfMinutes, midMinutesOfZhi 
 import { cityByName } from './cities.mjs';
 import { lunarToSolar } from './lunar.mjs';
 import { deepen } from './bazi.mjs';
+import { inChinaDST } from './dst-cn.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -146,6 +147,12 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
   else baseMinutes = midMinutesOfZhi(hour);
   if (baseMinutes === null) throw new Error('hour 需要地支');
 
+  const inputMinutes = baseMinutes;
+
+  /* 1986–1991 夏令时：当时钟表快 1 小时，先减回标准时间 */
+  const dstApplied = inChinaDST(y, m, d);
+  if (dstApplied) baseMinutes -= 60;
+
   const correction = lng === null ? 0 : solarCorrection(y, m, d, lng);
   const adjMinutes = Math.round(baseMinutes + correction);
   const { clock: correctedClock, dayShift } = fromMinutes(adjMinutes);
@@ -164,6 +171,7 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
 
   const notes = [];
   if (lunarConverted) notes.push('lunar_converted');
+  if (dstApplied) notes.push('china_dst_applied');
   if (hourUnknown) notes.push('hour_assumed');
   if (lng === null) notes.push('true_solar_skipped_no_longitude');
   else notes.push('true_solar_applied');
@@ -171,6 +179,8 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
   const resolved = {
     calendar: lunarConverted ? 'lunar' : 'solar',
     lunar: lunarInfo,
+    dstApplied,
+    inputClock: fromMinutes(inputMinutes).clock,
     city: city || null,
     longitude: lng,
     baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,

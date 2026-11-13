@@ -1348,6 +1348,7 @@ function fortuneSheet(yong = [], dom = '') {
 
 
 
+
 const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const GAN_E = ['木', '木', '火', '火', '土', '土', '金', '金', '水', '水'];
@@ -1484,6 +1485,12 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, h
   else baseMinutes = midMinutesOfZhi(hour);
   if (baseMinutes === null) throw new Error('hour 需要地支');
 
+  const inputMinutes = baseMinutes;
+
+  /* 1986–1991 夏令时：当时钟表快 1 小时，先减回标准时间 */
+  const dstApplied = inChinaDST(y, m, d);
+  if (dstApplied) baseMinutes -= 60;
+
   const correction = lng === null ? 0 : solarCorrection(y, m, d, lng);
   const adjMinutes = Math.round(baseMinutes + correction);
   const { clock: correctedClock, dayShift } = fromMinutes(adjMinutes);
@@ -1502,6 +1509,7 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, h
 
   const notes = [];
   if (lunarConverted) notes.push('lunar_converted');
+  if (dstApplied) notes.push('china_dst_applied');
   if (hourUnknown) notes.push('hour_assumed');
   if (lng === null) notes.push('true_solar_skipped_no_longitude');
   else notes.push('true_solar_applied');
@@ -1509,6 +1517,8 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, h
   const resolved = {
     calendar: lunarConverted ? 'lunar' : 'solar',
     lunar: lunarInfo,
+    dstApplied,
+    inputClock: fromMinutes(inputMinutes).clock,
     city: city || null,
     longitude: lng,
     baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,
@@ -2977,7 +2987,7 @@ const DIRS8 = [
   { v: '乾', label: '西北', angle: 315 },
 ];
 
-const CITIES = ['北京','上海','广州','深圳','天津','重庆','成都','杭州','南京','武汉','西安','沈阳','哈尔滨','长春','石家庄','太原','济南','郑州','合肥','长沙','南昌','福州','厦门','昆明','贵阳','南宁','海口','兰州','西宁','银川','乌鲁木齐','呼和浩特','拉萨','香港','澳门','台北'];
+const CITIES = ['北京','上海','广州','深圳','天津','重庆','成都','杭州','南京','武汉','西安','沈阳','哈尔滨','长春','石家庄','太原','济南','郑州','合肥','长沙','南昌','福州','厦门','昆明','贵阳','南宁','海口','兰州','西宁','银川','乌鲁木齐','呼和浩特','拉萨','香港','澳门','台北','苏州','无锡','宁波','温州','东莞','佛山','珠海','汕头','泉州','烟台','潍坊','洛阳','襄阳','宜昌','绵阳','遵义','桂林','三亚','包头','唐山','徐州','常州','南通','嘉兴'];
 
 
 /* ===== assets/js/engine.js ===== */
@@ -5952,6 +5962,10 @@ function mingView() {
         </select>
       </div>
       <div class="field">
+        <label for="mlng">经度（选不到城市就填这里，可不填）</label>
+        <input class="input" id="mlng" type="number" step="0.1" min="73" max="135" placeholder="例如 116.4" data-lng>
+      </div>
+      <div class="field">
         <label>性别</label>
         <div class="opts">
           <button class="opt" type="button" data-gender="male" aria-pressed="true">男</button>
@@ -6006,9 +6020,11 @@ function mingView() {
         btn.textContent = '排 盘 中';
         try {
           const city = $('[data-city]', root)?.value || '';
+          const lngRaw = ($('[data-lng]', root)?.value || '').trim();
+          const lng = lngRaw && Number(lngRaw) >= 73 && Number(lngRaw) <= 135 ? Number(lngRaw) : undefined;
           const payload = cal === 'lunar'
-            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, hourUnknown: unknownHour }
-            : { date, hour, gender, city, hourUnknown: unknownHour };
+            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, longitude: lng, hourUnknown: unknownHour }
+            : { date, hour, gender, city, longitude: lng, hourUnknown: unknownHour };
           const r = await api.tool('paipan', payload);
           const rows = r.pillars.map((p) => `${p.gan}${p.zhi}`);
           const hiddenRow = (r.deep?.hidden || []).map((h) => h.stems.map((x) => x.gan).join(''));
@@ -6039,8 +6055,9 @@ function mingView() {
                 ['历法', r.resolved?.calendar === 'lunar' ? `农历 ${r.resolved.lunar?.year} 年${r.resolved.lunar?.leap ? '闰' : ''}${r.resolved.lunar?.month} 月${r.resolved.lunar?.day} 日 → 公历 ${r.resolved.adjustedDate}` : '公历'],
                 ['换年', '立春'],
                 ['换日', '23:00 起算子时'],
+                ['夏令时', r.resolved?.dstApplied ? '1986–1991 夏令时 · 已减 60 分钟' : '未涉及'],
                 ['真太阳时', r.resolved?.trueSolarApplied
-                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.baseClock}→${r.resolved.correctedClock}`
+                  ? `${r.resolved.city || '东经 ' + r.resolved.longitude} · ${r.resolved.correctionMinutes > 0 ? '+' : ''}${r.resolved.correctionMinutes} 分 · ${r.resolved.inputClock || r.resolved.baseClock}→${r.resolved.correctedClock}`
                   : '未校正（没选出出生地）'],
                 ['时辰', `${r.resolved?.hour || hour}时${r.resolved?.hourAssumed ? ' · 不清楚，按正午暂排' : ''}`],
               ] },
