@@ -41,7 +41,7 @@ export function homeView() {
   return {
     html: `
     <header class="topbar">
-      <a class="brand" href="#/">${MARK}<span>fatetell</span></a>
+      <a class="brand" href="#/">${MARK}<span>问鹤</span></a>
       <a class="tb-link" href="#/history">我的记录</a>
     </header>
 

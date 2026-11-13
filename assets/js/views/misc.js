@@ -41,7 +41,7 @@ export function historyView() {
 
   const html = `
     <header class="topbar">
-      <a class="brand" href="#/">fatetell</a>
+      <a class="brand" href="#/">问鹤</a>
       ${reports.length ? '<button class="tb-link" type="button" data-clear>清空</button>' : '<a class="tb-link" href="#/">回命盘</a>'}
     </header>
 
@@ -121,7 +121,7 @@ export function aboutView() {
   return {
     html: `
     <header class="topbar">
-      <a class="brand" href="#/">fatetell</a>
+      <a class="brand" href="#/">问鹤</a>
       <a class="tb-link" href="#/history">我的记录</a>
     </header>
 
@@ -134,7 +134,7 @@ export function aboutView() {
     <section class="sec" style="margin-top:16px">
       <div class="sec-head"><h2>这是什么</h2></div>
       <p class="lead" style="margin-top:14px">
-        fatetell 以五门组织：命、卜、相、堪舆、择日。相与堪舆在本机推演，命、卜、择日由本机 Node 服务里的工具层排算。
+        问鹤以五门组织：命、卜、相、堪舆、择日。相与堪舆在本机推演，命、卜、择日由本机 Node 服务里的工具层排算。
         五类古籍已内化为本机知识库，用来生成批注，不在页面逐条列出。
       </p>
     </section>
@@ -166,6 +166,6 @@ export function aboutView() {
       </p>
     </section>
 
-    <footer class="foot">fatetell 0.1 · 本机规则版 · 2026</footer>`,
+    <footer class="foot">问鹤 0.1 · 本机规则版 · 2026</footer>`,
   };
 }

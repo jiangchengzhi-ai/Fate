@@ -35,7 +35,7 @@ function notFoundView() {
   return {
     html: `
       <header class="topbar">
-        <a class="brand" href="#/">fatetell</a>
+        <a class="brand" href="#/">问鹤</a>
         <a class="tb-link" href="#/history">批注簿</a>
       </header>
       <div class="empty">
