@@ -13,6 +13,7 @@ const ORDER = [
   'assets/js/store.js',
   'assets/js/ui.js',
   'assets/js/lunar.js',
+  'assets/js/facemesh.js',
   'assets/js/sensors.js',
   'assets/js/track.js',
   'assets/js/views/home.js',

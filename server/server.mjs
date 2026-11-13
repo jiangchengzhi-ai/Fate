@@ -397,7 +397,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       try {
-        const out = await analyzeImage(kind, image);
+        const out = await analyzeImage(kind, image, body.measures || null);
         recordModel('vision', out.usage, session?.phone);
         return json(res, 200, out);
       } catch (e) {

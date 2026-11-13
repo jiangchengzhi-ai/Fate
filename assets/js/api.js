@@ -42,10 +42,10 @@ export const api = {
     body: JSON.stringify(body),
   }),
   visionStatus: () => req('/api/vision/status'),
-  vision: (kind, image) => req(`/api/vision/${kind === 'palm' ? 'palm' : 'face'}`, {
+  vision: (kind, image, measures) => req(`/api/vision/${kind === 'palm' ? 'palm' : 'face'}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ image }),
+    body: JSON.stringify({ image, measures: measures || undefined }),
   }),
   visionFace: (image) => req('/api/vision/face', {
     method: 'POST',

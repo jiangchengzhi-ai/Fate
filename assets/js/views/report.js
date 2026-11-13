@@ -281,13 +281,16 @@ function visionBlock(rec) {
   if (!v?.items?.length) return '';
   const conf = Number.isFinite(v.confidence) ? ` · 置信度 ${v.confidence}` : '';
   const mm = v.measures;
+  const src = mm?.source === 'mediapipe-468' ? '468 点实测' : '模型估测';
   const mline = mm
-    ? `<p class="vision-measure">测量：${[
+    ? `<p class="vision-measure">${src}：${[
         mm.faceWH != null ? `脸长宽比 ${mm.faceWH}` : '',
         mm.upper != null ? `三庭 ${Math.round(mm.upper * 100)}/${Math.round((mm.middle || 0) * 100)}/${Math.round((mm.lower || 0) * 100)}` : '',
         mm.eyeGap != null ? `眼距 ${mm.eyeGap} 眼宽` : '',
+        mm.eyeTilt != null ? `眼角倾斜 ${mm.eyeTilt}` : '',
         mm.noseWidth != null ? `鼻宽比 ${mm.noseWidth}` : '',
         mm.jawWidth != null ? `下颌比 ${mm.jawWidth}` : '',
+        mm.cheekWidth != null ? `颧宽比 ${mm.cheekWidth}` : '',
       ].filter(Boolean).join(' · ')}</p>`
     : '';
   return `
