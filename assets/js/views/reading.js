@@ -220,7 +220,7 @@ function readingView(cfg) {
             return;
           }
           entries.forEach(([qid, v]) => { draft.answers[qid] = v; });
-          store.saveDraft(type, draft);
+          try { store.saveDraft(type, draft); } catch { /* 存储满也不影响本次结果 */ }
           paintAnswers();
           const items = required
             .map((q) => ({ t: q.title, v: q.options.find((o) => o.v === draft.answers[q.id])?.label || '' }))
@@ -231,14 +231,21 @@ function readingView(cfg) {
             items,
           });
         } catch (err) {
+          const msg = String(err.message || '');
           if (err.status === 503) {
             if (location.protocol === 'file:') {
               toast('这是离线包，不接视觉模型。用「启动.bat」打开在线版再看相');
             } else {
               toast('视觉模型未配置：检查 启动.bat 里的 FATETELL_VISION_MODEL 后重启服务');
             }
+          } else if (/超时|超時|timeout/i.test(msg)) {
+            toast('识别超时了，换个网络或稍后再点一次');
+          } else if (/没有返回结果|截断/.test(msg)) {
+            toast('模型这次没给出结果，再点一次「看 相」');
+          } else if (/格式|过大|不支持/.test(msg)) {
+            toast('这张照片读不了，换成 JPG 或 PNG 再试');
           } else {
-            toast(err.message || '识别失败');
+            toast(msg || '识别失败，再试一次');
           }
         } finally {
           scan.hidden = true;
@@ -276,9 +283,9 @@ function readingView(cfg) {
       if (e.target.closest('[data-photo]')) {
         pickImage((dataUrl) => {
           draft.photo = dataUrl;
-          store.saveDraft(type, draft);
+          try { store.saveDraft(type, draft); } catch { /* 本机存储满，仍用内存里的照片 */ }
           slot.innerHTML = photoHtml(draft.photo, type);
-          toast('照片已存在本机');
+          toast('照片已添加');
         });
         return;
       }

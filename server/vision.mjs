@@ -114,7 +114,7 @@ export async function analyzeImage(kind, dataUrl) {
       body: JSON.stringify({
         model: CFG.model,
         temperature: 0,
-        max_tokens: 1400,
+        max_tokens: 2200,
         reasoning_effort: CFG.effort,
         messages: [
           { role: 'system', content: SYSTEM[kind] },
@@ -142,8 +142,10 @@ export async function analyzeImage(kind, dataUrl) {
     if (e.name === 'AbortError') {
       const err = new Error('视觉模型超时');
       err.code = 'TIMEOUT';
+      console.warn('[vision] TIMEOUT', kind, Date.now() - started + 'ms');
       throw err;
     }
+    console.warn('[vision]', e.code || 'ERR', e.message, e.detail ? String(e.detail).slice(0, 200) : '');
     throw e;
   } finally {
     clearTimeout(timer);
