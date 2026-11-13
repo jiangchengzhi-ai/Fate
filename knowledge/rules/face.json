@@ -180,14 +180,46 @@
       "reason": "上下唇总厚 ≥ 0.09 脸长"
     },
     {
-      "id": "mouth-thin",
-      "field": "mouth",
-      "value": "thin",
-      "title": "唇薄",
-      "when": { "lipThick": { "max": 0.05 } },
-      "basis": ["sx-wg-02"],
-      "reason": "上下唇总厚 ≤ 0.05 脸长"
+      "id": "cheek-high",
+      "field": "cheek",
+      "value": "high",
+      "title": "两颧高起",
+      "when": { "cheekJawRatio": { "min": 1.12 }, "cheekWidth": { "min": 0.84 } },
+      "basis": ["sx-wyue-13", "sx-wy-03"],
+      "reason": "颧宽/下颌宽 ≥ 1.12，东西岳高于颌"
+    },
+    {
+      "id": "chin-square",
+      "field": "chin",
+      "value": "square",
+      "title": "地阁方正",
+      "when": { "chinRatio": { "min": 0.85 } },
+      "basis": ["sx-st-01", "sx-wyue-13"],
+      "reason": "颏宽/下颌宽 ≥ 0.85，下停收得方"
+    },
+    {
+      "id": "chin-pointed",
+      "field": "chin",
+      "value": "pointed",
+      "title": "地阁尖收",
+      "when": { "chinRatio": { "max": 0.68 } },
+      "basis": ["sx-st-01"],
+      "reason": "颏宽/下颌宽 ≤ 0.68，下停收得尖"
+    },
+    {
+      "id": "chin-round",
+      "field": "chin",
+      "value": "round",
+      "title": "地阁圆润",
+      "when": { "chinRatio": { "min": 0.68, "max": 0.85 } },
+      "basis": ["sx-st-01"],
+      "reason": "颏宽/下颌宽介于 0.68–0.85"
     }
+  ],
+  "limits": [
+    "照片只能看形：神态、气色、举止、谈吐属于观人术的另一半，无法从一张正面照判断。",
+    "光线、镜头角度、化妆会改变气色与轮廓，照片结论只作参考。",
+    "相不独论：一官之象不定全局，须合看，也要合行事与环境。"
   ],
   "modelOnlyFields": ["brow", "chin", "mole"],
   "modelOnlyNote": "眉、下巴、痣无法由关键点稳定测量，交由视觉模型判断；痣只作提醒，不作吉凶断语。",

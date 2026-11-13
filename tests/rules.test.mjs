@@ -7,7 +7,7 @@ const ok = (name, fn) => { fn(); pass++; console.log('ok  ', name); };
 
 ok('规则库已加载', () => {
   const m = ruleMeta();
-  assert.ok(m.ruleCount >= 18);
+  assert.ok(m.ruleCount >= 23);
   assert.deepEqual(m.modelOnlyFields, ['brow', 'chin', 'mole']);
 });
 
@@ -39,6 +39,16 @@ ok('颧与口', () => {
   assert.equal(applyFaceRules({ cheekWidth: 0.7 }).features.cheek, 'thin');
   assert.equal(applyFaceRules({ mouthWidth: 0.45 }).features.mouth, 'wide');
   assert.equal(applyFaceRules({ lipThick: 0.1 }).features.mouth, 'thick');
+});
+
+ok('地阁：方 / 尖 / 圆', () => {
+  assert.equal(applyFaceRules({ chinRatio: 0.9 }).features.chin, 'square');
+  assert.equal(applyFaceRules({ chinRatio: 0.6 }).features.chin, 'pointed');
+  assert.equal(applyFaceRules({ chinRatio: 0.75 }).features.chin, 'round');
+});
+
+ok('两颧高起：颧宽/下颌宽 ≥ 1.12', () => {
+  assert.equal(applyFaceRules({ cheekWidth: 0.86, cheekJawRatio: 1.2 }).features.cheek, 'high');
 });
 
 ok('每条命中都带古籍依据', () => {

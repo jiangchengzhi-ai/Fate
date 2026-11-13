@@ -304,6 +304,7 @@ function visionBlock(rec) {
     <p>由照片识别得到，仅作预填；可在「相」页点「自己逐项选」修改后重出批注。</p>
     ${mline}
     ${basisLine}
+    <p class="vision-limit">照片只能看形：神态、气色、举止无法从一张照片判断；相不独论，结论只作参考。</p>
   </details>`;
 }
 
