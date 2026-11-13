@@ -4563,7 +4563,7 @@ function readingView(cfg) {
       rec.meta = { ...(rec.meta || {}), auto: Boolean(auto) };
       if (visionMeta) rec.meta.vision = visionMeta;
       store.addReport(rec);
-      goReplace(`#/report/${rec.id}`);
+      go(`#/report/${rec.id}`);
     };
 
     const look = () => {
@@ -6046,7 +6046,7 @@ function finish(result, extra) {
     verdict: pickLine(VERDICT[result.type] || VERDICT.bu),
   });
   store.addReport(rec);
-  goReplace(`#/report/${rec.id}`);
+  go(`#/report/${rec.id}`);
 }
 
 /* ---------------- 命 · 四柱 ---------------- */

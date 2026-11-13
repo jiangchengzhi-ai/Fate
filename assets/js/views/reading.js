@@ -188,7 +188,7 @@ function readingView(cfg) {
       rec.meta = { ...(rec.meta || {}), auto: Boolean(auto) };
       if (visionMeta) rec.meta.vision = visionMeta;
       store.addReport(rec);
-      goReplace(`#/report/${rec.id}`);
+      go(`#/report/${rec.id}`);
     };
 
     const look = () => {
