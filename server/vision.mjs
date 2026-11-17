@@ -199,6 +199,7 @@ export function parseFeatures(text, kind = 'face', clientMeasures = null) {
   let measures = null;
   let applied = [];
   let basis = [];
+  let ruleFeatures = {};
 
   if (kind === 'face') {
     const cm = sanitizeMeasures(clientMeasures);
@@ -206,6 +207,7 @@ export function parseFeatures(text, kind = 'face', clientMeasures = null) {
     if (measures) {
       const r = applyFaceRules(measures);
       features = { ...features, ...r.features };
+      ruleFeatures = { ...r.features };
       applied = r.applied;
       basis = r.basis;
     }
@@ -215,13 +217,14 @@ export function parseFeatures(text, kind = 'face', clientMeasures = null) {
     if (measures) {
       const r = applyPalmRules(measures);
       features = { ...features, ...r.features };
+      ruleFeatures = { ...r.features };
       applied = r.applied;
       basis = r.basis;
     }
   }
 
   const confidence = Number(raw.confidence);
-  if (Number.isFinite(confidence) && confidence < 45) return { features: {}, confidence, dropped, measures };
+  if (Number.isFinite(confidence) && confidence < 45) return { features: ruleFeatures, confidence, dropped, measures, applied, basis };
   return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures, applied, basis };
 }
 
