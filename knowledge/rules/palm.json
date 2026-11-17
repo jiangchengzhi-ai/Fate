@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "kind": "palm",
-  "notes": "手相规则：判据来自 21 点手部关键点测量，依据为《麻衣神相》掌型五行与指长条目。",
+  "notes": "手相规则：判据来自 21 点手部关键点测量，依据为《麻衣神相》掌型五行与指长条目。同一字段先命中先采用，具体的指型规则排在通用的指长规则之前。",
   "rules": [
     {
       "id": "palm-wood",
@@ -40,24 +40,6 @@
       "reason": "掌长/掌宽 ≤ 1.0"
     },
     {
-      "id": "finger-long",
-      "field": "finger",
-      "value": "long",
-      "title": "指长掌短，偏思",
-      "when": { "fingerPalmRatio": { "min": 1.0 } },
-      "basis": ["my-sx-07"],
-      "reason": "中指长/掌长 ≥ 1.0"
-    },
-    {
-      "id": "finger-short",
-      "field": "finger",
-      "value": "short",
-      "title": "指短掌长，偏行",
-      "when": { "fingerPalmRatio": { "max": 0.8 } },
-      "basis": ["my-sx-07"],
-      "reason": "中指长/掌长 ≤ 0.8"
-    },
-    {
       "id": "finger-index",
       "field": "finger",
       "value": "index",
@@ -74,6 +56,24 @@
       "when": { "indexRingRatio": { "max": 0.9 } },
       "basis": ["my-sx-07"],
       "reason": "食指/无名指 ≤ 0.9"
+    },
+    {
+      "id": "finger-long",
+      "field": "finger",
+      "value": "long",
+      "title": "指长掌短，偏思",
+      "when": { "fingerPalmRatio": { "min": 1.0 } },
+      "basis": ["my-sx-07"],
+      "reason": "中指长/掌长 ≥ 1.0"
+    },
+    {
+      "id": "finger-short",
+      "field": "finger",
+      "value": "short",
+      "title": "指短掌长，偏行",
+      "when": { "fingerPalmRatio": { "max": 0.8 } },
+      "basis": ["my-sx-07"],
+      "reason": "中指长/掌长 ≤ 0.8"
     }
   ],
   "modelOnlyFields": ["hand", "thick", "life", "head", "heart", "fate", "mount", "mark"],
