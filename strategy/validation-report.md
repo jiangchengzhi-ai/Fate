@@ -179,3 +179,48 @@ node tests/calendar.test.mjs
 # 重新生成节气表
 node scripts/gen-jieqi.mjs
 ```
+
+---
+
+# 第二轮优化（已上线）
+
+## 1. 交叉校验产品化
+
+| 内容 | 状态 |
+| --- | --- |
+| 黄金样本 ixtures/bazi-golden.json | 117 例，来自 lunar-javascript，100% 一致 |
+| 全量对账 scripts/validate-cn.mjs | 6,567 例，100.00% 一致 |
+| 真太阳时独立校验 scripts/validate-solar.mjs | Spencer vs NOAA 公式，318 组，平均差 0.46 分钟，最大 1.15 分钟 |
+| 一键校验 scripts/check.mjs | 11 组，全过 |
+
+**发布门禁**：deploy/update.sh 在重启前跑 
+ode scripts/check.mjs，**不通过直接回滚，不发布**。
+
+## 2. 解读守卫（防模型跑偏）
+
+server/guard.mjs 在每次解读后检查：
+
+- 文中干支必须来自引擎结果（禁止编造）
+- 禁止绝对化/预测性表述（一定会、注定、大凶…）
+- 禁止医疗/投资具体建议
+- 长度边界
+
+不通过 → 自动重试一次（strict 模式）→ 仍不通过则返回并标记 guard，服务端记录日志。
+
+实测：live 解读 200，无 guard 告警。
+
+## 3. 旧记录标记
+
+- 批注写入 engineVersion: 2026-11-17
+- 旧批注（无版本号或版本不一致）页面顶部显示：
+  「旧版算法：日柱已修正，建议重新算一次」
+- 新批注不显示
+
+## 4. 待办
+
+| 项 | 原因 |
+| --- | --- |
+| GitHub Actions CI | 当前 token 缺 `workflow` scope，push 被拒；需换带 workflow 权限的 token 或在网页添加 |
+| 城市经度扩充 | 需要可信数据源，当前 90 城 + 手填经度 |
+| 紫微对账 | 接入 iztro 后按同样方法对账 |
+| 解读评测 30 题 | 需样本与人工标注 |
