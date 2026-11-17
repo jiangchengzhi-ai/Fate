@@ -2,6 +2,7 @@
    tools.mjs — 确定性工具层
    一张八字盘、一课上六壬、一日建除，都只依赖输入，不依赖模型。
    ========================================================================== */
+import fs from 'node:fs';
 import { elementsOf, buildCompass, ganzhi, mountainAt } from '../assets/js/engine.js';
 import { GUAS, BAZHAI } from '../assets/js/data.js';
 import { fortuneSheet } from './fortune.mjs';
@@ -23,7 +24,7 @@ const pad = (n) => String(n).padStart(2, '0');
 /* 以 2000-01-01 为戊午日锚点推算日柱；与两个独立记忆锚点自洽 */
 function dayGanzhi(y, m, d) {
   const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(2000, 0, 1)) / 86400000);
-  const idx = (((54 - days) % 60) + 60) % 60;
+  const idx = (((54 + days) % 60) + 60) % 60;
   return { idx, gan: GAN[idx % 10], zhi: ZHI[idx % 12] };
 }
 
@@ -72,8 +73,15 @@ function termJD(year, t) {
   return (lo + hi) / 2;
 }
 
+const JIEQI = JSON.parse(fs.readFileSync(new URL('../knowledge/jieqi.json', import.meta.url), 'utf8'));
+const TERM_ZHI = { 大雪: 0, 小寒: 1, 立春: 2, 惊蛰: 3, 清明: 4, 立夏: 5, 芒种: 6, 小暑: 7, 立秋: 8, 白露: 9, 寒露: 10, 立冬: 11 };
+const termMs = (y, name) => {
+  const iso = JIEQI[y]?.[name];
+  return iso ? Date.parse(iso) : null;
+};
+
 const termCache = new Map();
-function termsOf(year) {
+export function termsOf(year) {
   if (!termCache.has(year)) {
     termCache.set(year, TERMS.map((t) => ({
       ...t,
@@ -84,18 +92,35 @@ function termsOf(year) {
   return termCache.get(year);
 }
 
-function monthZhiOf(y, m, d, hourMid = 12) {
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
+function monthZhiOf(y, m, d, minuteOfDay = 720) {
+  const t = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  let bestMs = null;
+  let bestZhi = null;
+  for (const yy of [y - 1, y]) {
+    const row = JIEQI[yy];
+    if (!row) continue;
+    for (const [name, iso] of Object.entries(row)) {
+      const ms = Date.parse(iso);
+      if (ms <= t && (bestMs === null || ms > bestMs)) {
+        bestMs = ms;
+        bestZhi = TERM_ZHI[name];
+      }
+    }
+  }
+  if (bestZhi !== null) return bestZhi;
+  const birthJD = t / 86400000 + 2440587.5;
   const all = [...termsOf(y - 1), ...termsOf(y), ...termsOf(y + 1)].sort((a, b) => a.jd - b.jd);
-  const prev = all.filter((t) => t.jd <= birthJD).pop();
+  const prev = all.filter((x) => x.jd <= birthJD).pop();
   return prev ? prev.zhi : 0;
 }
 
 /* 年柱以立春为界（按精确立春时刻） */
-function yearOf(y, m, d, hourMid = 12) {
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
-  const lichun = termsOf(y)[1].jd;
-  return birthJD < lichun ? y - 1 : y;
+function yearOf(y, m, d, minuteOfDay = 720) {
+  const t = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  const lichun = termMs(y, '立春');
+  if (lichun !== null) return t < lichun ? y - 1 : y;
+  const birthJD = t / 86400000 + 2440587.5;
+  return birthJD < termsOf(y)[1].jd ? y - 1 : y;
 }
 
 const SHISHEN = {
@@ -194,12 +219,23 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
     notes,
   };
 
-  const bYear = yearOf(y, m, d, hourMid);
+  const minuteOfDay = ((adjMinutes % 1440) + 1440) % 1440;
+  const bYear = yearOf(y, m, d, minuteOfDay);
   const yGanIdx = ((bYear - 4) % 10 + 10) % 10;
   const yZhiIdx = ((bYear - 4) % 12 + 12) % 12;
-  const mZhiIdx = monthZhiOf(y, m, d, hourMid);
+  const mZhiIdx = monthZhiOf(y, m, d, minuteOfDay);
   const mGanIdx = (yGanIdx * 2 + 2 + ((mZhiIdx - 2 + 12) % 12)) % 10;
-  const day = dayGanzhi(y, m, d);
+  /* 23:00 起算子时：晚子时按次日日柱（sect 2），与 conventions.hourBoundary 一致 */
+  let dayY = y;
+  let dayM = m;
+  let dayD = d;
+  if (hourMid >= 23) {
+    const nx = new Date(Date.UTC(y, m - 1, d + 1));
+    dayY = nx.getUTCFullYear();
+    dayM = nx.getUTCMonth() + 1;
+    dayD = nx.getUTCDate();
+  }
+  const day = dayGanzhi(dayY, dayM, dayD);
   const hGanIdx = ((day.idx % 10) % 5 * 2 + hZhiIdx) % 10;
 
   const pillars = [
@@ -232,14 +268,20 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
   const yong = strong ? [KE[me], SHENG[me]] : [me, Object.keys(SHENG).find((k) => SHENG[k] === me)];
 
   /* ---- 大运：阳年男顺、阴年男逆；阳年女逆、阴年女顺 ---- */
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
-  const allTerms = [...termsOf(y - 1), ...termsOf(y), ...termsOf(y + 1)].sort((a, b) => a.jd - b.jd);
-  const prevTerm = allTerms.filter((t) => t.jd <= birthJD).pop();
-  const nextTerm = allTerms.find((t) => t.jd > birthJD);
+  const birthMs = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  const allTerms = [];
+  for (const yy of [y - 1, y, y + 1]) {
+    const row = JIEQI[yy];
+    if (!row) continue;
+    for (const [name, iso] of Object.entries(row)) allTerms.push({ name, ms: Date.parse(iso) });
+  }
+  allTerms.sort((a, b) => a.ms - b.ms);
+  const prevTerm = allTerms.filter((t) => t.ms <= birthMs).pop();
+  const nextTerm = allTerms.find((t) => t.ms > birthMs);
 
   const yangYear = yGanIdx % 2 === 0;
   const forward = yangYear === (gender === 'male');
-  const distDays = forward ? (nextTerm.jd - birthJD) : (birthJD - prevTerm.jd);
+  const distDays = forward ? (nextTerm.ms - birthMs) / 86400000 : (birthMs - prevTerm.ms) / 86400000;
   const totalMonths = Math.max(0, Math.round(distDays * 4)); // 3 日 = 1 年 = 12 月
   const startYears = Math.floor(totalMonths / 12);
   const startMonths = totalMonths % 12;

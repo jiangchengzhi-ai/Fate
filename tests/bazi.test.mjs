@@ -36,9 +36,9 @@ ok('流月：甲年正月丙寅', () => {
 
 ok('paipan 带出深化字段', () => {
   const r = paipan({ date: '1994-08-12', hour: '未', city: '北京' });
-  assert.equal(r.deep.nayin[2].name, '天河水');
-  assert.equal(r.deep.stages[2].stage, '帝旺');
-  assert.equal(r.deep.pattern.name, '七杀格');
+  assert.equal(r.deep.nayin[2].name, '路旁土');
+  assert.equal(r.deep.stages[2].stage, '沐浴');
+  assert.equal(r.deep.pattern.name, '食神格');
   assert.equal(r.deep.months.length, 12);
 });
 
