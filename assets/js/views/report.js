@@ -282,9 +282,19 @@ function visionBlock(rec) {
   if (!v?.items?.length) return '';
   const conf = Number.isFinite(v.confidence) ? ` · 置信度 ${v.confidence}` : '';
   const mm = v.measures;
-  const src = mm?.source === 'mediapipe-468' ? '468 点实测' : '模型估测';
+  const isPalm = rec.type === 'palm';
+  const src = mm?.source === 'mediapipe-468'
+    ? '468 点实测'
+    : mm?.source === 'mediapipe-hand-21'
+      ? '21 点实测'
+      : '模型估测';
   const mline = mm
-    ? `<p class="vision-measure">${src}：${[
+    ? `<p class="vision-measure">${src}：${(isPalm ? [
+        mm.palmRatio != null ? `掌长宽比 ${mm.palmRatio}` : '',
+        mm.fingerPalmRatio != null ? `指掌比 ${mm.fingerPalmRatio}` : '',
+        mm.indexRingRatio != null ? `食指/无名指 ${mm.indexRingRatio}` : '',
+        mm.handSpread != null ? `摊开度 ${mm.handSpread}` : '',
+      ] : [
         mm.faceWH != null ? `脸长宽比 ${mm.faceWH}` : '',
         mm.upper != null ? `三庭 ${Math.round(mm.upper * 100)}/${Math.round((mm.middle || 0) * 100)}/${Math.round((mm.lower || 0) * 100)}` : '',
         mm.eyeGap != null ? `眼距 ${mm.eyeGap} 眼宽` : '',
@@ -292,7 +302,7 @@ function visionBlock(rec) {
         mm.noseWidth != null ? `鼻宽比 ${mm.noseWidth}` : '',
         mm.jawWidth != null ? `下颌比 ${mm.jawWidth}` : '',
         mm.cheekWidth != null ? `颧宽比 ${mm.cheekWidth}` : '',
-      ].filter(Boolean).join(' · ')}</p>`
+      ]).filter(Boolean).join(' · ')}</p>`
     : '';
   const basis = (v.basis || []).slice(0, 3);
   const basisLine = basis.length

@@ -4469,6 +4469,100 @@ async function measureFace(dataUrl) {
 const isReady = () => Boolean(landmarkerPromise);
 
 
+/* ================= 手相：21 点关键点 ================= */
+let handPromise = null;
+
+async function getHandLandmarker() {
+  if (!handPromise) {
+    handPromise = (async () => {
+      const { HandLandmarker, FilesetResolver } = await import(`${BASE}vision_bundle.mjs`);
+      const vision = await FilesetResolver.forVisionTasks(`${BASE}wasm`);
+      const make = (delegate) => HandLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: `${BASE}hand_landmarker.task`, delegate },
+        runningMode: 'IMAGE',
+        numHands: 1,
+        minHandDetectionConfidence: 0.4,
+        minHandPresenceConfidence: 0.4,
+        minTrackingConfidence: 0.4,
+      });
+      try { return await make('GPU'); } catch { return await make('CPU'); }
+    })().catch((e) => { handPromise = null; throw e; });
+  }
+  return handPromise;
+}
+
+const HAND_EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+
+function handMetrics(p, w, h) {
+  const d = (i, j) => Math.hypot((p[i].x - p[j].x) * w, (p[i].y - p[j].y) * h);
+  const palmWidth = d(5, 17) || 1;
+  const palmLength = d(0, 9) || 1;
+  const middle = d(9, 12) || 1;
+  const index = d(5, 8) || 1;
+  const ring = d(13, 16) || 1;
+  const pinky = d(17, 20) || 1;
+  return {
+    palmWidth: r3(palmWidth), palmLength: r3(palmLength),
+    palmRatio: r3(palmLength / palmWidth),
+    fingerPalmRatio: r3(middle / palmLength),
+    indexRingRatio: r3(index / (ring || 1)),
+    pinkyRatio: r3(pinky / (middle || 1)),
+    handSpread: r3(d(4, 20) / palmWidth),
+    points: 21,
+    source: 'mediapipe-hand-21',
+  };
+}
+
+function handQuality(p, w, h) {
+  const d = (i, j) => Math.hypot((p[i].x - p[j].x) * w, (p[i].y - p[j].y) * h);
+  const palmWidth = d(5, 17) || 1;
+  const spread = d(4, 20) / palmWidth;
+  const issues = [];
+  if (spread < 1.5) issues.push('手指没摊开：掌心朝上、五指自然张开');
+  return { spread: r3(spread), issues };
+}
+
+async function measureHand(dataUrl) {
+  try {
+    const lm = await getHandLandmarker();
+    const img = await loadImage(dataUrl);
+    const res = lm.detect(img);
+    const hand = res?.landmarks?.[0];
+    if (!hand || hand.length < 21) return { ok: false, reason: 'no-hand' };
+    return { ok: true, measures: handMetrics(hand, img.naturalWidth, img.naturalHeight), landmarks: hand, quality: handQuality(hand, img.naturalWidth, img.naturalHeight) };
+  } catch (e) {
+    return { ok: false, reason: e?.message || 'measure-failed' };
+  }
+}
+
+async function drawHandOverlay(dataUrl, landmarks) {
+  const img = await loadImage(dataUrl);
+  const max = 720;
+  const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * scale);
+  const h = Math.round(img.naturalHeight * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  ctx.strokeStyle = 'rgba(203,169,104,.9)';
+  ctx.lineWidth = 1.2;
+  for (const [a, b] of HAND_EDGES) {
+    ctx.beginPath();
+    ctx.moveTo(landmarks[a].x * w, landmarks[a].y * h);
+    ctx.lineTo(landmarks[b].x * w, landmarks[b].y * h);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(203,169,104,.7)';
+  for (const pt of landmarks) {
+    ctx.beginPath();
+    ctx.arc(pt.x * w, pt.y * h, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return c.toDataURL('image/jpeg', 0.85);
+}
+
+
 /* ===== assets/js/sensors.js ===== */
 /* ==========================================================================
    sensors.js — 方向与定位
@@ -4871,6 +4965,20 @@ function readingView(cfg) {
                 } catch { /* 预览失败不影响识别 */ }
               }
             } catch { /* 关键点不可用就走模型估测 */ }
+          } else if (type === 'palm') {
+            try {
+              const m = await measureHand(draft.photo);
+              if (m.ok) {
+                local = m.measures;
+                quality = m.quality || null;
+                if (m.quality?.issues?.length) toast(m.quality.issues[0]);
+                try {
+                  const ov = await drawHandOverlay(draft.photo, m.landmarks);
+                  const slot = $('[data-slot]');
+                  if (slot) slot.innerHTML = `<img class="ph" src="${ov}" alt="手部 21 点测量预览">`;
+                } catch { /* 预览失败不影响识别 */ }
+              }
+            } catch { /* 手部关键点不可用就走模型估测 */ }
           }
           const out = await api.vision(type, draft.photo, local);
           const entries = Object.entries(out.features || {});
@@ -5826,9 +5934,19 @@ function visionBlock(rec) {
   if (!v?.items?.length) return '';
   const conf = Number.isFinite(v.confidence) ? ` · 置信度 ${v.confidence}` : '';
   const mm = v.measures;
-  const src = mm?.source === 'mediapipe-468' ? '468 点实测' : '模型估测';
+  const isPalm = rec.type === 'palm';
+  const src = mm?.source === 'mediapipe-468'
+    ? '468 点实测'
+    : mm?.source === 'mediapipe-hand-21'
+      ? '21 点实测'
+      : '模型估测';
   const mline = mm
-    ? `<p class="vision-measure">${src}：${[
+    ? `<p class="vision-measure">${src}：${(isPalm ? [
+        mm.palmRatio != null ? `掌长宽比 ${mm.palmRatio}` : '',
+        mm.fingerPalmRatio != null ? `指掌比 ${mm.fingerPalmRatio}` : '',
+        mm.indexRingRatio != null ? `食指/无名指 ${mm.indexRingRatio}` : '',
+        mm.handSpread != null ? `摊开度 ${mm.handSpread}` : '',
+      ] : [
         mm.faceWH != null ? `脸长宽比 ${mm.faceWH}` : '',
         mm.upper != null ? `三庭 ${Math.round(mm.upper * 100)}/${Math.round((mm.middle || 0) * 100)}/${Math.round((mm.lower || 0) * 100)}` : '',
         mm.eyeGap != null ? `眼距 ${mm.eyeGap} 眼宽` : '',
@@ -5836,7 +5954,7 @@ function visionBlock(rec) {
         mm.noseWidth != null ? `鼻宽比 ${mm.noseWidth}` : '',
         mm.jawWidth != null ? `下颌比 ${mm.jawWidth}` : '',
         mm.cheekWidth != null ? `颧宽比 ${mm.cheekWidth}` : '',
-      ].filter(Boolean).join(' · ')}</p>`
+      ]).filter(Boolean).join(' · ')}</p>`
     : '';
   const basis = (v.basis || []).slice(0, 3);
   const basisLine = basis.length

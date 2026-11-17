@@ -1,6 +1,6 @@
 import { FACE, PALM } from '../data.js';
 import { buildFace, buildPalm, makeRecord } from '../engine.js';
-import { measureFace, drawOverlay } from '../facemesh.js';
+import { measureFace, drawOverlay, measureHand, drawHandOverlay } from '../facemesh.js';
 import { store } from '../store.js';
 import { $, esc, pickImage, toast, go, goReplace, openSheet, closeSheet } from '../ui.js';
 import { api } from '../api.js';
@@ -231,6 +231,20 @@ function readingView(cfg) {
                 } catch { /* 预览失败不影响识别 */ }
               }
             } catch { /* 关键点不可用就走模型估测 */ }
+          } else if (type === 'palm') {
+            try {
+              const m = await measureHand(draft.photo);
+              if (m.ok) {
+                local = m.measures;
+                quality = m.quality || null;
+                if (m.quality?.issues?.length) toast(m.quality.issues[0]);
+                try {
+                  const ov = await drawHandOverlay(draft.photo, m.landmarks);
+                  const slot = $('[data-slot]');
+                  if (slot) slot.innerHTML = `<img class="ph" src="${ov}" alt="手部 21 点测量预览">`;
+                } catch { /* 预览失败不影响识别 */ }
+              }
+            } catch { /* 手部关键点不可用就走模型估测 */ }
           }
           const out = await api.vision(type, draft.photo, local);
           const entries = Object.entries(out.features || {});
