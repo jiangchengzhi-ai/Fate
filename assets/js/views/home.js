@@ -8,10 +8,10 @@ const MARK = `<svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
 </svg>`;
 
 const GATES = [
-  { glyph: '命', name: '命理', desc: '填写出生时间，看一生的运势起伏', href: '#/ming' },
+  { glyph: '命', name: '命理', desc: '填生日和时辰，看清自己的结构', href: '#/ming' },
   { glyph: '卜', name: '占卜', desc: '心里想一件事，看眼下顺不顺', href: '#/bu' },
   { glyph: '相', name: '看相', desc: '上传照片，看面相或手相', href: '#/face' },
-  { glyph: '堪', name: '风水', desc: '看房子的坐向，讲家里怎么摆', href: '#/compass' },
+  { glyph: '堪', name: '风水', desc: '看房子的坐向与布局', href: '#/compass' },
   { glyph: '择', name: '择日', desc: '挑好日子：结婚、搬家、开业', href: '#/ze' },
 ];
 
@@ -65,6 +65,15 @@ export function homeView() {
           <span class="gate-arrow">›</span>
         </a>`).join('')}
     </nav>
+
+    <a class="gate-card gate-sub" href="#/hepan">
+      <span class="gate-glyph">合</span>
+      <span class="gate-text">
+        <span class="gate-name">两人合盘</span>
+        <span class="gate-desc">两个人的日柱与五行，看合不合</span>
+      </span>
+      <span class="gate-arrow">›</span>
+    </a>
 
 ${recentHtml}
 

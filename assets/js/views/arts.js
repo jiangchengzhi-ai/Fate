@@ -59,9 +59,12 @@ export function finish(result, extra) {
 /* ---------------- 命 · 四柱 ---------------- */
 export function mingView() {
   return {
-    html: shell('四柱', `
-      <p class="lead">填出生日期和时辰，就能排出命盘，看一生的运势起伏。</p>
-      <p style="margin:-6px 0 18px"><a class="more" href="#/hepan">和另一半合盘 ›</a></p>
+    html: shell('命理', `
+      <div class="seg">
+        <a class="seg-item is-on" href="#/ming">看自己</a>
+        <a class="seg-item" href="#/hepan">看两人</a>
+      </div>
+      <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
       <div class="field">
         <label>生日用哪种历</label>
         <div class="opts">
@@ -96,13 +99,12 @@ export function mingView() {
         <div class="hour-grid">
           ${HOURS.map((h) => `<button class="hour" type="button" data-hour="${h.v}" aria-pressed="${h.v === '午'}">
             <b>${h.label}</b><span>${h.range}</span></button>`).join('')}
-        </div>
-        <div class="cp-actions">
-          <button class="btn btn-ghost btn-sm" type="button" data-unknown aria-pressed="false">时辰不清楚</button>
+          <button class="hour hour-unknown" type="button" data-unknown aria-pressed="false">
+            <b>不知道几点出生？</b><span>按正午 12:00 算</span></button>
         </div>
       </div>
       <div class="field">
-        <label for="mp">出生地 · 省（用于真太阳时校正，可不填）</label>
+        <label for="mp">出生地 · 省（不填也能算）</label>
         <select class="input" id="mp" data-province>
           <option value="">不校正</option>
           ${PROVINCES.map((p) => `<option value="${p.name}">${p.name}</option>`).join('')}
@@ -114,10 +116,13 @@ export function mingView() {
           <option value="">先选省</option>
         </select>
       </div>
-      <div class="field">
-        <label for="mlng">经度（选不到城市就填这里，可不填）</label>
-        <input class="input" id="mlng" type="number" step="0.1" min="73" max="135" placeholder="例如 116.4" data-lng>
-      </div>
+      <details class="adv">
+        <summary>手动填经度（选不到城市时用）</summary>
+        <div class="field">
+          <label for="mlng">经度 · 东经</label>
+          <input class="input" id="mlng" type="number" step="0.1" min="73" max="135" placeholder="例如 116.4" data-lng>
+        </div>
+      </details>
       <div class="field">
         <label>性别</label>
         <div class="opts">
@@ -126,7 +131,7 @@ export function mingView() {
         </div>
       </div>
       <p class="foot">节气按太阳视黄经计算；起运以三日折一年。日柱如与万年历不符，以历书为准。</p>
-    `, '<button class="btn btn-primary" type="button" data-go>起 盘</button>'),
+    `, '<button class="btn btn-primary" type="button" data-go>看 命 理</button>'),
     mount: () => {
       const root = $('#app .view');
       let hour = '午';
@@ -157,6 +162,7 @@ export function mingView() {
         if (unk) {
           unknownHour = !unknownHour;
           unk.setAttribute('aria-pressed', String(unknownHour));
+          root.querySelectorAll('[data-hour]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
           return;
         }
         const h = e.target.closest('[data-hour]');
@@ -518,7 +524,8 @@ export function zeView() {
 
 /* ---------------- 合盘 ---------------- */
 export function hepanView() {
-  const hourOpts = HOURS.map((h) => `<option value="${h.v}">${h.label}</option>`).join('');
+  const hourOpts = HOURS.map((h) => `<option value="${h.v}">${h.label}</option>`).join('')
+    + '<option value="unknown" selected>不清楚（按正午）</option>';
   const person = (k, label) => `
     <div class="field"><label>${label}生日</label>
       <input class="input" type="date" data-${k}-date max="${today()}" min="1900-01-01"></div>
@@ -529,7 +536,11 @@ export function hepanView() {
 
   return {
     html: shell('合盘', `
-      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。</p>
+      <div class="seg">
+        <a class="seg-item" href="#/ming">看自己</a>
+        <a class="seg-item is-on" href="#/hepan">看两人</a>
+      </div>
+      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。时辰不清楚就选「不清楚」，按正午算。</p>
       <h2 class="step"><b>一</b>第一个人</h2>
       ${person('a', '他/她')}
       <h2 class="step"><b>二</b>第二个人</h2>
@@ -547,8 +558,9 @@ export function hepanView() {
         btn.disabled = true;
         btn.textContent = '合 盘 中';
         try {
-          const a = { date: aDate, hour: $('[data-a-hour]', root).value, gender: $('[data-a-g]', root).value };
-          const b = { date: bDate, hour: $('[data-b-hour]', root).value, gender: $('[data-b-g]', root).value };
+          const pickHour = (v) => (v === 'unknown' ? '午' : v);
+          const a = { date: aDate, hour: pickHour($('[data-a-hour]', root).value), gender: $('[data-a-g]', root).value };
+          const b = { date: bDate, hour: pickHour($('[data-b-hour]', root).value), gender: $('[data-b-g]', root).value };
           const r = await api.tool('hepan', { a, b });
           const pa = r.a.pillars.map((x) => x.gan + x.zhi).join(' ');
           const pb = r.b.pillars.map((x) => x.gan + x.zhi).join(' ');
