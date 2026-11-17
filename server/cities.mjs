@@ -1,95 +1,31 @@
-/* 主要城市经度（东经，度）。真太阳时校正用。 */
-export const CITIES = [
-  { name: '北京', lng: 116.41 },
-  { name: '上海', lng: 121.47 },
-  { name: '广州', lng: 113.26 },
-  { name: '深圳', lng: 114.06 },
-  { name: '天津', lng: 117.20 },
-  { name: '重庆', lng: 106.55 },
-  { name: '成都', lng: 104.07 },
-  { name: '杭州', lng: 120.15 },
-  { name: '南京', lng: 118.80 },
-  { name: '武汉', lng: 114.30 },
-  { name: '西安', lng: 108.94 },
-  { name: '沈阳', lng: 123.43 },
-  { name: '哈尔滨', lng: 126.53 },
-  { name: '长春', lng: 125.32 },
-  { name: '石家庄', lng: 114.51 },
-  { name: '太原', lng: 112.55 },
-  { name: '济南', lng: 117.00 },
-  { name: '郑州', lng: 113.62 },
-  { name: '合肥', lng: 117.23 },
-  { name: '长沙', lng: 112.94 },
-  { name: '南昌', lng: 115.86 },
-  { name: '福州', lng: 119.30 },
-  { name: '厦门', lng: 118.09 },
-  { name: '昆明', lng: 102.83 },
-  { name: '贵阳', lng: 106.63 },
-  { name: '南宁', lng: 108.37 },
-  { name: '海口', lng: 110.20 },
-  { name: '兰州', lng: 103.83 },
-  { name: '西宁', lng: 101.78 },
-  { name: '银川', lng: 106.23 },
-  { name: '乌鲁木齐', lng: 87.62 },
-  { name: '呼和浩特', lng: 111.75 },
-  { name: '拉萨', lng: 91.14 },
-  { name: '香港', lng: 114.17 },
-  { name: '澳门', lng: 113.54 },
-  { name: '台北', lng: 121.56 },
-  { name: '苏州', lng: 120.58 },
-  { name: '无锡', lng: 120.3 },
-  { name: '宁波', lng: 121.55 },
-  { name: '温州', lng: 120.7 },
-  { name: '东莞', lng: 113.75 },
-  { name: '佛山', lng: 113.12 },
-  { name: '珠海', lng: 113.58 },
-  { name: '汕头', lng: 116.68 },
-  { name: '泉州', lng: 118.68 },
-  { name: '烟台', lng: 121.39 },
-  { name: '潍坊', lng: 119.16 },
-  { name: '洛阳', lng: 112.45 },
-  { name: '襄阳', lng: 112.14 },
-  { name: '宜昌', lng: 111.29 },
-  { name: '绵阳', lng: 104.68 },
-  { name: '遵义', lng: 106.93 },
-  { name: '桂林', lng: 110.29 },
-  { name: '三亚', lng: 109.51 },
-  { name: '包头', lng: 109.84 },
-  { name: '唐山', lng: 118.18 },
-  { name: '徐州', lng: 117.18 },
-  { name: '常州', lng: 119.97 },
-  { name: '南通', lng: 120.86 },
-  { name: '嘉兴', lng: 120.76 },
-  { name: '义乌', lng: 120.07 },
-  { name: '昆山', lng: 120.98 },
-  { name: '江阴', lng: 120.28 },
-  { name: '常熟', lng: 120.75 },
-  { name: '张家港', lng: 120.55 },
-  { name: '慈溪', lng: 121.27 },
-  { name: '余姚', lng: 121.15 },
-  { name: '诸暨', lng: 120.24 },
-  { name: '温岭', lng: 121.36 },
-  { name: '瑞安', lng: 120.65 },
-  { name: '乐清', lng: 120.98 },
-  { name: '晋江', lng: 118.55 },
-  { name: '石狮', lng: 118.65 },
-  { name: '福清', lng: 119.38 },
-  { name: '南安', lng: 118.39 },
-  { name: '普宁', lng: 116.17 },
-  { name: '博罗', lng: 114.29 },
-  { name: '增城', lng: 113.81 },
-  { name: '从化', lng: 113.59 },
-  { name: '番禺', lng: 113.38 },
-  { name: '顺德', lng: 113.29 },
-  { name: '南海', lng: 113.14 },
-  { name: '新会', lng: 113.03 },
-  { name: '台山', lng: 112.79 },
-  { name: '开平', lng: 112.7 },
-  { name: '鹤山', lng: 112.96 },
-  { name: '四会', lng: 112.73 },
-  { name: '高要', lng: 112.46 },
-  { name: '惠东', lng: 114.72 },
-  { name: '花都', lng: 113.22 },
-];
+/* ==========================================================================
+   cities.mjs — 中国 34 个省级行政区 → 地级市 经纬度
+   数据：assets/js/cities-cn.js（自动生成）
+   ========================================================================== */
+import { PROVINCES } from '../assets/js/cities-cn.js';
 
-export const cityByName = (name) => CITIES.find((c) => c.name === name) || null;
+const norm = (s) => String(s || '')
+  .replace(/(特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|自治州|地区|盟|省|市|县|区)$/g, '')
+  .trim();
+
+const byKey = new Map();
+const byCity = new Map();
+for (const p of PROVINCES) {
+  for (const c of p.cities) {
+    byKey.set(`${norm(p.name)}|${norm(c.name)}`, c);
+    if (!byCity.has(norm(c.name))) byCity.set(norm(c.name), c);
+  }
+}
+
+export const CITIES = PROVINCES.flatMap((p) => p.cities.map((c) => ({ name: c.name, lng: c.lng, province: p.name })));
+
+export function cityByName(name, province) {
+  if (!name) return null;
+  if (province) {
+    const hit = byKey.get(`${norm(province)}|${norm(name)}`);
+    if (hit) return hit;
+  }
+  return byCity.get(norm(name)) || null;
+}
+
+export const PROVINCE_LIST = PROVINCES;

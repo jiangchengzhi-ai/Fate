@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { inChinaDST, chinaDSTSpan } from '../server/dst-cn.mjs';
 import { paipan } from '../server/tools.mjs';
+import { cityByName } from '../server/cities.mjs';
 
 let pass = 0;
 const ok = (name, fn) => { fn(); pass++; console.log('ok  ', name); };
@@ -35,7 +36,7 @@ ok('非夏令时年份不扣 60 分钟', () => {
 });
 
 ok('手填经度与城市经度等效', () => {
-  const a = paipan({ date: '1994-08-12', hour: '未', longitude: 87.62 });
+  const a = paipan({ date: '1994-08-12', hour: '未', longitude: cityByName('乌鲁木齐').lng });
   const b = paipan({ date: '1994-08-12', hour: '未', city: '乌鲁木齐' });
   assert.equal(a.resolved.correctedClock, b.resolved.correctedClock);
   assert.equal(a.resolved.correctionMinutes, b.resolved.correctionMinutes);

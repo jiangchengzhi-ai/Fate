@@ -148,7 +148,7 @@ function shishen(dayGan, otherGan) {
   return SHISHEN[rel][sameYinYang ? 0 : 1];
 }
 
-export function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, hourUnknown = false, calendar = 'solar', lunar = null }) {
+export function paipan({ date, hour = '午', gender = 'male', clock, city, province, longitude, hourUnknown = false, calendar = 'solar', lunar = null }) {
   let lunarConverted = false;
   let lunarInfo = null;
   if (calendar === 'lunar') {
@@ -164,7 +164,7 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
 
   const lng = Number.isFinite(Number(longitude)) && longitude !== undefined
     ? Number(longitude)
-    : (cityByName(city)?.lng ?? null);
+    : (cityByName(city, province)?.lng ?? null);
 
   /* 起算时刻：有钟点用钟点；时辰未知用正午；否则取所报时辰的中点 */
   let baseMinutes = null;
@@ -208,6 +208,7 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, longi
     dstApplied,
     inputClock: fromMinutes(inputMinutes).clock,
     city: city || null,
+    province: province || null,
     longitude: lng,
     baseClock: `${String(Math.floor(baseMinutes / 60)).padStart(2, '0')}:${String(baseMinutes % 60).padStart(2, '0')}`,
     correctedClock,

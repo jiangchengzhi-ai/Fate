@@ -1,5 +1,6 @@
 import { api } from '../api.js';
-import { HOURS, CITIES } from '../data.js';
+import { HOURS } from '../data.js';
+import { PROVINCES } from '../cities-cn.js';
 import { lunarParts, zhiIndexNow, nowLabel } from '../lunar.js';
 import { makeRecord, levelOf } from '../engine.js';
 import { store } from '../store.js';
@@ -101,10 +102,16 @@ export function mingView() {
         </div>
       </div>
       <div class="field">
-        <label for="mc">出生地（用于真太阳时校正，可不填）</label>
-        <select class="input" id="mc" data-city>
+        <label for="mp">出生地 · 省（用于真太阳时校正，可不填）</label>
+        <select class="input" id="mp" data-province>
           <option value="">不校正</option>
-          ${CITIES.map((c) => `<option value="${c}">${c}</option>`).join('')}
+          ${PROVINCES.map((p) => `<option value="${p.name}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label for="mc">出生地 · 市</label>
+        <select class="input" id="mc" data-city>
+          <option value="">先选省</option>
         </select>
       </div>
       <div class="field">
@@ -126,6 +133,17 @@ export function mingView() {
       let gender = 'male';
       let unknownHour = false;
       let cal = 'solar';
+
+      const provinceSel = $('[data-province]', root);
+      const citySel = $('[data-city]', root);
+      const fillCities = (provName) => {
+        const prov = PROVINCES.find((x) => x.name === provName);
+        citySel.innerHTML = prov
+          ? prov.cities.map((c) => `<option value="${c.name}">${c.name}</option>`).join('')
+          : '<option value="">先选省</option>';
+      };
+      provinceSel?.addEventListener('change', (e) => fillCities(e.target.value));
+      fillCities(provinceSel?.value || '');
       root.addEventListener('click', (e) => {
         const cbtn = e.target.closest('[data-cal]');
         if (cbtn) {
@@ -165,12 +183,13 @@ export function mingView() {
         btn.disabled = true;
         btn.textContent = '排 盘 中';
         try {
+          const province = $('[data-province]', root)?.value || '';
           const city = $('[data-city]', root)?.value || '';
           const lngRaw = ($('[data-lng]', root)?.value || '').trim();
           const lng = lngRaw && Number(lngRaw) >= 73 && Number(lngRaw) <= 135 ? Number(lngRaw) : undefined;
           const payload = cal === 'lunar'
-            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, city, longitude: lng, hourUnknown: unknownHour }
-            : { date, hour, gender, city, longitude: lng, hourUnknown: unknownHour };
+            ? { calendar: 'lunar', lunar: { year: Number($('[data-ly]', root).value), month: Number($('[data-lm]', root).value), day: Number($('[data-ld]', root).value), leap: $('[data-leap]', root).checked }, hour, gender, province, city, longitude: lng, hourUnknown: unknownHour }
+            : { date, hour, gender, province, city, longitude: lng, hourUnknown: unknownHour };
           const r = await api.tool('paipan', payload);
           let week = null;
           try { week = await api.tool('daily', { birth: payload, days: 7 }); } catch { week = null; }

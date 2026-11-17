@@ -10,6 +10,7 @@ const JOBS = [
   ['单元 · 规则', 'tests/rules.test.mjs'],
   ['单元 · 日历', 'tests/calendar.test.mjs'],
   ['单元 · 守卫', 'tests/guard.test.mjs'],
+  ['单元 · 城市', 'tests/cities.test.mjs'],
   ['交叉 · 黄金样本', 'scripts/validate-golden.mjs'],
   ['交叉 · 真太阳时', 'scripts/validate-solar.mjs'],
   ['交叉 · lunar-javascript 全量', 'scripts/validate-cn.mjs'],
