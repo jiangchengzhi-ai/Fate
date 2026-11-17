@@ -2,6 +2,8 @@
    engine.js — 规则引擎
    选项 → 六维 → 批注。全部同步计算，无网络请求。
    ========================================================================== */
+export const ENGINE_VERSION = '2026-11-17';
+
 import {
   DIMS, DIM_KEYS, FACE, PALM,
   GAN, ZHI, GAN_ELEM, ZHI_ELEM, NAYIN, ELEM_ORDER, ELEM_INFO, GE_NAMES, GE_SINGLE,
@@ -467,5 +469,6 @@ export function makeRecord(report) {
     id: `${report.type}-${now.getTime().toString(36)}`,
     createdAt: now.toISOString(),
     dateLabel: fmtDate(now),
+    engineVersion: ENGINE_VERSION,
   };
 }

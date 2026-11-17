@@ -1,4 +1,5 @@
 import { store } from '../store.js';
+import { ENGINE_VERSION } from '../engine.js';
 import { api } from '../api.js';
 import { $, esc, radarSVG, copyText, saveCard, recordToText, toast } from '../ui.js';
 
@@ -354,6 +355,7 @@ export function reportView(id) {
           <span class="rep-side">${esc(rec.title)}</span>
 
           <header class="rep-head">
+            ${(!rec.engineVersion || rec.engineVersion !== ENGINE_VERSION) ? `<p class="rep-legacy">旧版算法：日柱已修正，建议 <a href="${again}">重新算一次</a></p>` : ''}
             <div class="rep-kicker">${esc(rec.dateLabel)}<span class="rep-tag">传统文化 · 娱乐参考</span></div>
             <h1 class="rep-title">${esc(rec.heading)}</h1>
             <p class="rep-sub">${esc(subtitle)}</p>

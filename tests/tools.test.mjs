@@ -12,10 +12,10 @@ check('2000-01-01 为戊午日', () => {
   assert.equal(p.pillars[2].gan + p.pillars[2].zhi, '戊午');
 });
 
-check('1994-08-12 未时 → 甲戌 壬申 丙午 乙未', () => {
+check('1994-08-12 未时 → 甲戌 壬申 庚午 癸未', () => {
   const p = paipan({ date: '1994-08-12', hour: '未' });
-  assert.equal(p.pillars.map((x) => x.gan + x.zhi).join(' '), '甲戌 壬申 丙午 乙未');
-  assert.equal(p.dayMaster, '丙');
+  assert.equal(p.pillars.map((x) => x.gan + x.zhi).join(' '), '甲戌 壬申 庚午 癸未');
+  assert.equal(p.dayMaster, '庚');
 });
 
 check('阳年女逆行，首运辛未', () => {
@@ -44,12 +44,12 @@ check('立春前算上一年', () => {
   assert.equal(p.pillars[0].gan + p.pillars[0].zhi, '癸酉');
 });
 
-check('2026-10-30 为己亥日、戌月除日', () => {
+check('2026-10-30 为丁丑日、戌月平日', () => {
   const z = zeri({ date: '2026-10-30' });
-  assert.equal(z.ganzhi, '己亥');
+  assert.equal(z.ganzhi, '丁丑');
   assert.equal(z.monthZhi, '戌');
-  assert.equal(z.jianchu.name, '除');
-  assert.equal(z.chong, '巳');
+  assert.equal(z.jianchu.name, '平');
+  assert.equal(z.chong, '未');
 });
 
 check('小六壬 9月10日第6时 → 小吉', () => {

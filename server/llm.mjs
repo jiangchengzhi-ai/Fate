@@ -79,7 +79,7 @@ export async function interpret(input) {
         max_tokens: 1800,
         reasoning_effort: process.env.FATETELL_LLM_EFFORT || 'low',
         messages: [
-          { role: 'system', content: SYSTEM },
+          { role: 'system', content: SYSTEM + (input.strict ? '\n10. 这是重试：上一版出现违规表述（绝对化、预测或编造干支）。这次更保守，删掉任何确定性判断，干支只用上文出现过的。' : '') },
           { role: 'user', content: buildUser(input) },
         ],
       }),

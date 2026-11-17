@@ -10,6 +10,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { TOOLS, TOOL_MANIFEST } from './tools.mjs';
 import { interpret, llmStatus } from './llm.mjs';
+import { checkInterpret } from './guard.mjs';
 import { analyzeImage, visionStatus } from './vision.mjs';
 import {
   readSession, readAdmin, verifyPerson, makeSession, cookie, clearCookie,
@@ -434,11 +435,21 @@ const server = http.createServer(async (req, res) => {
 
       try {
         const out = await interpret(payload);
-        recordModel('interpret', out.usage, session?.phone);
-        const rec = { text: out.text, model: out.model, usage: out.usage, at: Date.now() };
+        let final = out;
+        let guard = checkInterpret(out.text, payload.chart);
+        if (!guard.ok) {
+          console.warn('[guard]', guard.issues.join('; '));
+          try {
+            const retry = await interpret({ ...payload, strict: true });
+            const g2 = checkInterpret(retry.text, payload.chart);
+            if (g2.ok || g2.issues.length < guard.issues.length) { final = retry; guard = g2; }
+          } catch { /* 保留第一版 */ }
+        }
+        recordModel('interpret', final.usage, session?.phone);
+        const rec = { text: final.text, model: final.model, usage: final.usage, at: Date.now(), guard: guard.ok ? undefined : guard.issues };
         CACHE.set(hash, rec);
         if (CACHE.size > 100) CACHE.delete(CACHE.keys().next().value);
-        return json(res, 200, { ...rec, cached: false, ms: out.ms });
+        return json(res, 200, { ...rec, cached: false, ms: final.ms });
       } catch (e) {
         return json(res, e.code === 'BAD_KEY' ? 502 : 504, {
           error: e.message,

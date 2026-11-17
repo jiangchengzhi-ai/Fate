@@ -1272,6 +1272,9 @@ body{font-size:15px}
 .wx-tip button{border:1px solid rgba(203,169,104,.6);background:transparent;color:#CBA968;
   border-radius:8px;padding:6px 10px;font-size:13px;white-space:nowrap}
 .wx-tip button[data-wx-close]{border:0;font-size:18px;padding:0 4px;color:#9a948a}
+
+.rep-legacy{margin:0 0 12px;padding:8px 12px;border:1px solid rgba(163,59,43,.35);border-radius:8px;font-size:13px;color:#a33b2b;line-height:1.5}
+.rep-legacy a{color:inherit;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -1358,6 +1361,7 @@ function fortuneSheet(yong = [], dom = '') {
 
 
 
+
 const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const GAN_E = ['木', '木', '火', '火', '土', '土', '金', '金', '水', '水'];
@@ -1369,7 +1373,7 @@ const pad = (n) => String(n).padStart(2, '0');
 /* 以 2000-01-01 为戊午日锚点推算日柱；与两个独立记忆锚点自洽 */
 function dayGanzhi(y, m, d) {
   const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(2000, 0, 1)) / 86400000);
-  const idx = (((54 - days) % 60) + 60) % 60;
+  const idx = (((54 + days) % 60) + 60) % 60;
   return { idx, gan: GAN[idx % 10], zhi: ZHI[idx % 12] };
 }
 
@@ -1418,6 +1422,13 @@ function termJD(year, t) {
   return (lo + hi) / 2;
 }
 
+const JIEQI = JSON.parse(fs.readFileSync(new URL('../knowledge/jieqi.json', import.meta.url), 'utf8'));
+const TERM_ZHI = { 大雪: 0, 小寒: 1, 立春: 2, 惊蛰: 3, 清明: 4, 立夏: 5, 芒种: 6, 小暑: 7, 立秋: 8, 白露: 9, 寒露: 10, 立冬: 11 };
+const termMs = (y, name) => {
+  const iso = JIEQI[y]?.[name];
+  return iso ? Date.parse(iso) : null;
+};
+
 const termCache = new Map();
 function termsOf(year) {
   if (!termCache.has(year)) {
@@ -1430,18 +1441,35 @@ function termsOf(year) {
   return termCache.get(year);
 }
 
-function monthZhiOf(y, m, d, hourMid = 12) {
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
+function monthZhiOf(y, m, d, minuteOfDay = 720) {
+  const t = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  let bestMs = null;
+  let bestZhi = null;
+  for (const yy of [y - 1, y]) {
+    const row = JIEQI[yy];
+    if (!row) continue;
+    for (const [name, iso] of Object.entries(row)) {
+      const ms = Date.parse(iso);
+      if (ms <= t && (bestMs === null || ms > bestMs)) {
+        bestMs = ms;
+        bestZhi = TERM_ZHI[name];
+      }
+    }
+  }
+  if (bestZhi !== null) return bestZhi;
+  const birthJD = t / 86400000 + 2440587.5;
   const all = [...termsOf(y - 1), ...termsOf(y), ...termsOf(y + 1)].sort((a, b) => a.jd - b.jd);
-  const prev = all.filter((t) => t.jd <= birthJD).pop();
+  const prev = all.filter((x) => x.jd <= birthJD).pop();
   return prev ? prev.zhi : 0;
 }
 
 /* 年柱以立春为界（按精确立春时刻） */
-function yearOf(y, m, d, hourMid = 12) {
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
-  const lichun = termsOf(y)[1].jd;
-  return birthJD < lichun ? y - 1 : y;
+function yearOf(y, m, d, minuteOfDay = 720) {
+  const t = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  const lichun = termMs(y, '立春');
+  if (lichun !== null) return t < lichun ? y - 1 : y;
+  const birthJD = t / 86400000 + 2440587.5;
+  return birthJD < termsOf(y)[1].jd ? y - 1 : y;
 }
 
 const SHISHEN = {
@@ -1540,12 +1568,23 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, h
     notes,
   };
 
-  const bYear = yearOf(y, m, d, hourMid);
+  const minuteOfDay = ((adjMinutes % 1440) + 1440) % 1440;
+  const bYear = yearOf(y, m, d, minuteOfDay);
   const yGanIdx = ((bYear - 4) % 10 + 10) % 10;
   const yZhiIdx = ((bYear - 4) % 12 + 12) % 12;
-  const mZhiIdx = monthZhiOf(y, m, d, hourMid);
+  const mZhiIdx = monthZhiOf(y, m, d, minuteOfDay);
   const mGanIdx = (yGanIdx * 2 + 2 + ((mZhiIdx - 2 + 12) % 12)) % 10;
-  const day = dayGanzhi(y, m, d);
+  /* 23:00 起算子时：晚子时按次日日柱（sect 2），与 conventions.hourBoundary 一致 */
+  let dayY = y;
+  let dayM = m;
+  let dayD = d;
+  if (hourMid >= 23) {
+    const nx = new Date(Date.UTC(y, m - 1, d + 1));
+    dayY = nx.getUTCFullYear();
+    dayM = nx.getUTCMonth() + 1;
+    dayD = nx.getUTCDate();
+  }
+  const day = dayGanzhi(dayY, dayM, dayD);
   const hGanIdx = ((day.idx % 10) % 5 * 2 + hZhiIdx) % 10;
 
   const pillars = [
@@ -1578,14 +1617,20 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, longitude, h
   const yong = strong ? [KE[me], SHENG[me]] : [me, Object.keys(SHENG).find((k) => SHENG[k] === me)];
 
   /* ---- 大运：阳年男顺、阴年男逆；阳年女逆、阴年女顺 ---- */
-  const birthJD = Date.UTC(y, m - 1, d, hourMid - 8) / 86400000 + 2440587.5;
-  const allTerms = [...termsOf(y - 1), ...termsOf(y), ...termsOf(y + 1)].sort((a, b) => a.jd - b.jd);
-  const prevTerm = allTerms.filter((t) => t.jd <= birthJD).pop();
-  const nextTerm = allTerms.find((t) => t.jd > birthJD);
+  const birthMs = Date.UTC(y, m - 1, d) + (minuteOfDay - 480) * 60000;
+  const allTerms = [];
+  for (const yy of [y - 1, y, y + 1]) {
+    const row = JIEQI[yy];
+    if (!row) continue;
+    for (const [name, iso] of Object.entries(row)) allTerms.push({ name, ms: Date.parse(iso) });
+  }
+  allTerms.sort((a, b) => a.ms - b.ms);
+  const prevTerm = allTerms.filter((t) => t.ms <= birthMs).pop();
+  const nextTerm = allTerms.find((t) => t.ms > birthMs);
 
   const yangYear = yGanIdx % 2 === 0;
   const forward = yangYear === (gender === 'male');
-  const distDays = forward ? (nextTerm.jd - birthJD) : (birthJD - prevTerm.jd);
+  const distDays = forward ? (nextTerm.ms - birthMs) / 86400000 : (birthMs - prevTerm.ms) / 86400000;
   const totalMonths = Math.max(0, Math.round(distDays * 4)); // 3 日 = 1 年 = 12 月
   const startYears = Math.floor(totalMonths / 12);
   const startMonths = totalMonths % 12;
@@ -3071,6 +3116,8 @@ const CITIES = ['北京','上海','广州','深圳','天津','重庆','成都','
    engine.js — 规则引擎
    选项 → 六维 → 批注。全部同步计算，无网络请求。
    ========================================================================== */
+const ENGINE_VERSION = '2026-11-17';
+
 
 
 /* ---------------- 基础工具 ---------------- */
@@ -3532,6 +3579,7 @@ function makeRecord(report) {
     id: `${report.type}-${now.getTime().toString(36)}`,
     createdAt: now.toISOString(),
     dateLabel: fmtDate(now),
+    engineVersion: ENGINE_VERSION,
   };
 }
 
@@ -5467,6 +5515,7 @@ function compassView() {
 
 
 
+
 const SEAL = ['相', '由', '心', '生'];
 
 const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
@@ -5819,6 +5868,7 @@ function reportView(id) {
           <span class="rep-side">${esc(rec.title)}</span>
 
           <header class="rep-head">
+            ${(!rec.engineVersion || rec.engineVersion !== ENGINE_VERSION) ? `<p class="rep-legacy">旧版算法：日柱已修正，建议 <a href="${again}">重新算一次</a></p>` : ''}
             <div class="rep-kicker">${esc(rec.dateLabel)}<span class="rep-tag">传统文化 · 娱乐参考</span></div>
             <h1 class="rep-title">${esc(rec.heading)}</h1>
             <p class="rep-sub">${esc(subtitle)}</p>

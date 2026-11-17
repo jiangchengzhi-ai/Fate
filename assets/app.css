@@ -1265,3 +1265,6 @@ body{font-size:15px}
 .wx-tip button{border:1px solid rgba(203,169,104,.6);background:transparent;color:#CBA968;
   border-radius:8px;padding:6px 10px;font-size:13px;white-space:nowrap}
 .wx-tip button[data-wx-close]{border:0;font-size:18px;padding:0 4px;color:#9a948a}
+
+.rep-legacy{margin:0 0 12px;padding:8px 12px;border:1px solid rgba(163,59,43,.35);border-radius:8px;font-size:13px;color:#a33b2b;line-height:1.5}
+.rep-legacy a{color:inherit;text-decoration:underline}

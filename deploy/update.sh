@@ -25,6 +25,14 @@ fi
 git reset --hard "$TARGET"
 chmod +x deploy/*.sh 2>/dev/null || true
 
+# 发布门禁：单元测试 + 与独立实现的交叉校验，不过不发布
+if ! node scripts/check.mjs; then
+  echo "==> 校验未通过，回滚到 $PREV"
+  git reset --hard "$PREV"
+  chmod +x deploy/*.sh 2>/dev/null || true
+  exit 1
+fi
+
 systemctl restart wenhe
 sleep 2
 
