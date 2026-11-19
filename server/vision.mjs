@@ -3,7 +3,7 @@
    照片只在本次请求里传给模型，不落盘、不写进批注。
    ========================================================================== */
 import { FACE, PALM } from '../assets/js/data.js';
-import { applyFaceRules } from './rules.mjs';
+import { applyFaceRules, applyPalmRules } from './rules.mjs';
 
 const CFG = {
   base: (process.env.FATETELL_VISION_BASE || process.env.FATETELL_LLM_BASE || 'https://api.deepseek.com/v1').replace(/\/+$/, ''),
@@ -109,6 +109,23 @@ function sanitizeMeasures(raw) {
   return Object.keys(out).length ? out : null;
 }
 
+/* 手相 21 点测量值 */
+function sanitizePalm(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const m = {
+    palmWidth: n(raw.palmWidth, 10, 5000),
+    palmLength: n(raw.palmLength, 10, 5000),
+    palmRatio: n(raw.palmRatio, 0.5, 2.5),
+    fingerPalmRatio: n(raw.fingerPalmRatio, 0.4, 1.6),
+    indexRingRatio: n(raw.indexRingRatio, 0.5, 2.0),
+    pinkyRatio: n(raw.pinkyRatio, 0.4, 1.2),
+    handSpread: n(raw.handSpread, 0.8, 3.5),
+  };
+  const out = {};
+  for (const [k, v] of Object.entries(m)) if (v != null) out[k] = Math.round(v * 1000) / 1000;
+  return Object.keys(out).length ? out : null;
+}
+
 function applyMeasureRules(features, measures) {
   if (!measures) return features;
   const f = { ...features };
@@ -179,22 +196,35 @@ export function parseFeatures(text, kind = 'face', clientMeasures = null) {
     features[id] = v;
   }
 
-  const cm = kind === 'face' ? sanitizeMeasures(clientMeasures) : null;
-  const measures = cm
-    ? { ...cm, source: 'mediapipe-468' }
-    : (kind === 'face' ? sanitizeMeasures(raw.measures) : null);
-
+  let measures = null;
   let applied = [];
   let basis = [];
-  if (measures && kind === 'face') {
-    const r = applyFaceRules(measures);
-    features = { ...features, ...r.features };
-    applied = r.applied;
-    basis = r.basis;
+  let ruleFeatures = {};
+
+  if (kind === 'face') {
+    const cm = sanitizeMeasures(clientMeasures);
+    measures = cm ? { ...cm, source: 'mediapipe-468' } : sanitizeMeasures(raw.measures);
+    if (measures) {
+      const r = applyFaceRules(measures);
+      features = { ...features, ...r.features };
+      ruleFeatures = { ...r.features };
+      applied = r.applied;
+      basis = r.basis;
+    }
+  } else if (kind === 'palm') {
+    const cm = sanitizePalm(clientMeasures);
+    measures = cm ? { ...cm, source: 'mediapipe-hand-21' } : sanitizePalm(raw.measures);
+    if (measures) {
+      const r = applyPalmRules(measures);
+      features = { ...features, ...r.features };
+      ruleFeatures = { ...r.features };
+      applied = r.applied;
+      basis = r.basis;
+    }
   }
 
   const confidence = Number(raw.confidence);
-  if (Number.isFinite(confidence) && confidence < 45) return { features: {}, confidence, dropped, measures };
+  if (Number.isFinite(confidence) && confidence < 45) return { features: ruleFeatures, confidence, dropped, measures, applied, basis };
   return { features, confidence: Number.isFinite(confidence) ? confidence : 60, dropped, measures, applied, basis };
 }
 

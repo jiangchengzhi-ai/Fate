@@ -181,3 +181,97 @@ export async function measureFace(dataUrl) {
 }
 
 export const isReady = () => Boolean(landmarkerPromise);
+
+
+/* ================= 手相：21 点关键点 ================= */
+let handPromise = null;
+
+async function getHandLandmarker() {
+  if (!handPromise) {
+    handPromise = (async () => {
+      const { HandLandmarker, FilesetResolver } = await import(`${BASE}vision_bundle.mjs`);
+      const vision = await FilesetResolver.forVisionTasks(`${BASE}wasm`);
+      const make = (delegate) => HandLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: `${BASE}hand_landmarker.task`, delegate },
+        runningMode: 'IMAGE',
+        numHands: 1,
+        minHandDetectionConfidence: 0.4,
+        minHandPresenceConfidence: 0.4,
+        minTrackingConfidence: 0.4,
+      });
+      try { return await make('GPU'); } catch { return await make('CPU'); }
+    })().catch((e) => { handPromise = null; throw e; });
+  }
+  return handPromise;
+}
+
+const HAND_EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+
+function handMetrics(p, w, h) {
+  const d = (i, j) => Math.hypot((p[i].x - p[j].x) * w, (p[i].y - p[j].y) * h);
+  const palmWidth = d(5, 17) || 1;
+  const palmLength = d(0, 9) || 1;
+  const middle = d(9, 12) || 1;
+  const index = d(5, 8) || 1;
+  const ring = d(13, 16) || 1;
+  const pinky = d(17, 20) || 1;
+  return {
+    palmWidth: r3(palmWidth), palmLength: r3(palmLength),
+    palmRatio: r3(palmLength / palmWidth),
+    fingerPalmRatio: r3(middle / palmLength),
+    indexRingRatio: r3(index / (ring || 1)),
+    pinkyRatio: r3(pinky / (middle || 1)),
+    handSpread: r3(d(4, 20) / palmWidth),
+    points: 21,
+    source: 'mediapipe-hand-21',
+  };
+}
+
+function handQuality(p, w, h) {
+  const d = (i, j) => Math.hypot((p[i].x - p[j].x) * w, (p[i].y - p[j].y) * h);
+  const palmWidth = d(5, 17) || 1;
+  const spread = d(4, 20) / palmWidth;
+  const issues = [];
+  if (spread < 1.5) issues.push('手指没摊开：掌心朝上、五指自然张开');
+  return { spread: r3(spread), issues };
+}
+
+export async function measureHand(dataUrl) {
+  try {
+    const lm = await getHandLandmarker();
+    const img = await loadImage(dataUrl);
+    const res = lm.detect(img);
+    const hand = res?.landmarks?.[0];
+    if (!hand || hand.length < 21) return { ok: false, reason: 'no-hand' };
+    return { ok: true, measures: handMetrics(hand, img.naturalWidth, img.naturalHeight), landmarks: hand, quality: handQuality(hand, img.naturalWidth, img.naturalHeight) };
+  } catch (e) {
+    return { ok: false, reason: e?.message || 'measure-failed' };
+  }
+}
+
+export async function drawHandOverlay(dataUrl, landmarks) {
+  const img = await loadImage(dataUrl);
+  const max = 720;
+  const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * scale);
+  const h = Math.round(img.naturalHeight * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  ctx.strokeStyle = 'rgba(203,169,104,.9)';
+  ctx.lineWidth = 1.2;
+  for (const [a, b] of HAND_EDGES) {
+    ctx.beginPath();
+    ctx.moveTo(landmarks[a].x * w, landmarks[a].y * h);
+    ctx.lineTo(landmarks[b].x * w, landmarks[b].y * h);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(203,169,104,.7)';
+  for (const pt of landmarks) {
+    ctx.beginPath();
+    ctx.arc(pt.x * w, pt.y * h, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return c.toDataURL('image/jpeg', 0.85);
+}

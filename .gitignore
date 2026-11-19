@@ -32,3 +32,6 @@ tmp-*
 .prev-rev
 
 assets/vendor/mediapipe/
+
+assets/lab/samples/
+samples/

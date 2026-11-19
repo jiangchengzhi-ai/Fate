@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>掌纹调试台 · 内部</title>
+<style>
+  body{margin:0;background:#0b1210;color:#e9e4d6;font:14px/1.6 system-ui,"PingFang SC",sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px}
+  h1{font-size:20px;font-weight:400;letter-spacing:.12em;margin:0 0 6px}
+  p.sub{color:#9a948a;margin:0 0 18px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+  canvas{background:#111;border:1px solid rgba(203,169,104,.25);max-width:100%}
+  .box{flex:1;min-width:280px}
+  .box h2{font-size:13px;color:#cba968;font-weight:400;letter-spacing:.1em;margin:0 0 6px}
+  input[type=file]{color:#e9e4d6}
+  pre{background:#0f1916;border:1px solid rgba(203,169,104,.2);padding:10px;max-height:300px;overflow:auto;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>掌纹调试台</h1>
+  <p class="sub">内部工具：上传一张手掌照，看 ROI 归一化、线条增强、骨架与三线识别结果。不上传服务器。</p>
+  <div class="row">
+    <input type="file" id="file" accept="image/*">
+    <button id="run">重新分析</button>
+  </div>
+  <div class="row">
+    <div class="box"><h2>原图 + 关键点</h2><canvas id="c0" width="360" height="360"></canvas></div>
+    <div class="box"><h2>ROI 归一化</h2><canvas id="c1" width="480" height="360"></canvas></div>
+    <div class="box"><h2>线条响应</h2><canvas id="c2" width="480" height="360"></canvas></div>
+  </div>
+  <div class="row">
+    <div class="box"><h2>骨架</h2><canvas id="c3" width="480" height="360"></canvas></div>
+    <div class="box"><h2>三线识别</h2><canvas id="c4" width="480" height="360"></canvas></div>
+    <div class="box"><h2>识别结果</h2><pre id="out">等待上传</pre></div>
+  </div>
+</div>
+<script type="module">
+const BASE = '/assets/vendor/mediapipe/';
+const $ = (id) => document.getElementById(id);
+let img = null;
+let running = false;
+
+async function getLandmarker() {
+  const { HandLandmarker, FilesetResolver } = await import(`${BASE}vision_bundle.mjs`);
+  const vision = await FilesetResolver.forVisionTasks(`${BASE}wasm`);
+  const make = (delegate) => HandLandmarker.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: `${BASE}hand_landmarker.task`, delegate },
+    runningMode: 'IMAGE', numHands: 1,
+    minHandDetectionConfidence: 0.3, minHandPresenceConfidence: 0.3, minTrackingConfidence: 0.3,
+  });
+  try { return await make('GPU'); } catch { return await make('CPU'); }
+}
+
+const loadImage = (src) => new Promise((res, rej) => {
+  const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src;
+});
+
+/* ---------- 透视变换：4 点 → 矩形 ---------- */
+function solve8(A, b) {
+  const n = 8;
+  const M = A.map((row, i) => [...row, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c;
+    for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]];
+    const d = M[c][c] || 1e-9;
+    for (let j = c; j <= n; j++) M[c][j] /= d;
+    for (let r = 0; r < n; r++) {
+      if (r === c) continue;
+      const f = M[r][c];
+      if (!f) continue;
+      for (let j = c; j <= n; j++) M[r][j] -= f * M[c][j];
+    }
+  }
+  return M.map((row) => row[n]);
+}
+
+function homography(src, dst) {
+  const A = []; const b = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = src[i]; const [u, v] = dst[i];
+    A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+    A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+  }
+  const h = solve8(A, b);
+  return [...h, 1];
+}
+
+function warpToCanvas(image, quad, dstQuad, out) {
+  const ctx = out.getContext('2d');
+  const w = out.width; const h = out.height;
+  const H = homography(dstQuad, quad);
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const tctx = tmp.getContext('2d');
+  const sctx = document.createElement('canvas');
+  sctx.width = image.naturalWidth; sctx.height = image.naturalHeight;
+  sctx.getContext('2d').drawImage(image, 0, 0);
+  const sdat = sctx.getContext('2d').getImageData(0, 0, image.naturalWidth, image.naturalHeight);
+  const outDat = tctx.createImageData(w, h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const den = H[6] * x + H[7] * y + H[8];
+      const u = (H[0] * x + H[1] * y + H[2]) / den;
+      const v = (H[3] * x + H[4] * y + H[5]) / den;
+      const sx = Math.max(0, Math.min(image.naturalWidth - 1, Math.round(u)));
+      const sy = Math.max(0, Math.min(image.naturalHeight - 1, Math.round(v)));
+      const si = (sy * image.naturalWidth + sx) * 4;
+      const di = (y * w + x) * 4;
+      outDat.data[di] = sdat.data[si];
+      outDat.data[di + 1] = sdat.data[si + 1];
+      outDat.data[di + 2] = sdat.data[si + 2];
+      outDat.data[di + 3] = 255;
+    }
+  }
+  tctx.putImageData(outDat, 0, 0);
+  ctx.drawImage(tmp, 0, 0);
+  return outDat;
+}
+
+/* ---------- 预处理：灰度 + 局部直方图均衡 ---------- */
+function toGray(dat, w, h) {
+  const g = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    g[i] = 0.299 * dat.data[i * 4] + 0.587 * dat.data[i * 4 + 1] + 0.114 * dat.data[i * 4 + 2];
+  }
+  return g;
+}
+
+function clahe(g, w, h, tiles = 8, clip = 2.5) {
+  const out = new Float32Array(w * h);
+  const tw = Math.ceil(w / tiles); const th = Math.ceil(h / tiles);
+  for (let ty = 0; ty < tiles; ty++) {
+    for (let tx = 0; tx < tiles; tx++) {
+      const x0 = tx * tw; const y0 = ty * th;
+      const x1 = Math.min(w, x0 + tw); const y1 = Math.min(h, y0 + th);
+      const hist = new Array(256).fill(0);
+      let n = 0;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { hist[Math.max(0, Math.min(255, Math.round(g[y * w + x])))]++; n++; }
+      const limit = Math.max(1, (clip * n) / 256);
+      let excess = 0;
+      for (let i = 0; i < 256; i++) { if (hist[i] > limit) { excess += hist[i] - limit; hist[i] = limit; } }
+      const inc = excess / 256;
+      for (let i = 0; i < 256; i++) hist[i] += inc;
+      const lut = new Array(256);
+      let cum = 0;
+      for (let i = 0; i < 256; i++) { cum += hist[i]; lut[i] = Math.round((cum / n) * 255); }
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+        const v = Math.max(0, Math.min(255, Math.round(g[y * w + x])));
+        out[y * w + x] = lut[v];
+      }
+    }
+  }
+  return out;
+}
+
+
+function sobel(g, w, h) {
+  const out = new Float32Array(w * h);
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      const tl=g[i-w-1], tc=g[i-w], tr=g[i-w+1];
+      const ml=g[i-1], mr=g[i+1];
+      const bl=g[i+w-1], bc=g[i+w], br=g[i+w+1];
+      const gx = (tr + 2*mr + br) - (tl + 2*ml + bl);
+      const gy = (bl + 2*bc + br) - (tl + 2*tc + tr);
+      out[i] = Math.hypot(gx, gy);
+    }
+  }
+  return out;
+}
+
+/* ---------- Gabor 滤波 ---------- */
+function gaborKernel(orient, lambda = 8, sigma = 2.4, gamma = 0.5) {
+  const r = Math.ceil(3 * sigma);
+  const size = r * 2 + 1;
+  const k = new Float32Array(size * size);
+  const theta = (orient * Math.PI) / 180;
+  const ct = Math.cos(theta); const st = Math.sin(theta);
+  for (let y = -r; y <= r; y++) {
+    for (let x = -r; x <= r; x++) {
+      const xr = x * ct + y * st;
+      const yr = -x * st + y * ct;
+      const env = Math.exp(-(xr * xr + gamma * gamma * yr * yr) / (2 * sigma * sigma));
+      k[(y + r) * size + (x + r)] = env * Math.cos((2 * Math.PI * xr) / lambda);
+    }
+  }
+  return { k, r, size };
+}
+
+function convolveMax(g, w, h, orients = [0, 45, 90, 135]) {
+  const out = new Float32Array(w * h);
+  for (const o of orients) {
+    const { k, r, size } = gaborKernel(o);
+    for (let y = r; y < h - r; y++) {
+      for (let x = r; x < w - r; x++) {
+        let s = 0;
+        for (let ky = 0; ky < size; ky++) {
+          for (let kx = 0; kx < size; kx++) {
+            s += g[(y + ky - r) * w + (x + kx - r)] * k[ky * size + kx];
+          }
+        }
+        const v = Math.abs(s);
+        if (v > out[y * w + x]) out[y * w + x] = v;
+      }
+    }
+  }
+  return out;
+}
+
+function thresholdPercentile(resp, w, h, pct = 0.88) {
+  const arr = Array.from(resp).sort((a, b) => a - b);
+  const t = arr[Math.floor(arr.length * pct)] || 0;
+  const bin = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) bin[i] = resp[i] >= t ? 1 : 0;
+  return bin;
+}
+
+function morph(bin, w, h, times = 1) {
+  let a = bin;
+  const dilate = (b) => {
+    const o = new Uint8Array(w * h);
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      let s = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) s |= b[(y + dy) * w + (x + dx)];
+      o[y * w + x] = s;
+    }
+    return o;
+  };
+  const erode = (b) => {
+    const o = new Uint8Array(w * h);
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      let s = 1;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) s &= b[(y + dy) * w + (x + dx)];
+      o[y * w + x] = s;
+    }
+    return o;
+  };
+  for (let i = 0; i < times; i++) a = erode(dilate(a));
+  return a;
+}
+
+/* ---------- Zhang-Suen 细化 ---------- */
+function thin(bin, w, h) {
+  const img = Uint8Array.from(bin);
+  const idx = (x, y) => y * w + x;
+  let changed = true; let guard = 0;
+  const neighbours = (x, y) => [
+    img[idx(x, y - 1)], img[idx(x + 1, y - 1)], img[idx(x + 1, y)], img[idx(x + 1, y + 1)],
+    img[idx(x, y + 1)], img[idx(x - 1, y + 1)], img[idx(x - 1, y)], img[idx(x - 1, y - 1)],
+  ];
+  while (changed && guard++ < 400) {
+    changed = false;
+    for (const step of [0, 1]) {
+      const del = [];
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          if (!img[idx(x, y)]) continue;
+          const p = neighbours(x, y);
+          const B = p.reduce((a, b) => a + b, 0);
+          if (B < 2 || B > 6) continue;
+          let A = 0;
+          for (let i = 0; i < 8; i++) if (!p[i] && p[(i + 1) % 8]) A++;
+          if (A !== 1) continue;
+          const [p2, p3, p4, p5, p6, p7, p8, p9] = p;
+          if (step === 0) {
+            if (p2 * p4 * p6 !== 0) continue;
+            if (p4 * p6 * p8 !== 0) continue;
+          } else {
+            if (p2 * p4 * p8 !== 0) continue;
+            if (p2 * p6 * p8 !== 0) continue;
+          }
+          del.push([x, y]);
+        }
+      }
+      if (del.length) { changed = true; for (const [x, y] of del) img[idx(x, y)] = 0; }
+    }
+  }
+  return img;
+}
+
+/* ---------- 连通域与三线判定 ---------- */
+function components(skel, w, h) {
+  const seen = new Uint8Array(w * h);
+  const comps = [];
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      if (!skel[i] || seen[i]) continue;
+      const stack = [i]; seen[i] = 1; const pts = [];
+      while (stack.length) {
+        const p = stack.pop(); const px = p % w; const py = (p - px) / w; pts.push([px, py]);
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = px + dx; const ny = py + dy;
+          if (nx < 1 || ny < 1 || nx >= w - 1 || ny >= h - 1) continue;
+          const ni = ny * w + nx;
+          if (skel[ni] && !seen[ni]) { seen[ni] = 1; stack.push(ni); }
+        }
+      }
+      if (pts.length < 30) continue;
+      let sx = 0; let sy = 0;
+      for (const [px, py] of pts) { sx += px; sy += py; }
+      const cx = sx / pts.length; const cy = sy / pts.length;
+      let sxx = 0; let syy = 0; let sxy = 0;
+      for (const [px, py] of pts) { sxx += (px - cx) ** 2; syy += (py - cy) ** 2; sxy += (px - cx) * (py - cy); }
+      const angle = 0.5 * Math.atan2(2 * sxy, sxx - syy) * (180 / Math.PI);
+      let minX = w; let maxX = 0; let minY = h; let maxY = 0;
+      for (const [px, py] of pts) { minX = Math.min(minX, px); maxX = Math.max(maxX, px); minY = Math.min(minY, py); maxY = Math.max(maxY, py); }
+      let branches = 0;
+      for (const [px, py] of pts) {
+        let n = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const nx = px + dx; const ny = py + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          if (skel[ny * w + nx]) n++;
+        }
+        if (n >= 3) branches++;
+      }
+      comps.push({ pts, size: pts.length, cx, cy, angle: Math.abs(angle), minX, maxX, minY, maxY, branches, w, h });
+    }
+  }
+  comps.sort((a, b) => b.size - a.size);
+  return comps;
+}
+
+function classify(comps, w, h) {
+  const out = { life: null, head: null, heart: null };
+  for (const c of comps) {
+    if (c.size < 60) continue;
+    const nx = c.cx / w; const ny = c.cy / h;
+    const horiz = c.angle < 35; // 相对水平
+    if (!out.heart && ny < 0.36 && horiz && c.maxX - c.minX > 0.35 * w) { out.heart = c; continue; }
+    if (!out.head && ny >= 0.28 && ny < 0.62 && horiz && c.maxX - c.minX > 0.35 * w && c !== out.heart) { out.head = c; continue; }
+    if (!out.life && nx < 0.5 && ny > 0.42 && c.angle > 35) out.life = c;
+  }
+  return out;
+}
+
+/* ---------- 主流程 ---------- */
+async function analyze(image) {
+  img = image;
+  $('out').textContent = '检测关键点…';
+  const lm = await getLandmarker();
+  const res = lm.detect(image);
+  const hand = res?.landmarks?.[0];
+  if (!hand) { $('out').textContent = '没检测到手，换一张'; return; }
+
+  // 原图 + 关键点
+  const c0 = $('c0'); const x0 = c0.getContext('2d');
+  const s = Math.min(c0.width / image.naturalWidth, c0.height / image.naturalHeight);
+  const iw = image.naturalWidth * s; const ih = image.naturalHeight * s;
+  x0.clearRect(0, 0, c0.width, c0.height);
+  x0.drawImage(image, (c0.width - iw) / 2, (c0.height - ih) / 2, iw, ih);
+  x0.fillStyle = '#cba968';
+  for (const p of hand) {
+    x0.beginPath();
+    x0.arc((c0.width - iw) / 2 + p.x * iw, (c0.height - ih) / 2 + p.y * ih, 1.6, 0, Math.PI * 2);
+    x0.fill();
+  }
+
+  // ROI：手腕、食指根、小指根、中指根 → 四边形
+  const P = (i) => [hand[i].x * image.naturalWidth, hand[i].y * image.naturalHeight];
+  const w = 480; const h = 360;
+  const [i5, i17, wrist, mid] = [P(5), P(17), P(0), P(9)];
+  const axis = [mid[0] - wrist[0], mid[1] - wrist[1]];
+  const axisLen = Math.hypot(axis[0], axis[1]) || 1;
+  const ux = [axis[0] / axisLen, axis[1] / axisLen];
+  const vx = [-ux[1], ux[0]];
+  const half = Math.hypot(i5[0] - i17[0], i5[1] - i17[1]) / 2;
+  const quad = [
+    [i5[0], i5[1]],
+    [i17[0], i17[1]],
+    [wrist[0] + vx[0] * half, wrist[1] + vx[1] * half],
+    [wrist[0] - vx[0] * half, wrist[1] - vx[1] * half],
+  ];
+  const dstQuad = [[0, 0], [w, 0], [w, h], [0, h]];
+  const dat = warpToCanvas(image, quad, dstQuad, $('c1'));
+
+  // 灰度 + CLAHE + Gabor
+  const g = clahe(toGray(dat, w, h), w, h);
+  $('out').textContent = '计算线条响应…';
+  const resp = sobel(g, w, h);
+  const rc = $('c2'); const rctx = rc.getContext('2d');
+  const rimg = rctx.createImageData(w, h);
+  let maxv = 0;
+  for (let i = 0; i < resp.length; i++) if (resp[i] > maxv) maxv = resp[i];
+  maxv = maxv || 1;
+  for (let i = 0; i < w * h; i++) {
+    const v = Math.round((resp[i] / maxv) * 255);
+    rimg.data[i * 4] = v; rimg.data[i * 4 + 1] = v; rimg.data[i * 4 + 2] = v; rimg.data[i * 4 + 3] = 255;
+  }
+  rctx.putImageData(rimg, 0, 0);
+
+  // 二值 + 形态 + 细化
+  const bin = morph(thresholdPercentile(resp, w, h, 0.9), w, h, 1);
+  const skel = thin(bin, w, h);
+  const sc = $('c3'); const sctx = sc.getContext('2d');
+  const simg = sctx.createImageData(w, h);
+  for (let i = 0; i < w * h; i++) {
+    const v = skel[i] ? 255 : 0;
+    simg.data[i * 4] = v; simg.data[i * 4 + 1] = v; simg.data[i * 4 + 2] = v; simg.data[i * 4 + 3] = 255;
+  }
+  sctx.putImageData(simg, 0, 0);
+
+  // 三线
+  const comps = components(skel, w, h);
+  const lines = classify(comps, w, h);
+  const cc = $('c4'); const cctx = cc.getContext('2d');
+  cctx.drawImage($('c1'), 0, 0);
+  const colors = { life: '#4caf50', head: '#2196f3', heart: '#e53935' };
+  for (const key of ['life', 'head', 'heart']) {
+    const c = lines[key];
+    if (!c) continue;
+    cctx.fillStyle = colors[key];
+    for (const [px, py] of c.pts) cctx.fillRect(px, py, 1.6, 1.6);
+  }
+
+  const summary = Object.entries(lines).map(([k, c]) => c ? {
+    line: k, pixels: c.size,
+    lengthPct: Math.round((Math.max(c.maxX - c.minX, c.maxY - c.minY) / w) * 100),
+    centroid: [Math.round(c.cx), Math.round(c.cy)],
+    angle: Math.round(c.angle),
+    branches: c.branches,
+  } : { line: k, missing: true });
+  $('out').textContent = JSON.stringify({ hand: res.handedness?.[0]?.[0]?.categoryName, components: comps.length, lines: summary }, null, 1);
+  window.__lab = { summary, comps: comps.length };
+}
+
+$('file').addEventListener('change', async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  await analyze(await loadImage(url));
+});
+$('run').addEventListener('click', async () => { if (img) await analyze(img); });
+
+window.analyzeDataUrl = async (dataUrl) => analyze(await loadImage(dataUrl));
+</script>
+</body>
+</html>
