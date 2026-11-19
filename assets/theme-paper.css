@@ -176,3 +176,74 @@ hr,.sep{border-color:var(--line)}
 .dock-info{color:var(--text-3)}
 .dock-info b{color:var(--text)}
 .tb-link{border-color:var(--line)}
+
+/* ==========================================================================
+   交互与动效 v2.1（与 DESIGN.md · Motion & Interaction 同步）
+   ========================================================================== */
+:root{
+  --motion-fast:120ms;
+  --motion-base:180ms;
+  --motion-slow:240ms;
+  --ease-paper:cubic-bezier(.22,.61,.36,1);
+}
+
+/* 键盘焦点：只在键盘操作时出现 */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[role="button"]:focus-visible{
+  outline:2px solid var(--brass) !important;
+  outline-offset:2px !important;
+  border-radius:6px;
+}
+
+/* 颜色与按下的统一过渡 */
+.gate-card,.rec,.btn,.hour,.opt,.dir-btn,.input,select,textarea,summary{
+  transition:
+    background-color var(--motion-base) var(--ease-paper),
+    border-color var(--motion-base) var(--ease-paper),
+    color var(--motion-base) var(--ease-paper),
+    transform var(--motion-fast) var(--ease-paper),
+    opacity var(--motion-base) var(--ease-paper);
+}
+
+/* 按下：看得见的反馈，不靠 1px 位移 */
+.gate-card:active,.rec:active,.btn:active,.hour:active,.opt:active,.dir-btn:active{
+  transform:scale(.985);
+}
+.btn-primary:active{background:var(--cinnabar-deep)}
+.btn-ghost:active{background:rgba(140,107,63,.10)}
+
+/* 禁用 */
+.btn[disabled],.btn:disabled{opacity:.5;pointer-events:none}
+
+/* 加载：文字保持不变，转圈替代 */
+.btn[aria-busy="true"],.btn[aria-busy="true"] *{position:relative;color:transparent !important}
+.btn[aria-busy="true"]::after{
+  content:"";
+  position:absolute;inset:0;margin:auto;
+  width:18px;height:18px;
+  border:2px solid rgba(251,247,238,.4);
+  border-top-color:#FBF7EE;
+  border-radius:50%;
+  animation:paperSpin .8s linear infinite;
+}
+@keyframes paperSpin{to{transform:rotate(360deg)}}
+
+/* 页面进入：240ms，位移只有 6px */
+@media (prefers-reduced-motion: no-preference){
+  .view{animation:paperIn var(--motion-slow) var(--ease-paper) both}
+  @keyframes paperIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .toast{animation:paperToast var(--motion-base) var(--ease-paper) both}
+  @keyframes paperToast{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  .sheet{animation:paperSheet var(--motion-slow) var(--ease-paper) both}
+  @keyframes paperSheet{from{transform:translateY(24px);opacity:.7}to{transform:none;opacity:1}}
+}
+
+/* 尊重系统减弱动效 */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
