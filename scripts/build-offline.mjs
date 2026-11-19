@@ -112,7 +112,7 @@ return { paipan, xiaoliuren, zeri, bazhai, yangzhai, yinzha };
 `;
 
 const js = [toolsWrap, shim, ...ORDER.map((f) => `\n/* ===== ${f} ===== */\n${strip(read(f))}`)].join('\n');
-const css = read('assets/app.css');
+const css = read('assets/app.css') + '\n' + read('assets/theme-paper.css');
 
 const html = `<!doctype html>
 <html lang="zh-CN">

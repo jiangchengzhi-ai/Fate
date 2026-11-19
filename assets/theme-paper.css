@@ -1,0 +1,178 @@
+/* ==========================================================================
+   问鹤 · 宣纸主题 v2（design-v2.0）
+   与 DESIGN.md 同步：paper canvas / ink type / brass hairline / cinnabar seal
+   加载顺序：app.css 之后
+   ========================================================================== */
+
+:root{
+  color-scheme: light;
+
+  --ink:#F6F1E6;
+  --ink-2:#FBF7EE;
+  --ink-3:#EFE7D6;
+
+  --brass:#8C6B3F;
+  --brass-hi:#A9854F;
+  --brass-soft:rgba(140,107,63,.26);
+  --brass-faint:rgba(140,107,63,.10);
+
+  --cinnabar:#A33B2B;
+  --cinnabar-hi:#B84A36;
+  --cinnabar-deep:#8B2F22;
+  --seal:#9C3325;
+
+  --text:#241F17;
+  --text-2:#3B342A;
+  --text-3:#6B6253;
+  --line:#DCD2BE;
+  --line-strong:#C9BCA2;
+
+  --paper:#F6F1E6;
+  --paper-2:#EFE7D6;
+  --paper-ink:#241F17;
+  --paper-ink-2:rgba(36,31,23,.66);
+  --paper-line:rgba(36,31,23,.20);
+
+  --pad:20px;
+}
+
+body{
+  background:
+    radial-gradient(900px 560px at 50% -10%, rgba(140,107,63,.07), transparent 62%),
+    linear-gradient(180deg, #F8F3E8 0%, #F6F1E6 38%, #F4EDDF 100%);
+  color:var(--text-2);
+  font-size:17px;
+  line-height:1.85;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  background:rgba(246,241,230,.94);
+  border-bottom:1px solid var(--line);
+  color:var(--text);
+}
+.brand,.tb-link,.topbar a{color:var(--text)}
+.brand-mark{color:var(--brass)}
+.tb-link{color:var(--text-3)}
+
+/* ---------- 标题与正文 ---------- */
+.home-title,.page-title,.rep-title,h1,h2{
+  color:var(--text);
+  font-family:var(--serif);
+  font-weight:400;
+}
+.home-sub,.lead,.foot,.q-hint,.rec-meta,.rep-meta{
+  color:var(--text-3);
+}
+.lead{font-size:16px;line-height:1.85}
+
+/* ---------- 卡片 ---------- */
+.gate-card,.notice-card,.rec,.card,.q-card,.person-card,.vision-note,
+.admin-card,.report-card,.rep-section,.sheet{
+  background:var(--ink-2);
+  border-color:var(--line);
+  box-shadow:none;
+}
+.gate-card{background:#FBF7EE}
+.gate-card:hover{border-color:var(--brass-soft);background:#FDFAF3}
+.gate-name{color:var(--text)}
+.gate-desc{color:var(--text-3)}
+.gate-glyph{
+  color:var(--brass);
+  border-color:var(--line-strong);
+  background:#F6EFE0;
+}
+.gate-arrow{color:var(--brass)}
+
+/* ---------- 表单 ---------- */
+.input,select,textarea,input[type=date],input[type=number]{
+  background:#FFFDF7;
+  color:var(--text);
+  border-color:var(--line-strong);
+}
+.input:focus,select:focus,textarea:focus,input:focus{
+  border-color:var(--brass);
+  outline:none;
+  box-shadow:none;
+}
+.input::placeholder,input::placeholder{color:#9A8F7B}
+label{color:var(--text-3)}
+
+/* ---------- 选项组：时辰 / 历法 / 性别 ---------- */
+.hour,.opt,.dir-btn{
+  background:#FBF7EE;
+  color:var(--text);
+  border-color:var(--line);
+}
+.hour b,.opt{color:var(--text)}
+.hour span{color:var(--text-3)}
+.hour:hover,.opt:hover{border-color:var(--brass-soft)}
+.hour[aria-pressed="true"],.opt[aria-pressed="true"],.dir-btn[aria-pressed="true"]{
+  background:rgba(140,107,63,.13);
+  border-color:var(--brass);
+  color:var(--text);
+}
+.hour[aria-pressed="true"] b{color:var(--text)}
+
+/* ---------- 按钮 ---------- */
+.btn-primary{
+  background:var(--cinnabar);
+  color:#FBF7EE;
+  border:1px solid var(--cinnabar-deep);
+}
+.btn-primary:hover{background:var(--cinnabar-hi)}
+.btn-ghost{
+  background:transparent;
+  border-color:var(--line-strong);
+  color:var(--text-2);
+}
+.btn-ghost:hover{border-color:var(--brass);color:var(--text)}
+
+/* ---------- 链接与强调 ---------- */
+.more,a{color:var(--brass)}
+.more:hover{color:var(--cinnabar)}
+
+/* ---------- 批注页 ---------- */
+.rep-title{color:var(--text)}
+.rep-date,.rep-meta{color:var(--text-3)}
+.rep-section h2{color:var(--text);border-color:var(--line)}
+.rep-kv dt{color:var(--text-3)}
+.rep-kv dd{color:var(--text)}
+.vision-note{background:#F8F2E4;border-color:var(--line)}
+.vision-note summary{color:var(--text)}
+.vision-measure,.vision-limit,.vision-basis{color:var(--text-3)}
+.vision-basis{border-top-color:var(--line)}
+
+/* ---------- 记录列表 ---------- */
+.rec{background:#FBF7EE}
+.rec-title{color:var(--text)}
+.rec-go{color:var(--brass)}
+.rec-seal{background:var(--cinnabar);color:#FBF7EE}
+
+/* ---------- 印章 / 标签 ---------- */
+.seal,.tag,.badge{background:var(--cinnabar);color:#FBF7EE}
+.rep-legacy{color:var(--cinnabar);border-color:var(--cinnabar)}
+
+/* ---------- 底部与提示 ---------- */
+.foot{border-top-color:var(--line)}
+.toast{background:#241F17;color:#F6F1E6}
+hr,.sep{border-color:var(--line)}
+
+/* ---------- 罗盘：浅底校准 ---------- */
+.compass,.compass-wrap,.dial{background:#F8F3E8}
+.compass-ring,.dial-ring{border-color:var(--line-strong)}
+.compass-label,.dial-label{color:var(--text-3)}
+
+/* ---------- 深色蒙版改纸色 ---------- */
+.photo-mask,.preview-mask{background:rgba(246,241,230,.86)}
+
+/* ---------- 页脚声明 ---------- */
+.footer-note,.disclaimer{color:var(--text-3)}
+
+/* ---------- 底部操作条：纸色渐隐 ---------- */
+.dock{
+  background:linear-gradient(180deg, rgba(246,241,230,0) 0%, rgba(246,241,230,.94) 30%, #F6F1E6 70%);
+}
+.dock-info{color:var(--text-3)}
+.dock-info b{color:var(--text)}
+.tb-link{border-color:var(--line)}

@@ -1,232 +1,259 @@
 ---
-name: fatetell
-description: 中国传统术数五门 H5 —— 墨玉为底、黄铜为界、宣纸为批注
+version: 2.0
+name: wenhe-paper
+description: 问鹤 · 五门问事的第二版视觉系统。以宣纸为底、墨字为骨、朱砂为印、赭石为界，把第一版的"墨玉夜读"改为"白天读纸"。目标用户是 45 岁以上的普通人，所以字号更大、对比更高、装饰更少；传统感来自纸张、宋体与印章，而不是暗色与金色。
 colors:
-  ink-jade: "#0B1210"
-  ink-jade-raised: "#0F1916"
-  ink-jade-sunken: "#15211D"
-  compass-brass: "#A98A4E"
-  compass-brass-bright: "#CBA968"
+  canvas: "#F6F1E6"
+  canvas-deep: "#EFE7D6"
+  surface: "#FBF7EE"
+  surface-sunken: "#F2EBDC"
+  ink: "#241F17"
+  body: "#3B342A"
+  muted: "#6B6253"
+  muted-soft: "#8A8171"
+  hairline: "#DCD2BE"
+  hairline-strong: "#C9BCA2"
+  brass: "#8C6B3F"
+  brass-hi: "#A9854F"
+  brass-faint: "rgba(140,107,63,0.10)"
   cinnabar: "#A33B2B"
   cinnabar-deep: "#8B2F22"
-  seal-paste: "#9C3325"
-  rice-paper: "#EDE7D8"
-  rice-paper-deep: "#E5DDCB"
-  paper-ink: "#241F17"
-  bone: "#E9E4D6"
+  seal: "#9C3325"
+  on-seal: "#FBF7EE"
+  success: "#4F7A5A"
+  warning: "#B07A2A"
+  error: "#A33B2B"
 typography:
   display:
     fontFamily: "Songti SC, Songti TC, STSong, Noto Serif CJK SC, Source Han Serif SC, SimSun, serif"
-    fontSize: "27px"
+    fontSize: 30px
     fontWeight: 400
-    lineHeight: 1.35
-    letterSpacing: "0.16em"
-  headline:
-    fontFamily: "Songti SC, STSong, Noto Serif CJK SC, serif"
-    fontSize: "19px"
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: "0.2em"
+    lineHeight: 1.3
+    letterSpacing: 0.12em
   title:
     fontFamily: "Songti SC, STSong, Noto Serif CJK SC, serif"
-    fontSize: "17px"
+    fontSize: 21px
     fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: "0.14em"
+    lineHeight: 1.45
+    letterSpacing: 0.08em
   body:
     fontFamily: "PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, Microsoft YaHei, system-ui, sans-serif"
-    fontSize: "13px"
+    fontSize: 17px
     fontWeight: 400
-    lineHeight: 1.95
-    letterSpacing: "0.02em"
+    lineHeight: 1.85
+    letterSpacing: 0.01em
   label:
-    fontFamily: "Songti SC, STSong, Noto Serif CJK SC, serif"
-    fontSize: "10.5px"
+    fontFamily: "PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, sans-serif"
+    fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: "0.2em"
-rounded:
-  instrument: "1px"
-  control: "1px"
-  seal: "0px"
-spacing:
-  hair: "1px"
-  xs: "6px"
-  sm: "10px"
-  md: "14px"
-  lg: "22px"
-  xl: "38px"
-components:
-  button-primary:
-    backgroundColor: "{colors.cinnabar}"
-    textColor: "#F5EBD6"
-    rounded: "{rounded.control}"
-    height: "50px"
-    padding: "0 22px"
-  button-primary-hover:
-    backgroundColor: "{colors.cinnabar-deep}"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.bone}"
-    rounded: "{rounded.control}"
-    height: "44px"
-    padding: "0 18px"
-  option:
-    backgroundColor: "rgba(233,228,214,0.018)"
-    textColor: "{colors.bone}"
-    rounded: "{rounded.control}"
-    height: "44px"
-    padding: "9px 14px"
-  option-selected:
-    backgroundColor: "rgba(169,138,78,0.13)"
-    textColor: "{colors.bone}"
-  paper-report:
-    backgroundColor: "{colors.rice-paper}"
-    textColor: "{colors.paper-ink}"
-    rounded: "0px"
-    padding: "7px"
-system:
-  description: "fatetell 的界面由两层物质构成：墨玉底上的黄铜仪器，与结果处的宣纸批注。"
+    lineHeight: 1.5
+    letterSpacing: 0.06em
+  caption:
+    fontFamily: "PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, sans-serif"
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 1.6
+    letterSpacing: 0.02em
 ---
 
-# Design System: fatetell
+# 问鹤 · 五门问事 — Design System v2「宣纸」
 
 ## Overview
 
-**Creative North Star: "铜镜与宣纸"**
+第一版是给夜里静心读的：墨玉底、黄铜线、宣纸批注，气质对，但对 45 岁以上用户不友好——暗底看久了累，金色小字在室外几乎看不见。
 
-界面只承认两种物质：一块墨玉底上的黄铜罗盘，和一张写满批注的宣纸。罗盘是尺，负责输入与方位；宣纸是纸，负责结论。所有设计判断都回到这两个比喻：它是不是刻在铜上的一根线，还是落在纸上的一笔字。
+第二版把同一个世界翻到白天：**同一套朱砂与宋体，换一张宣纸**。
 
-这套系统拒绝"深色科技风"的默认装饰：没有渐变文字，没有发光卡片，没有圆角浮层。深度靠色阶与发丝线，不靠阴影堆叠；强调靠字重与字号，不靠第二套亮色。唯一的暖色行动色是朱砂，且只出现在钤印与主操作上——它的稀有是刻意的。
+- 底：宣纸暖白 `#F6F1E6`，不是纯白。纯白刺眼，暖白像纸。
+- 字：墨色 `#241F17`，正文 17px，行高 1.85。
+- 界：赭石细线 `#8C6B3F`，只在需要分隔时出现。
+- 印：朱砂 `#A33B2B`，只给主按钮、印章、关键数字。
+- 装饰：几乎为零。纸张本身的纹理和留白就是装饰。
 
-**Key Characteristics:**
-- 墨玉三阶铺底，黄铜发丝线勾结构，宣纸只承载结果。
-- 直角优先（0–1px），圆只属于罗盘与印。
-- 宋体作显示与标题，黑体作正文；小字不低 9.5px，且必须过 4.5:1。
-- 动效只服务两处：盘面入场、纸面落定。
+一句话：**像一本大字本的宣纸册子，不像一个道观网页。**
 
 ## Colors
 
-冷绿黑作底，黄铜作结构，朱砂作行动，宣纸作结论。
+### 纸与面
 
-### Primary
-- **朱砂 (Cinnabar)** (#A33B2B): 主按钮、批语分隔、钤印、区块小方点。一屏占比不超过 5%，且从不用于正文文字。
+| Token | Hex | 用途 |
+| --- | --- | --- |
+| `canvas` | `#F6F1E6` | 页面底色 |
+| `canvas-deep` | `#EFE7D6` | 分区、页脚 |
+| `surface` | `#FBF7EE` | 卡片、输入框底色 |
+| `surface-sunken` | `#F2EBDC` | 凹陷区、代码、引用 |
 
-### Secondary
-- **罗盘铜 (Compass Brass)** (#A98A4E): 命盘刻度、分隔线、焦点环、次级强调。它是"尺"的颜色，不是"行动"的颜色。
-- **亮铜 (Brass Bright)** (#CBA968): 悬停、当前项、可点击文字的强调；与罗盘铜同色相，只提亮一档。
+### 墨与字
 
-### Neutral
-- **墨玉 (Ink Jade)** (#0B1210): 页面底色。
-- **墨玉·浮 (Ink Jade Raised)** (#0F1916): 弹层、输入框、面板。
-- **墨玉·沉 (Ink Jade Sunken)** (#15211D): 卡片内凹、悬停背景。
-- **骨白 (Bone)** (#E9E4D6): 正文文字；72% 为次级，54% 为提示（实测 8.0 / 5.0）。
-- **宣纸 (Rice Paper)** (#EDE7D8): 批注纸面。
-- **纸墨 (Paper Ink)** (#241F17): 纸上的字。
+| Token | Hex | 用途 |
+| --- | --- | --- |
+| `ink` | `#241F17` | 标题、正文强调 |
+| `body` | `#3B342A` | 正文 |
+| `muted` | `#6B6253` | 说明、辅助 |
+| `muted-soft` | `#8A8171` | 页脚、极弱提示 |
 
-### Named Rules
-**The Paper-Only Rule.** 宣纸色只用于"结果"：批注、印章、报告里的表格。导航、表单、设置永远留在墨玉上。
+正文对比度：`#3B342A` on `#F6F1E6` ≈ 9.6:1；说明文字 `#6B6253` ≈ 5.6:1，均高于 4.5:1。
 
-**The Seal Rule.** 朱砂的用量以一枚印为上限：主按钮、钤印、区块标记。它不做背景、不做正文、不做图标填充色。
+### 界与印
+
+| Token | Hex | 用途 |
+| --- | --- | --- |
+| `hairline` | `#DCD2BE` | 分隔线、卡片描边 |
+| `hairline-strong` | `#C9BCA2` | 输入框、需要抓眼的边 |
+| `brass` | `#8C6B3F` | 眉题、序号、细线 |
+| `cinnabar` | `#A33B2B` | 主按钮、印章、关键数字 |
+| `seal` | `#9C3325` | 印章底 |
+
+### 语义
+
+`success #4F7A5A`、`warning #B07A2A`、`error #A33B2B`。只用于状态，不做装饰。
 
 ## Typography
 
-**Display Font:** Songti SC / STSong（回退 Noto Serif CJK SC, SimSun）
-**Body Font:** PingFang SC / HarmonyOS Sans（回退 Noto Sans CJK SC, Microsoft YaHei）
+### 字体
 
-**Character:** 宋体的横细竖粗带出"刻"的味道，黑体负责把话说清楚。两种字体各司其职，不混用。
+- 标题：宋体（Songti SC / STSong / Noto Serif CJK SC）
+- 正文：苹方 / HarmonyOS Sans / 思源黑体
+- 数字：与正文同族，不用等宽字体
 
-### Hierarchy
-- **Display** (400, 27px, 1.35, tracking .16em): 批注标题、门名。只出现在结果页。
-- **Headline** (400, 19px, 1.4, tracking .2em): 页面标题（观面、择日、定盘）。
-- **Title** (400, 17px, 1.5, tracking .14em): 表单问题标题、报告小节标题。
-- **Body** (400, 13px, 1.95): 正文与报告段落；纸面行宽约 34em。
-- **Label** (400, 10.5px, tracking .2em): 字段标签、表格头、引文出处；9.5px 为绝对下限。
+### 层级
 
-### Named Rules
-**The Label Floor Rule.** 小于 9.5px 的字不存在。9.5–12px 的字必须达到 4.5:1，否则提亮，不靠加粗补偿。
+| 名称 | 字号 | 行高 | 字重 | 字距 | 用途 |
+| --- | --- | --- | --- | --- | --- |
+| display | 30px | 1.3 | 400 | 0.12em | 页面大标题 |
+| title | 21px | 1.45 | 400 | 0.08em | 区块标题 |
+| subtitle | 18px | 1.6 | 400 | 0.06em | 卡片标题 |
+| body | 17px | 1.85 | 400 | 0.01em | 正文 |
+| label | 14px | 1.5 | 400 | 0.06em | 表单标签 |
+| caption | 13px | 1.6 | 400 | 0.02em | 注释、出处 |
 
-**The Two Faces Rule.** 宋体只做标题、题目、批语与数字；黑体只做正文、按钮、表单与提示。不新增第三种字体。
+### 原则
+
+1. **不缩字**。小字最小 13px，不再用 9px、10px。
+2. 一屏最多三级字号，避免层级混乱。
+3. 中文标点用全角，数字与中文之间不空格。
+4. 标题不假粗体，靠字号与字距区分层级。
 
 ## Layout
 
-单列移动优先，内容宽 480px 上限，左右 22px。表单底部固定 `.dock`（含主按钮），页面底部留 120px 防遮挡。
+### 间距
 
-节奏：同组 6–10px，组间 22px，章节间 38px；标题上方永远大于下方。报告内部用 1px 界行分隔小节，不用卡片包裹。
+基数 4px：4 / 8 / 12 / 16 / 24 / 32 / 48。
+表单字段间距 24px；区块之间 32px；页面左右边距 20px（小屏 16px）。
 
-桌面只做居中留白，不放大栅格；390px 是首要验证宽度，320px 不得横向溢出。
+### 栅格与容器
+
+单列，最大宽度 520px，居中。不做多列——手机上一列最稳。
+
+### 留白
+
+留白是正文的一部分。每个区块上下至少 24px；主按钮上方 32px。
 
 ## Elevation & Depth
 
-整体是平的。深度只由三样东西表达：墨玉的明度阶、1px 发丝线、以及宣纸的纸面投影。
+不用投影堆层次，用：
 
-- 纸面投影：`0 30px 70px -34px rgba(0,0,0,.95)`，只给 `.paper`。
-- 弹层：`rgba(6,10,9,.66)` 遮罩 + 3px 背景模糊，只给确认与说明。
-- 其余一律无阴影。卡片不存在，圆角浮层不存在。
+1. 纸色深浅（canvas → surface）
+2. 1px 发丝线
+3. 极轻的内阴影（输入框）
 
-**The Flat-By-Default Rule.** 静止状态没有阴影；阴影只属于"被拿起来的一张纸"和"挡住页面的一层幕"。
+阴影只出现在浮动层（toast、相册预览），规则：
+`0 12px 32px rgba(36,31,23,0.12)`。
 
 ## Shapes
 
-直角系统：控件 1px 圆角，纸张 0，印 0。圆只出现在三处：命盘环、罗盘环、五行/状态圆点。
+### 圆角
 
-线条一律 1px；分隔线用 10%–20% 透明度，结构线用黄铜 26%。不使用胶囊、药丸、大圆角卡片。
+- 卡片：10px
+- 输入框、按钮：8px
+- 印章、标签：4px
+- 头像：50%
+
+### 线条
+
+描边统一 1px；选中态 1.5px；不用 2px 以上的粗边。
+
+### 图像
+
+照片不加滤镜、不加边框；需要解释时在下方加一行 caption。
 
 ## Components
 
-### Buttons
-- **Shape:** 1px 圆角，高 50px（主）/ 44px（次）。
-- **Primary:** 朱砂底、纸白字、宋体 15px、字距 .22em；hover 提亮到 #BE4C39，按下转深。
-- **Ghost:** 透明底、1px 骨白 18% 边框、骨白 72% 字；hover 边框转铜。
-- **Line:** 透明底、1px 黄铜边框、亮铜字；用于次级确认。
+### 顶栏
 
-### Options / Chips
-- 默认：墨玉底、1px 18% 边框、13.5px 字；最小高 44px。
-- 选中：边框转亮铜、背景 brass 13%、右上角 5px 朱砂方点；同时维护 `aria-pressed` 与 `aria-checked`。
-- 单选组必须是 `role="radiogroup"`，选项 `role="radio"`，roving tabindex。
+高 56px，左侧品牌（圆环 + 问鹤），右侧一个文字链接。底部 1px 发丝线，背景 `rgba(246,241,230,0.94)`，滚动时轻微模糊。
 
-### Inputs
-- 46px 高、1px 18% 边框、无圆角；聚焦时边框转铜、底色 brass 6%。
-- 占位符 58% 骨白；原生 `select` 必须显式给 `option` 与 `optgroup` 上色；分组选择优先用 chip，不用原生 optgroup。
+### 按钮
 
-### Paper Report
-- 双层版框：外 1px 42% 纸墨，内 1px 30%，内边距 22/20。
-- 右上竖排题签（`writing-mode: vertical-rl`），右下 48px 朱砂钤印（2×2 字，-3.5° 旋转）。
-- 表格 `table-layout: fixed`，首列 34% 且不换行；长中文列允许 `overflow-wrap: anywhere`。
-- 分数 64px 宋体；等级 19px 朱砂；小节标题前 5px 朱砂方点。
+- 主按钮：朱砂底、纸色字、8px 圆角、高 52px、字号 17px、字距 0.12em。
+- 次按钮：透明底、赭石描边、墨字。
+- 危险/重置：仅文字，朱砂色。
 
-### Dial
-- 5 个 64° 楔形（命/卜/相/堪舆/择日），内外半径 52–132；24 格刻度，外环 158。
-- 罗盘版：24 山直排、指针旋转、坐向高亮；拖动用 pointer capture，`touch-action: none`。
-- 命盘与罗盘共用刻度语言，但只允许出现在"方位"相关页面。
+### 卡片
 
-### Sheet / Toast
-- 弹层从底部升起 380ms；遮罩 66% + 3px 模糊；焦点锁在层内，Esc 关闭，背景锁滚动。
-- 危险操作的默认焦点是"保留"，不是"删除"。
-- Toast 2.4s 自动消失；带撤销时 6s，并把动作放在文字右侧。
+`surface` 底、1px `hairline`、10px 圆角、内边距 18px。卡片之间 12px。
+不用阴影，不用渐变。
 
-### Inline Warning
-- 服务不可用时的页内条：黄铜 26% 边框、brass 6% 底、12px 说明 + 44px「重试」。
-- 错误态与空态必须文案不同；错误给恢复路径。
+### 输入
+
+`surface` 底、1px `hairline-strong`、8px 圆角、高 52px、内边距 14px。
+聚焦时描边变 `brass`，不发光。
+
+### 选项组（时辰/性别/历法）
+
+等宽网格，高 56px；选中：`brass-faint` 底 + `brass` 1.5px 边 + 墨字；未选中：纸底 + 发丝线。
+
+### 标签 / 印章
+
+印章：朱砂底、纸色字、4px 圆角、字号 12px、字距 0.1em。
+
+### 注解
+
+左侧 2px 赭石竖线 + 14px 内边距，字号 14px，`muted` 色。
 
 ## Do's and Don'ts
 
-### Do:
-- **Do** 用 1px 发丝线与明度阶表达结构，阴影只给纸与幕。
-- **Do** 把结果放进宣纸，把操作留在墨玉。
-- **Do** 保持 0–1px 圆角；圆只给罗盘、印与状态点。
-- **Do** 主操作固定在拇指区（`.dock`），并在报告底部给「再算一次 / 复制 / 存图」。
-- **Do** 单选组用 radiogroup + aria-checked，点击目标 ≥44×44。
-- **Do** 所有小字过 4.5:1；9.5px 是下限。
-- **Do** 数字由工具层算，模型只负责叙述；分数必须有单位（命格/课象/日课/地气/气象）。
-- **Do** 发送照片前先弹确认，写清「发给谁、存不存、能不能改」，默认不发。
+### Do
 
-### Don't:
-- **Don't** 用原生 `<optgroup>` 做分组选择：暗色下标签会白字白底。
-- **Don't** 用渐变文字、发光卡片、圆角浮层、卡片套卡片。
-- **Don't** 把朱砂用于正文或大面积背景。
-- **Don't** 用 emoji 或 Unicode 字符当图标。
-- **Don't** 在标题上方加 kicker/eyebrow 小标签。
-- **Don't** 让删除按钮默认获得焦点，或把 16px 的 `×` 放在拇指热区。
-- **Don't** 用颜色单独承载状态（吉/凶必须同时有文字）。
-- **Don't** 在 390px 下让表格首列换行或页面横向滚动。
+- 用暖白纸色，不用纯白。
+- 正文 17px 起，行高 ≥1.8。
+- 用 1px 线与纸色差分层。
+- 朱砂只给"要做的事"和"印记"。
+- 每屏留一处空白。
+
+### Don't
+
+- 不要暗底 + 金字的组合（第一版的问题）。
+- 不要给卡片加阴影和渐变。
+- 不要用纯黑 `#000` 和纯白 `#FFF`。
+- 不要让正文小于 15px。
+- 不要用超过两种强调色。
+
+## Responsive Behavior
+
+### 断点
+
+- ≤380px：页面边距 16px，display 26px。
+- 381–520px：默认。
+- ≥521px：容器 520px 居中，页面底色延伸。
+
+### 触控
+
+所有可点区域 ≥48×48px；表单控件高 52px；相邻可点元素间距 ≥8px。
+
+### 折叠
+
+高级项（手动经度、原始测量值）一律折叠进 `<details>`，默认收起。
+
+## Iteration Guide
+
+1. 先改 token，再改组件；不要在组件里写死颜色。
+2. 新组件必须回答：它属于"纸、墨、界、印"哪一层。
+3. 每次改完看三张图：首页、表单页、批注页。
+4. 版本用 git tag 记录：`design-v2.0`。
+
+## Known Gaps
+
+- 深色模式未保留；如需要，另开 `design/v2-paper-dark` 分支。
+- 罗盘页的刻度线在浅底上对比度需单独校准。
+- 照片预览区的深色蒙版需改为纸色蒙版。
