@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="问鹤 分享卡片">
+  <rect width="1200" height="630" fill="#F6F1E6"/>
+  <g transform="translate(80 84)">
+    <rect x="0" y="0" width="132" height="132" rx="22" fill="#A33B2B"/>
+    <text x="66" y="100" text-anchor="middle" fill="#F6F1E6"
+          font-family="Songti SC, STSong, Noto Serif CJK SC, SimSun, serif" font-size="86">问</text>
+  </g>
+  <text x="80" y="360" fill="#241F17"
+        font-family="Songti SC, STSong, Noto Serif CJK SC, SimSun, serif"
+        font-size="104" letter-spacing="14">问鹤</text>
+  <text x="84" y="440" fill="#3B342A"
+        font-family="PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif"
+        font-size="30" letter-spacing="6">问一句，有出处。</text>
+  <text x="84" y="500" fill="#6B6253"
+        font-family="PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif"
+        font-size="22" letter-spacing="3">命 · 卜 · 相 · 堪 · 择　传统术数的自我洞察</text>
+  <text x="1120" y="560" text-anchor="end" fill="#8C6B3F"
+        font-family="PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, sans-serif"
+        font-size="22" letter-spacing="2">wenheai.cn</text>
+</svg>

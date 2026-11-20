@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 120" role="img" aria-label="问鹤 横版组合">
+  <g>
+    <rect x="2" y="26" width="68" height="68" rx="11" fill="#A33B2B"/>
+    <text x="36" y="78" text-anchor="middle" fill="#F6F1E6"
+          font-family="Songti SC, STSong, Noto Serif CJK SC, Source Han Serif SC, SimSun, serif"
+          font-size="44">问</text>
+  </g>
+  <text x="96" y="70" fill="#241F17"
+        font-family="Songti SC, STSong, Noto Serif CJK SC, Source Han Serif SC, SimSun, serif"
+        font-size="46" letter-spacing="8">问鹤</text>
+  <text x="98" y="98" fill="#8C6B3F"
+        font-family="PingFang SC, HarmonyOS Sans SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif"
+        font-size="13" letter-spacing="5">五门问事 · 问一句，有出处</text>
+</svg>
