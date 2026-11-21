@@ -1555,6 +1555,33 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* ---------- 批注落款：墨鹤 ---------- */
 .rep-crane{width:34px;height:auto;opacity:.92;margin:0 0 6px}
 .rep-foot .meta{font-size:12px}
+
+/* ==========================================================================
+   一句话录入 + 圆角与层次（v3 交互）
+   ========================================================================== */
+.gate-card,.notice-card,.rec,.card,.vision-note,.quick{border-radius:20px}
+.input,select,textarea,input[type=date],input[type=number]{border-radius:14px}
+.hour,.opt,.dir-btn{border-radius:14px}
+.hour-unknown{border-radius:14px}
+.btn{border-radius:999px}
+.btn-primary{padding:14px 30px}
+.gate-card{background:linear-gradient(180deg,#FFFDF8,#FBF6EA);border-color:#E3D7C1;box-shadow:0 8px 22px rgba(36,31,23,.05)}
+.gate-card:active{box-shadow:0 4px 12px rgba(36,31,23,.05)}
+.gate-glyph{border-radius:12px}
+
+.quick{position:relative;background:linear-gradient(180deg,#FFFDF8 0%,#FBF6EA 100%);border:1px solid #E3D7C1;padding:18px 16px 10px;box-shadow:0 12px 30px rgba(36,31,23,.07);margin:0 0 22px}
+.quick-q{font-family:var(--serif);font-size:18px;letter-spacing:.04em;color:var(--text);margin:0 0 12px}
+.quick-input{width:100%;min-height:88px;border-radius:16px;border:1px solid #D8CCB4;background:#FFFDF7;color:var(--text);font:inherit;font-size:16px;line-height:1.7;padding:14px 14px;resize:none;outline:none}
+.quick-input:focus{border-color:var(--brass);background:#FFFEF9}
+.quick-input::placeholder{color:#A2967F}
+.quick-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.quick-chips button{border:1px dashed #CFC0A6;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.quick-chips button:active{background:rgba(140,107,63,.08)}
+.quick-read{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 2px}
+.qr{display:inline-flex;align-items:center;gap:7px;background:#F3EAD8;border:1px solid #E6D9C1;border-radius:12px;padding:7px 11px;font-size:13.5px;color:var(--text)}
+.qr i{font-style:normal;color:var(--brass);font-size:11px;letter-spacing:.1em}
+.quick-err{color:var(--cinnabar);font-size:13px;margin:10px 0 0}
+.quick-link{display:inline-block;background:none;border:0;color:var(--brass);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:12px 0 8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -3390,6 +3417,91 @@ const DIRS8 = [
 ];
 
 const CITIES = ['北京','上海','广州','深圳','天津','重庆','成都','杭州','南京','武汉','西安','沈阳','哈尔滨','长春','石家庄','太原','济南','郑州','合肥','长沙','南昌','福州','厦门','昆明','贵阳','南宁','海口','兰州','西宁','银川','乌鲁木齐','呼和浩特','拉萨','香港','澳门','台北','苏州','无锡','宁波','温州','东莞','佛山','珠海','汕头','泉州','烟台','潍坊','洛阳','襄阳','宜昌','绵阳','遵义','桂林','三亚','包头','唐山','徐州','常州','南通','嘉兴','义乌','昆山','江阴','常熟','张家港','慈溪','余姚','诸暨','温岭','瑞安','乐清','晋江','石狮','福清','南安','普宁','博罗','增城','从化','番禺','顺德','南海','新会','台山','开平','鹤山','四会','高要','惠东','花都'];
+
+
+/* ===== assets/js/nlp.js ===== */
+/* ==========================================================================
+   nlp.js — 一句话录生日：日期 / 时辰 / 城市 / 性别
+   只做规则解析，不调模型；解析结果交给用户确认。
+   ========================================================================== */
+
+const HOUR_WORDS = [
+  ['凌晨', '丑'], ['半夜', '子'], ['深夜', '子'], ['夜里', '亥'],
+  ['早上', '卯'], ['早晨', '卯'], ['清晨', '卯'], ['上午', '巳'],
+  ['中午', '午'], ['正午', '午'], ['下午', '未'], ['傍晚', '酉'],
+  ['晚上', '戌'], ['晚间', '戌'],
+];
+
+const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+function hourFromClock(h) {
+  const n = ((Number(h) % 24) + 24) % 24;
+  return ZHI[Math.floor(((n + 1) % 24) / 2)];
+}
+
+function parseBirth(text, provinces = []) {
+  const raw = String(text || '').trim();
+  const out = { date: '', hour: '', gender: '', province: '', city: '', matched: [] };
+  if (!raw) return out;
+
+  /* 日期：1994年8月12日 / 1994-8-12 / 1994.8.12 / 8月12日 */
+  let m = raw.match(/(\d{4})\s*[年./\-]\s*(\d{1,2})\s*[月./\-]\s*(\d{1,2})/);
+  if (m) {
+    out.date = `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+    out.matched.push('date');
+  } else {
+    m = raw.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]/);
+    if (m) {
+      out.date = `1990-${String(m[1]).padStart(2, '0')}-${String(m[2]).padStart(2, '0')}`;
+      out.matched.push('date');
+    }
+  }
+
+  /* 时辰：先看“几点”，再看词 */
+  const hm = raw.match(/(\d{1,2})\s*[点时](?:\s*(\d{1,2})\s*分)?/) || raw.match(/(\d{1,2}):(\d{2})/);
+  if (hm) {
+    out.hour = hourFromClock(hm[1]);
+    out.matched.push('hour');
+  } else {
+    for (const [word, zhi] of HOUR_WORDS) {
+      if (raw.includes(word)) { out.hour = zhi; out.matched.push('hour'); break; }
+    }
+  }
+
+  /* 性别 */
+  if (/女|女生|女性/.test(raw)) { out.gender = 'female'; out.matched.push('gender'); }
+  else if (/男|男生|男性/.test(raw)) { out.gender = 'male'; out.matched.push('gender'); }
+
+  /* 城市：城市名优先，其次省名；取最长匹配 */
+  const flat = [];
+  for (const p of provinces) {
+    flat.push({ name: p.name, province: p.name, city: '' });
+    for (const c of p.cities) flat.push({ name: c.name, province: p.name, city: c.name });
+  }
+  flat.sort((a, b) => b.name.length - a.name.length);
+  const cleaned = raw.replace(/[省市区县]/g, '');
+  for (const item of flat) {
+    const base = item.name.replace(/[省市区县]/g, '');
+    if (base.length >= 2 && cleaned.includes(base)) {
+      out.province = item.province;
+      out.city = item.city;
+      out.matched.push('place');
+      break;
+    }
+  }
+
+  return out;
+}
+
+function describeParse(p) {
+  const bits = [];
+  if (p.date) bits.push(p.date);
+  if (p.hour) bits.push(`${p.hour}时`);
+  if (p.city) bits.push(p.city);
+  else if (p.province) bits.push(p.province);
+  if (p.gender) bits.push(p.gender === 'male' ? '男' : '女');
+  return bits;
+}
 
 
 /* ===== assets/js/cities-cn.js ===== */
@@ -6683,6 +6795,7 @@ function aboutView() {
 
 
 
+
 const today = () => {
   const d = new Date();
   const p = (n) => String(n).padStart(2, '0');
@@ -6742,6 +6855,19 @@ function mingView() {
         <a class="seg-item" href="#/hepan">看两人</a>
       </div>
       <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
+      <div class="quick" data-quick>
+        <p class="quick-q">用一句话说：哪天 · 大概几点 · 在哪出生</p>
+        <textarea class="quick-input" data-quick-input rows="2" placeholder="例如：1994年8月12日 下午 杭州 男"></textarea>
+        <div class="quick-chips">
+          <button type="button" data-fill="1994年8月12日 下午 杭州">1994年8月12日 下午 杭州</button>
+          <button type="button" data-fill="1980年3月5日 早上 北京 女">1980年3月5日 早上 北京 女</button>
+          <button type="button" data-fill="1994年8月12日 上海 不知道几点">1994年8月12日 上海 · 几点不清楚</button>
+        </div>
+        <div class="quick-read" data-quick-read hidden></div>
+        <p class="quick-err" data-quick-err hidden></p>
+        <button type="button" class="quick-link" data-toggle-detail>想逐项填？</button>
+      </div>
+      <div data-detailed hidden>
       <p class="remember-note" data-remember hidden>已记住上次填写，可直接改。</p>
       <div class="field">
         <label>生日用哪种历</label>
@@ -6811,6 +6937,7 @@ function mingView() {
         </div>
       </div>
       <p class="foot">节气按太阳视黄经计算；起运以三日折一年。日柱如与万年历不符，以历书为准。</p>
+      </div>
     `, '<button class="btn btn-primary" type="button" data-go>看 命 理</button>'),
     mount: () => {
       const root = $('#app .view');
@@ -6863,6 +6990,47 @@ function mingView() {
         inp.removeAttribute('aria-invalid');
       };
       $('[data-date]', root)?.addEventListener('input', clearErr);
+
+      const quick = $('[data-quick]', root);
+      const qi = $('[data-quick-input]', root);
+      const qr = $('[data-quick-read]', root);
+      const qe = $('[data-quick-err]', root);
+      const detailed = $('[data-detailed]', root);
+      let qTimer = null;
+
+      const renderQuick = () => {
+        const parsed = parseBirth(qi.value, PROVINCES);
+        const bits = [
+          ['日期', parsed.date || '还差'],
+          ['时辰', parsed.hour ? parsed.hour + '时' : '不清楚（按正午）'],
+          ['出生地', parsed.city || parsed.province || '不校正'],
+        ];
+        if (parsed.gender) bits.push(['性别', parsed.gender === 'male' ? '男' : '女']);
+        qr.innerHTML = bits.map(([k, v]) => '<span class="qr"><i>' + k + '</i>' + v + '</span>').join('');
+        qr.hidden = false;
+        return parsed;
+      };
+
+      const applyParsed = (parsed) => {
+        const di = $('[data-date]', root);
+        if (parsed.date) di.value = parsed.date;
+        if (parsed.hour) root.querySelector('[data-hour="' + parsed.hour + '"]')?.click();
+        else if (root.querySelector('[data-unknown]')?.getAttribute('aria-pressed') !== 'true') root.querySelector('[data-unknown]')?.click();
+        if (parsed.gender) root.querySelector('[data-gender="' + parsed.gender + '"]')?.click();
+        if (parsed.province && provinceSel) {
+          provinceSel.value = parsed.province;
+          fillCities(parsed.province);
+          if (parsed.city) citySel.value = parsed.city;
+        }
+      };
+
+      qi?.addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(renderQuick, 180); });
+      root.addEventListener('click', (e) => {
+        const fill = e.target.closest('[data-fill]');
+        if (fill) { qi.value = fill.dataset.fill; renderQuick(); return; }
+        const toggle = e.target.closest('[data-toggle-detail]');
+        if (toggle) { quick.hidden = true; detailed.hidden = false; return; }
+      });
       fillCities(provinceSel?.value || '');
       root.addEventListener('click', (e) => {
         const cbtn = e.target.closest('[data-cal]');
@@ -6909,6 +7077,17 @@ function mingView() {
       });
 
       const submit = async () => {
+        if (quick && !quick.hidden) {
+          const parsed = renderQuick();
+          if (!parsed.date) {
+            qe.textContent = '还差出生日期，例如：1994年8月12日 下午 杭州';
+            qe.hidden = false;
+            qi.focus();
+            return;
+          }
+          qe.hidden = true;
+          applyParsed(parsed);
+        }
         const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
         if (cal === 'solar' && !date) { showErr('请先选出生日期，再点「看命理」'); return; }
         clearErr();

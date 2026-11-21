@@ -1,6 +1,7 @@
 import { api } from '../api.js';
 import { HOURS } from '../data.js';
 import { PROVINCES } from '../cities-cn.js';
+import { parseBirth } from '../nlp.js';
 import { lunarParts, zhiIndexNow, nowLabel } from '../lunar.js';
 import { makeRecord, levelOf } from '../engine.js';
 import { store } from '../store.js';
@@ -65,6 +66,19 @@ export function mingView() {
         <a class="seg-item" href="#/hepan">看两人</a>
       </div>
       <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
+      <div class="quick" data-quick>
+        <p class="quick-q">用一句话说：哪天 · 大概几点 · 在哪出生</p>
+        <textarea class="quick-input" data-quick-input rows="2" placeholder="例如：1994年8月12日 下午 杭州 男"></textarea>
+        <div class="quick-chips">
+          <button type="button" data-fill="1994年8月12日 下午 杭州">1994年8月12日 下午 杭州</button>
+          <button type="button" data-fill="1980年3月5日 早上 北京 女">1980年3月5日 早上 北京 女</button>
+          <button type="button" data-fill="1994年8月12日 上海 不知道几点">1994年8月12日 上海 · 几点不清楚</button>
+        </div>
+        <div class="quick-read" data-quick-read hidden></div>
+        <p class="quick-err" data-quick-err hidden></p>
+        <button type="button" class="quick-link" data-toggle-detail>想逐项填？</button>
+      </div>
+      <div data-detailed hidden>
       <p class="remember-note" data-remember hidden>已记住上次填写，可直接改。</p>
       <div class="field">
         <label>生日用哪种历</label>
@@ -134,6 +148,7 @@ export function mingView() {
         </div>
       </div>
       <p class="foot">节气按太阳视黄经计算；起运以三日折一年。日柱如与万年历不符，以历书为准。</p>
+      </div>
     `, '<button class="btn btn-primary" type="button" data-go>看 命 理</button>'),
     mount: () => {
       const root = $('#app .view');
@@ -186,6 +201,47 @@ export function mingView() {
         inp.removeAttribute('aria-invalid');
       };
       $('[data-date]', root)?.addEventListener('input', clearErr);
+
+      const quick = $('[data-quick]', root);
+      const qi = $('[data-quick-input]', root);
+      const qr = $('[data-quick-read]', root);
+      const qe = $('[data-quick-err]', root);
+      const detailed = $('[data-detailed]', root);
+      let qTimer = null;
+
+      const renderQuick = () => {
+        const parsed = parseBirth(qi.value, PROVINCES);
+        const bits = [
+          ['日期', parsed.date || '还差'],
+          ['时辰', parsed.hour ? parsed.hour + '时' : '不清楚（按正午）'],
+          ['出生地', parsed.city || parsed.province || '不校正'],
+        ];
+        if (parsed.gender) bits.push(['性别', parsed.gender === 'male' ? '男' : '女']);
+        qr.innerHTML = bits.map(([k, v]) => '<span class="qr"><i>' + k + '</i>' + v + '</span>').join('');
+        qr.hidden = false;
+        return parsed;
+      };
+
+      const applyParsed = (parsed) => {
+        const di = $('[data-date]', root);
+        if (parsed.date) di.value = parsed.date;
+        if (parsed.hour) root.querySelector('[data-hour="' + parsed.hour + '"]')?.click();
+        else if (root.querySelector('[data-unknown]')?.getAttribute('aria-pressed') !== 'true') root.querySelector('[data-unknown]')?.click();
+        if (parsed.gender) root.querySelector('[data-gender="' + parsed.gender + '"]')?.click();
+        if (parsed.province && provinceSel) {
+          provinceSel.value = parsed.province;
+          fillCities(parsed.province);
+          if (parsed.city) citySel.value = parsed.city;
+        }
+      };
+
+      qi?.addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(renderQuick, 180); });
+      root.addEventListener('click', (e) => {
+        const fill = e.target.closest('[data-fill]');
+        if (fill) { qi.value = fill.dataset.fill; renderQuick(); return; }
+        const toggle = e.target.closest('[data-toggle-detail]');
+        if (toggle) { quick.hidden = true; detailed.hidden = false; return; }
+      });
       fillCities(provinceSel?.value || '');
       root.addEventListener('click', (e) => {
         const cbtn = e.target.closest('[data-cal]');
@@ -232,6 +288,17 @@ export function mingView() {
       });
 
       const submit = async () => {
+        if (quick && !quick.hidden) {
+          const parsed = renderQuick();
+          if (!parsed.date) {
+            qe.textContent = '还差出生日期，例如：1994年8月12日 下午 杭州';
+            qe.hidden = false;
+            qi.focus();
+            return;
+          }
+          qe.hidden = true;
+          applyParsed(parsed);
+        }
         const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
         if (cal === 'solar' && !date) { showErr('请先选出生日期，再点「看命理」'); return; }
         clearErr();

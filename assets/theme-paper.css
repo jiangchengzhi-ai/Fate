@@ -265,3 +265,30 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* ---------- 批注落款：墨鹤 ---------- */
 .rep-crane{width:34px;height:auto;opacity:.92;margin:0 0 6px}
 .rep-foot .meta{font-size:12px}
+
+/* ==========================================================================
+   一句话录入 + 圆角与层次（v3 交互）
+   ========================================================================== */
+.gate-card,.notice-card,.rec,.card,.vision-note,.quick{border-radius:20px}
+.input,select,textarea,input[type=date],input[type=number]{border-radius:14px}
+.hour,.opt,.dir-btn{border-radius:14px}
+.hour-unknown{border-radius:14px}
+.btn{border-radius:999px}
+.btn-primary{padding:14px 30px}
+.gate-card{background:linear-gradient(180deg,#FFFDF8,#FBF6EA);border-color:#E3D7C1;box-shadow:0 8px 22px rgba(36,31,23,.05)}
+.gate-card:active{box-shadow:0 4px 12px rgba(36,31,23,.05)}
+.gate-glyph{border-radius:12px}
+
+.quick{position:relative;background:linear-gradient(180deg,#FFFDF8 0%,#FBF6EA 100%);border:1px solid #E3D7C1;padding:18px 16px 10px;box-shadow:0 12px 30px rgba(36,31,23,.07);margin:0 0 22px}
+.quick-q{font-family:var(--serif);font-size:18px;letter-spacing:.04em;color:var(--text);margin:0 0 12px}
+.quick-input{width:100%;min-height:88px;border-radius:16px;border:1px solid #D8CCB4;background:#FFFDF7;color:var(--text);font:inherit;font-size:16px;line-height:1.7;padding:14px 14px;resize:none;outline:none}
+.quick-input:focus{border-color:var(--brass);background:#FFFEF9}
+.quick-input::placeholder{color:#A2967F}
+.quick-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.quick-chips button{border:1px dashed #CFC0A6;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.quick-chips button:active{background:rgba(140,107,63,.08)}
+.quick-read{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 2px}
+.qr{display:inline-flex;align-items:center;gap:7px;background:#F3EAD8;border:1px solid #E6D9C1;border-radius:12px;padding:7px 11px;font-size:13.5px;color:var(--text)}
+.qr i{font-style:normal;color:var(--brass);font-size:11px;letter-spacing:.1em}
+.quick-err{color:var(--cinnabar);font-size:13px;margin:10px 0 0}
+.quick-link{display:inline-block;background:none;border:0;color:var(--brass);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:12px 0 8px;cursor:pointer}

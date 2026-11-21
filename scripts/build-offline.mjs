@@ -9,6 +9,7 @@ const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
 const ORDER = [
   'assets/js/data.js',
+  'assets/js/nlp.js',
   'assets/js/cities-cn.js',
   'assets/js/engine.js',
   'assets/js/store.js',
