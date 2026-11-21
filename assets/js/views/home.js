@@ -1,11 +1,7 @@
 import { esc, noticeSeen, markNoticeSeen } from '../ui.js';
 import { store } from '../store.js';
 
-const MARK = `<svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
-  <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1"/>
-  <circle cx="12" cy="12" r="4.6" fill="none" stroke="currentColor" stroke-width=".7" opacity=".55"/>
-  <circle cx="12" cy="12" r="1.3" fill="#A33B2B"/>
-</svg>`;
+const MARK = `<img class="brand-mark" src="./assets/brand/crane.svg" alt="">`;
 
 const GATES = [
   { glyph: '命', name: '命理', desc: '填生日和时辰，看清自己的结构', href: '#/ming' },
