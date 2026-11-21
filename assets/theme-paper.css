@@ -252,3 +252,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .brand{gap:9px}
 .brand-mark{width:auto;height:23px;flex:none;opacity:1;display:block}
 @media (max-width:380px){.brand-mark{height:21px}}
+
+/* ---------- 表单交互：错误、示例、记忆 ---------- */
+.field-err{color:var(--cinnabar);font-size:13px;line-height:1.6;margin:8px 0 0}
+.input.is-err,select.is-err{border-color:var(--cinnabar)!important;background:#FFF9F6}
+.field-hint{margin:8px 0 0}
+.linklike{background:none;border:0;padding:2px 0;color:var(--brass);font:inherit;font-size:13px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linklike:hover{color:var(--cinnabar)}
+.remember-note{color:var(--brass);font-size:13px;letter-spacing:.04em;margin:-6px 0 14px}
+.home-brandline{font-family:var(--serif);color:var(--brass);font-size:14px;letter-spacing:.22em;margin:26px 0 4px}
+
+/* ---------- 批注落款：墨鹤 ---------- */
+.rep-crane{width:34px;height:auto;opacity:.92;margin:0 0 6px}
+.rep-foot .meta{font-size:12px}

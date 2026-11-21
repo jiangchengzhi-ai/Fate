@@ -1542,6 +1542,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .brand{gap:9px}
 .brand-mark{width:auto;height:23px;flex:none;opacity:1;display:block}
 @media (max-width:380px){.brand-mark{height:21px}}
+
+/* ---------- 表单交互：错误、示例、记忆 ---------- */
+.field-err{color:var(--cinnabar);font-size:13px;line-height:1.6;margin:8px 0 0}
+.input.is-err,select.is-err{border-color:var(--cinnabar)!important;background:#FFF9F6}
+.field-hint{margin:8px 0 0}
+.linklike{background:none;border:0;padding:2px 0;color:var(--brass);font:inherit;font-size:13px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linklike:hover{color:var(--cinnabar)}
+.remember-note{color:var(--brass);font-size:13px;letter-spacing:.04em;margin:-6px 0 14px}
+.home-brandline{font-family:var(--serif);color:var(--brass);font-size:14px;letter-spacing:.22em;margin:26px 0 4px}
+
+/* ---------- 批注落款：墨鹤 ---------- */
+.rep-crane{width:34px;height:auto;opacity:.92;margin:0 0 6px}
+.rep-foot .meta{font-size:12px}
 </style>
 </head>
 <body>
@@ -4938,6 +4951,7 @@ function homeView() {
       <button type="button" data-notice-close>知道了</button>
     </div>`}
 
+    <p class="home-brandline">问一句，有出处。</p>
     <h1 class="home-title">您想看什么？</h1>
     <p class="home-sub">点一下下面的方框，按提示填写即可。</p>
 
@@ -6312,6 +6326,7 @@ function reportView(id) {
           </div>
 
           <footer class="rep-foot">
+            <img class="rep-crane" src="./assets/brand/crane.svg" alt="">
             <div class="meta">仅供娱乐参考，不能代替医生、律师等专业意见。</div>
             <div class="seal">${SEAL.map((s) => `<span>${s}</span>`).join('')}</div>
           </footer>
@@ -6727,6 +6742,7 @@ function mingView() {
         <a class="seg-item" href="#/hepan">看两人</a>
       </div>
       <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
+      <p class="remember-note" data-remember hidden>已记住上次填写，可直接改。</p>
       <div class="field">
         <label>生日用哪种历</label>
         <div class="opts">
@@ -6738,6 +6754,8 @@ function mingView() {
       <div class="field" data-solar-only>
         <label for="md">出生日期 · 公历</label>
         <input class="input" type="date" id="md" data-date max="${today()}" min="1900-01-01">
+        <p class="field-err" data-err="date" role="alert" hidden></p>
+        <p class="field-hint"><button type="button" class="linklike" data-example>不知道填什么？看个示例</button></p>
       </div>
 
       <div class="field" data-lunar-only hidden>
@@ -6810,6 +6828,41 @@ function mingView() {
           : '<option value="">先选省</option>';
       };
       provinceSel?.addEventListener('change', (e) => fillCities(e.target.value));
+
+      const LAST_KEY = 'ft.lastBirth';
+      const readSaved = () => { try { return JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch { return null; } };
+      const saved = readSaved();
+      if (saved) {
+        const di = $('[data-date]', root);
+        if (saved.date && di && saved.date <= today()) di.value = saved.date;
+        if (saved.hour) root.querySelector(`[data-hour="${saved.hour}"]`)?.click();
+        if (saved.gender) root.querySelector(`[data-gender="${saved.gender}"]`)?.click();
+        if (saved.province && provinceSel) {
+          provinceSel.value = saved.province;
+          fillCities(saved.province);
+          if (saved.city) citySel.value = saved.city;
+        }
+        if (saved.date || saved.province) $('[data-remember]', root).hidden = false;
+      }
+
+      const showErr = (msg) => {
+        const err = $('[data-err="date"]', root);
+        const inp = $('[data-date]', root);
+        err.textContent = msg;
+        err.hidden = false;
+        inp.classList.add('is-err');
+        inp.setAttribute('aria-invalid', 'true');
+        inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        inp.focus({ preventScroll: true });
+      };
+      const clearErr = () => {
+        const err = $('[data-err="date"]', root);
+        const inp = $('[data-date]', root);
+        if (err) err.hidden = true;
+        inp.classList.remove('is-err');
+        inp.removeAttribute('aria-invalid');
+      };
+      $('[data-date]', root)?.addEventListener('input', clearErr);
       fillCities(provinceSel?.value || '');
       root.addEventListener('click', (e) => {
         const cbtn = e.target.closest('[data-cal]');
@@ -6841,14 +6894,27 @@ function mingView() {
           root.querySelectorAll('[data-gender]').forEach((b) => b.setAttribute('aria-pressed', String(b === g)));
           return;
         }
+        const ex = e.target.closest('[data-example]');
+        if (ex) {
+          const di = $('[data-date]', root);
+          di.value = '1990-06-15';
+          clearErr();
+          root.querySelector('[data-hour="午"]')?.click();
+          root.querySelector('[data-gender="male"]')?.click();
+          if (provinceSel) { provinceSel.value = '浙江省'; fillCities('浙江省'); if (citySel) citySel.value = '杭州市'; }
+          toast('已填入示例，可按自己的改');
+          return;
+        }
         if (e.target.closest('[data-go]')) submit();
       });
 
       const submit = async () => {
         const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
-        if (cal === 'solar' && !date) return toast('先选出生日期');
+        if (cal === 'solar' && !date) { showErr('请先选出生日期，再点「看命理」'); return; }
+        clearErr();
         const btn = $('[data-go]', root);
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.textContent = '排 盘 中';
         try {
           const province = $('[data-province]', root)?.value || '';
@@ -6865,6 +6931,7 @@ function mingView() {
           const hiddenRow = (r.deep?.hidden || []).map((h) => h.stems.map((x) => x.gan).join(''));
           const nayinRow = (r.deep?.nayin || []).map((n) => n.name);
           const stageRow = (r.deep?.stages || []).map((x) => x.stage);
+          try { localStorage.setItem(LAST_KEY, JSON.stringify({ date, hour, gender, province, city, unknownHour })); } catch {}
           finish(r, {
             title: '命盘批注',
             heading: '命',
@@ -6936,7 +7003,8 @@ function mingView() {
           });
         } catch (err) {
           btn.disabled = false;
-          btn.textContent = '起 盘';
+          btn.removeAttribute('aria-busy');
+          btn.textContent = '看 命 理';
           toast(err.message.includes('fetch') ? '服务未启动' : err.message);
         }
       };

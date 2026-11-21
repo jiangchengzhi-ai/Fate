@@ -65,6 +65,7 @@ export function mingView() {
         <a class="seg-item" href="#/hepan">看两人</a>
       </div>
       <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
+      <p class="remember-note" data-remember hidden>已记住上次填写，可直接改。</p>
       <div class="field">
         <label>生日用哪种历</label>
         <div class="opts">
@@ -76,6 +77,8 @@ export function mingView() {
       <div class="field" data-solar-only>
         <label for="md">出生日期 · 公历</label>
         <input class="input" type="date" id="md" data-date max="${today()}" min="1900-01-01">
+        <p class="field-err" data-err="date" role="alert" hidden></p>
+        <p class="field-hint"><button type="button" class="linklike" data-example>不知道填什么？看个示例</button></p>
       </div>
 
       <div class="field" data-lunar-only hidden>
@@ -148,6 +151,41 @@ export function mingView() {
           : '<option value="">先选省</option>';
       };
       provinceSel?.addEventListener('change', (e) => fillCities(e.target.value));
+
+      const LAST_KEY = 'ft.lastBirth';
+      const readSaved = () => { try { return JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch { return null; } };
+      const saved = readSaved();
+      if (saved) {
+        const di = $('[data-date]', root);
+        if (saved.date && di && saved.date <= today()) di.value = saved.date;
+        if (saved.hour) root.querySelector(`[data-hour="${saved.hour}"]`)?.click();
+        if (saved.gender) root.querySelector(`[data-gender="${saved.gender}"]`)?.click();
+        if (saved.province && provinceSel) {
+          provinceSel.value = saved.province;
+          fillCities(saved.province);
+          if (saved.city) citySel.value = saved.city;
+        }
+        if (saved.date || saved.province) $('[data-remember]', root).hidden = false;
+      }
+
+      const showErr = (msg) => {
+        const err = $('[data-err="date"]', root);
+        const inp = $('[data-date]', root);
+        err.textContent = msg;
+        err.hidden = false;
+        inp.classList.add('is-err');
+        inp.setAttribute('aria-invalid', 'true');
+        inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        inp.focus({ preventScroll: true });
+      };
+      const clearErr = () => {
+        const err = $('[data-err="date"]', root);
+        const inp = $('[data-date]', root);
+        if (err) err.hidden = true;
+        inp.classList.remove('is-err');
+        inp.removeAttribute('aria-invalid');
+      };
+      $('[data-date]', root)?.addEventListener('input', clearErr);
       fillCities(provinceSel?.value || '');
       root.addEventListener('click', (e) => {
         const cbtn = e.target.closest('[data-cal]');
@@ -179,14 +217,27 @@ export function mingView() {
           root.querySelectorAll('[data-gender]').forEach((b) => b.setAttribute('aria-pressed', String(b === g)));
           return;
         }
+        const ex = e.target.closest('[data-example]');
+        if (ex) {
+          const di = $('[data-date]', root);
+          di.value = '1990-06-15';
+          clearErr();
+          root.querySelector('[data-hour="午"]')?.click();
+          root.querySelector('[data-gender="male"]')?.click();
+          if (provinceSel) { provinceSel.value = '浙江省'; fillCities('浙江省'); if (citySel) citySel.value = '杭州市'; }
+          toast('已填入示例，可按自己的改');
+          return;
+        }
         if (e.target.closest('[data-go]')) submit();
       });
 
       const submit = async () => {
         const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
-        if (cal === 'solar' && !date) return toast('先选出生日期');
+        if (cal === 'solar' && !date) { showErr('请先选出生日期，再点「看命理」'); return; }
+        clearErr();
         const btn = $('[data-go]', root);
         btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
         btn.textContent = '排 盘 中';
         try {
           const province = $('[data-province]', root)?.value || '';
@@ -203,6 +254,7 @@ export function mingView() {
           const hiddenRow = (r.deep?.hidden || []).map((h) => h.stems.map((x) => x.gan).join(''));
           const nayinRow = (r.deep?.nayin || []).map((n) => n.name);
           const stageRow = (r.deep?.stages || []).map((x) => x.stage);
+          try { localStorage.setItem(LAST_KEY, JSON.stringify({ date, hour, gender, province, city, unknownHour })); } catch {}
           finish(r, {
             title: '命盘批注',
             heading: '命',
@@ -274,7 +326,8 @@ export function mingView() {
           });
         } catch (err) {
           btn.disabled = false;
-          btn.textContent = '起 盘';
+          btn.removeAttribute('aria-busy');
+          btn.textContent = '看 命 理';
           toast(err.message.includes('fetch') ? '服务未启动' : err.message);
         }
       };

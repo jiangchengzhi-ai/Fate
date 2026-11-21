@@ -47,6 +47,7 @@ export function homeView() {
       <button type="button" data-notice-close>知道了</button>
     </div>`}
 
+    <p class="home-brandline">问一句，有出处。</p>
     <h1 class="home-title">您想看什么？</h1>
     <p class="home-sub">点一下下面的方框，按提示填写即可。</p>
 

@@ -41,32 +41,55 @@ const baseCss = `
   @media (max-width:640px){th,td{font-size:13px;padding:8px 6px}.wrap{padding:20px 14px 50px}h1{font-size:26px}}
 `;
 
-const page = (title, body) => `<!doctype html>
+const page = (title, body, extraCss = '') => `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} · 问鹤</title>
-<style>${baseCss}</style></head>
+<style>${baseCss}${extraCss}</style></head>
 <body><div class="wrap">${body}</div></body></html>`;
 
 export function loginPage({ error = '', phone = '' } = {}) {
-  return page('访问受限', `
+  const css = `
+    :root{color-scheme:light}
+    body{background:radial-gradient(900px 560px at 50% -10%,rgba(140,107,63,.07),transparent 62%),linear-gradient(180deg,#F8F3E8,#F6F1E6 40%,#F4EDDF);color:#241F17}
+    .wrap{max-width:480px;padding:0 20px 48px}
+    .login{max-width:400px;margin:9vh auto 0;text-align:center}
+    .login .mark{width:88px;height:auto;margin:0 auto 14px;display:block}
+    h1{font-size:38px;letter-spacing:.18em;margin:0 0 8px}
+    .tagline{color:#8C6B3F;font-size:14px;letter-spacing:.18em;margin:0 0 22px}
+    .sub{color:#6B6253;font-size:15px;line-height:1.8;margin:0 0 26px}
+    label{color:#6B6253;font-size:13px;letter-spacing:.1em;margin:16px 0 6px;text-align:left}
+    input{height:52px;border-radius:8px;background:#FFFDF7;border:1px solid #C9BCA2;color:#241F17}
+    input:focus{border-color:#8C6B3F;background:#FFFDF7}
+    button{height:52px;border-radius:8px;background:#A33B2B;border:1px solid #8B2F22;font-size:16px;letter-spacing:.12em}
+    button:hover{background:#B84A36}
+    .err{color:#A33B2B;font-size:14px;text-align:left;margin:10px 0 0}
+    .muted{color:#6B6253;font-size:13px;line-height:1.7}
+    .wx-tip{margin-top:18px;padding:12px 14px;border:1px solid #DCD2BE;border-radius:10px;font-size:13px;color:#3B342A;background:#FBF7EE;text-align:left;line-height:1.6}
+    .foot{margin-top:28px;color:#8A8171;font-size:12px;letter-spacing:.06em}
+  `;
+  return page('进入', `
     <div class="login">
+      <img class="mark" src="/assets/brand/crane.svg" alt="">
       <h1>问鹤</h1>
-      <p class="sub">这个站点只对受邀的人开放。请输入管理员给你的手机号和访问码。</p>
+      <p class="tagline">问一句，有出处。</p>
+      <p class="sub">这个站点只对受邀的人开放。<br>请输入管理员给你的手机号和访问码。</p>
       <form method="post" action="/login">
         <label for="phone">手机号</label>
-        <input id="phone" name="phone" inputmode="numeric" autocomplete="tel" maxlength="11" value="${esc(phone)}" placeholder="11 位手机号" required style="width:100%">
+        <input id="phone" name="phone" inputmode="numeric" autocomplete="tel" maxlength="11"
+               value="${esc(phone)}" placeholder="11 位手机号" required style="width:100%">
         <label for="code">访问码</label>
         <input id="code" name="code" inputmode="numeric" maxlength="6" placeholder="6 位数字" required style="width:100%">
         ${error ? `<p class="err">${esc(error)}</p>` : ''}
         <div class="row" style="margin-top:20px"><button type="submit" style="width:100%">进 入</button></div>
       </form>
       <p class="muted" style="margin-top:22px">没有访问码？联系把这个链接发给你的人。</p>
-      <div id="wx-tip" hidden style="margin-top:18px;padding:10px 12px;border:1px solid rgba(203,169,104,.45);border-radius:10px;font-size:13px;color:#e9e4d6;line-height:1.5">
+      <div id="wx-tip" class="wx-tip" hidden>
         微信里可能打不开或显示不全：点右上角 <b>···</b> → <b>在浏览器打开</b>。也可以复制网址到浏览器访问。
       </div>
       <script>if(/MicroMessenger/i.test(navigator.userAgent)){document.getElementById('wx-tip').hidden=false;}</script>
-    </div>`);
+      <p class="foot">传统术数 · 自我洞察 · 仅供娱乐参考</p>
+    </div>`, css);
 }
 
 const fmt = (iso) => {

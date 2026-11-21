@@ -409,6 +409,7 @@ export function reportView(id) {
           </div>
 
           <footer class="rep-foot">
+            <img class="rep-crane" src="./assets/brand/crane.svg" alt="">
             <div class="meta">仅供娱乐参考，不能代替医生、律师等专业意见。</div>
             <div class="seal">${SEAL.map((s) => `<span>${s}</span>`).join('')}</div>
           </footer>
