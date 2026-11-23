@@ -49,6 +49,8 @@ function notFoundView() {
 
 let lastHash = null;
 let lastAt = 0;
+/* 当前实际渲染的路由：内嵌面板常锁住 location.hash，返回判断不能依赖地址栏 */
+let currentRoute = '#/';
 
 /* 站内足迹：返回时回到上一级，而不是一律回首页 */
 let trail = (() => {
@@ -81,6 +83,7 @@ function renderPage(target) {
   if (hash === lastHash && now - lastAt < 150) return;
   lastHash = hash;
   lastAt = now;
+  currentRoute = hash;
   remember(hash);
 
 
@@ -90,6 +93,8 @@ function renderPage(target) {
     layer.classList.remove('on');
     layer.innerHTML = '';
   }
+  // 通知当前页做资源清理（指南针传感器等）。不依赖 hashchange，受限面板同样生效。
+  try { window.dispatchEvent(new Event('ft:leave')); } catch { /* 老浏览器 */ }
 
   let matched = null;
   for (const r of routes) {
@@ -168,7 +173,7 @@ document.addEventListener('click', (e) => {
   const back = e.target.closest('[data-back]');
   if (back) {
     e.preventDefault();
-    const target = back.getAttribute('data-parent') || parentFor(location.hash);
+    const target = back.getAttribute('data-parent') || parentFor(currentRoute);
     go(target || back.getAttribute('data-fallback') || '#/');
     return;
   }
@@ -192,11 +197,31 @@ document.addEventListener('click', (e) => {
   mount(href);
 });
 
+/* 开屏：每个标签页会话只播一次；地址带 ?splash=1 可强制重播，方便随时查看 */
+function playSplash() {
+  const s = document.getElementById('splash');
+  if (!s) return;
+  const force = new URLSearchParams(location.search).get('splash') === '1';
+  let seen = false;
+  try { seen = sessionStorage.getItem('ft.splash.seen') === '1'; } catch { /* 隐私模式 */ }
+  const finish = () => {
+    s.classList.add('splash-out');
+    setTimeout(() => { s.remove(); }, 520);
+  };
+  if (seen && !force) { s.remove(); return; }
+  try { sessionStorage.setItem('ft.splash.seen', '1'); } catch { /* ignore */ }
+  // 1.65s 主体动画（墨鹤晕开→字标→朱砂落款）+ 0.75s 停留，再淡出
+  setTimeout(finish, 2400);
+  // 用户提前点击/按键可跳过
+  s.addEventListener('click', finish, { once: true });
+}
+
 if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', () => { mount(); maybeWechatHint(); });
+  window.addEventListener('DOMContentLoaded', () => { mount(); maybeWechatHint(); playSplash(); });
 } else {
   mount();
   maybeWechatHint();
+  playSplash();
 }
 
 /* 键盘：Esc 关闭弹层 */

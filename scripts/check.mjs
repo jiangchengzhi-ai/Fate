@@ -12,6 +12,8 @@ const JOBS = [
   ['单元 · 守卫', 'tests/guard.test.mjs'],
   ['单元 · 城市', 'tests/cities.test.mjs'],
   ['单元 · 手相', 'tests/palm.test.mjs'],
+  ['单元 · 模型接入', 'tests/llm.test.mjs'],
+  ['单元 · 视觉守卫', 'tests/vision.test.mjs'],
   ['交叉 · 黄金样本', 'scripts/validate-golden.mjs'],
   ['交叉 · 真太阳时', 'scripts/validate-solar.mjs'],
   ['交叉 · lunar-javascript 全量', 'scripts/validate-cn.mjs'],

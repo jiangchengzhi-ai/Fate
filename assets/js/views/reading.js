@@ -9,7 +9,7 @@ function photoHtml(photo, kind) {
   if (!photo) {
     return `<button class="photo-box" type="button" data-photo>
       ${kind === 'face' ? '上传正面照' : '上传掌心照'}
-      <span>照片默认只存在本机；点「看相」时才发给一次视觉模型</span>
+      <span>照片只留在这台设备；点「看相」时才用来识别一次</span>
     </button>`;
   }
   return `
@@ -101,7 +101,7 @@ function readingView(cfg) {
           <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>返回
         </a>
         <h1>${esc(MOD.title)}</h1>
-        <a class="tb-link right" href="#/about">相法</a>
+        <a class="tb-link right" href="#/about">关于</a>
       </header>
 
       <p class="lead">${esc(MOD.lead)}</p>
@@ -121,7 +121,7 @@ function readingView(cfg) {
     </div>
 
     <div class="dock">
-      <div class="dock-info"><b data-count>${countAnswered()}/${required.length}</b><span data-count-label>已落笔</span></div>
+      <div class="dock-info" data-count-box hidden><b data-count></b><span data-count-label>已落笔</span></div>
       <button class="btn btn-primary" type="button" data-go>看 相</button>
     </div>`;
 
@@ -129,7 +129,7 @@ function readingView(cfg) {
     const root = $('#app .view');
     const goBtn = $('[data-go]', root);
     const countEl = $('[data-count]', root);
-    const countLabel = $('[data-count-label]', root);
+    const countBox = $('[data-count-box]', root);
     const slot = $('[data-slot]', root);
     const manual = $('[data-manual]', root);
     const scan = $('[data-scan]', root);
@@ -137,8 +137,8 @@ function readingView(cfg) {
 
     const refresh = () => {
       const n = countAnswered();
-      countEl.textContent = manualMode ? `${n}/${required.length}` : '—';
-      countLabel.textContent = manualMode ? '已落笔' : '照片识别';
+      countBox.hidden = !manualMode;
+      countEl.textContent = `${n}/${required.length}`;
       goBtn.disabled = manualMode && n < required.length;
     };
 
@@ -169,17 +169,6 @@ function readingView(cfg) {
     paintAnswers();
     setManual(false);
 
-    /* 在线版先探一次视觉模型，没配就地提示，不等到点「看相」才报错 */
-    if (location.protocol !== 'file:') {
-      api.visionStatus().then((s) => {
-        if (s?.ready) return;
-        const warn = document.createElement('div');
-        warn.className = 'inline-warn';
-        warn.innerHTML = '<p>视觉模型未配置：在 启动.bat 里设置 FATETELL_VISION_MODEL 与 KEY，然后重启服务。也可以自己逐项选。</p><button class="btn btn-ghost btn-sm" type="button" data-manual-toggle>自己逐项选</button>';
-        slot.after(warn);
-      }).catch(() => { /* 服务没起时保持安静 */ });
-    }
-
     const finish = async (answers, auto, visionMeta) => {
       const report = type === 'face' ? buildFace(answers) : buildPalm(answers);
       try {
@@ -198,8 +187,8 @@ function readingView(cfg) {
         return;
       }
       openSheet(`
-        <h2>把照片发给视觉模型？</h2>
-        <p>我们会看这张照片，然后直接给出结果。照片不会保存，也不会写进记录里。</p>
+        <h2>用照片来识别？</h2>
+        <p>我们会识别这张照片，直接给出结果。照片不会保存，也不会写进记录里。</p>
         <p>不用您一项项选，直接看结论就行。</p>
         <div class="acts">
           <button class="btn btn-primary" type="button" data-confirm>发送并看相</button>
@@ -249,7 +238,7 @@ function readingView(cfg) {
           const out = await api.vision(type, draft.photo, local);
           const entries = Object.entries(out.features || {});
           if (!entries.length) {
-            toast('模型没看清，可以换张照片，或自己逐项选');
+            toast('没看清，可以换张照片，或自己逐项选');
             return;
           }
           entries.forEach(([qid, v]) => { draft.answers[qid] = v; });
@@ -270,15 +259,11 @@ function readingView(cfg) {
         } catch (err) {
           const msg = String(err.message || '');
           if (err.status === 503) {
-            if (location.protocol === 'file:') {
-              toast('这是离线包，不接视觉模型。用「启动.bat」打开在线版再看相');
-            } else {
-              toast('视觉模型未配置：检查 启动.bat 里的 FATETELL_VISION_MODEL 后重启服务');
-            }
+            toast('照片识别暂时用不了，可以自己逐项选');
           } else if (/超时|超時|timeout/i.test(msg)) {
             toast('识别超时了，换个网络或稍后再点一次');
           } else if (/没有返回结果|截断/.test(msg)) {
-            toast('模型这次没给出结果，再点一次「看 相」');
+            toast('这次没识别出来，再点一次「看 相」');
           } else if (/格式|过大|不支持/.test(msg)) {
             toast('这张照片读不了，换成 JPG 或 PNG 再试');
           } else {

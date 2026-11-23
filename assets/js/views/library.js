@@ -21,7 +21,7 @@ const STATIC_CATS = [
     methods: [
       { name: '面相', desc: '上传正面照 → 直接看相', href: '#/face' },
       { name: '手相', desc: '上传掌心照 → 直接看相', href: '#/palm' },
-      { name: '综合相', desc: '面 + 掌 + 命 → 合参', href: '#/combo' },
+      { name: '综合相', desc: '面相 + 手相 + 生辰，合起来看一个人', href: '#/combo' },
     ],
   },
   {

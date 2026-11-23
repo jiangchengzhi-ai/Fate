@@ -394,7 +394,7 @@ export const FACE = {
           v: 'cheek', label: '面颊', note: '颧颊一带',
           dims: { career: 0, wealth: 0, love: 0, health: 0, social: -1, mind: 0 },
           traits: ['是非偏多'],
-          text: '颊上有痣，人际是非偏多。谨言即可化解大半，不传话、不站队，麻烦自然少。',
+          text: '颊上有痣，人际是非偏多。少说、不传话、不站队，麻烦自然少一大半。',
         },
       ],
     },

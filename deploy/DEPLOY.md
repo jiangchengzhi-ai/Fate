@@ -17,7 +17,10 @@
 ## 发布新版本
 
 ```bash
-# 本地：提交并打 tag
+# 本地：先过发布门禁（全量校验 + 离线包重建），不过不许发
+npm run prepublish-check
+
+# 提交并打 tag
 git add -A && git commit -m "feat: ..."
 git tag -a v0.3.0 -m "说明"
 git push origin main --tags
@@ -49,6 +52,8 @@ curl -s localhost:5173/api/health
 
 ## 注意
 
+- 发布门禁有两层：本地 `npm run prepublish-check`（提交前），服务器端 `update.sh` 内的 `node scripts/check.mjs`（更新前，不过自动回滚）
+- CI（`.github/workflows/test.yml`）在每次 push / PR 跑 `npm test`；首次启用需仓库开启 Actions 权限
 - `.env` 和 `data/` 不进 git，`update.sh` 的 `reset --hard` 不会删它们
 - 每次发布前建议打 tag，回滚时按 tag 最省事
 - 证书由 certbot 自动续期，不需要手动管

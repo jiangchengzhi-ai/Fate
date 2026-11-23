@@ -10,6 +10,58 @@ export const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({
 
 export const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------------- 公历生日三段选择 ----------------
+   用户的生日用 type=date 时空框只显示「年 /月/日」占位符，长辈看不懂要做什么。
+   改成三个带默认提示的下拉（选年份 / 选月份 / 选日子），不预填任何值。
+   年份倒序（今年在最上），值本身自带「年/月/日」语义，无需额外标注。 */
+export const birthYearMax = () => new Date().getFullYear();
+
+// prefix：同一页多个日期框时区分，如 'md' / 'a' / 'b' / 'bdate'
+// value：'YYYY-MM-DD'，用于回填已保存或已解析的日期
+export function solarDateHTML(prefix, value = '') {
+  const parts = value ? value.split('-').map(Number) : [];
+  const [vy, vm, vd] = parts;
+  const maxY = birthYearMax();
+  const years = Array.from({ length: maxY - 1900 + 1 }, (_, i) => maxY - i);
+  return `<div class="row3 date3" data-date3="${prefix}">
+    <select class="input" data-d3y aria-label="出生年份">
+      <option value="">选年份</option>
+      ${years.map((y) => `<option value="${y}"${y === vy ? ' selected' : ''}>${y} 年</option>`).join('')}
+    </select>
+    <select class="input" data-d3m aria-label="出生月份">
+      <option value="">选月份</option>
+      ${Array.from({ length: 12 }, (_, i) => i + 1).map((m) => `<option value="${m}"${m === vm ? ' selected' : ''}>${m} 月</option>`).join('')}
+    </select>
+    <select class="input" data-d3d aria-label="出生日子">
+      <option value="">选日子</option>
+      ${Array.from({ length: 31 }, (_, i) => i + 1).map((d) => `<option value="${d}"${d === vd ? ' selected' : ''}>${d} 日</option>`).join('')}
+    </select>
+  </div>`;
+}
+
+// 从三段下拉读出 'YYYY-MM-DD'；三段没选全返回 ''
+export function readSolarDate(root, prefix) {
+  const box = $(`[data-date3="${prefix}"]`, root);
+  if (!box) return '';
+  const y = $('[data-d3y]', box)?.value || '';
+  const m = $('[data-d3m]', box)?.value || '';
+  const d = $('[data-d3d]', box)?.value || '';
+  if (!y || !m || !d) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${y}-${pad(m)}-${pad(d)}`;
+}
+
+// 回填三段下拉（保存记录 / 一句话解析 / 示例）
+export function setSolarDate(root, prefix, value) {
+  const box = $(`[data-date3="${prefix}"]`, root);
+  if (!box) return;
+  const [y, m, d] = (value || '').split('-');
+  const ys = $('[data-d3y]', box); const ms = $('[data-d3m]', box); const ds = $('[data-d3d]', box);
+  if (ys) ys.value = y || '';
+  if (ms) ms.value = m ? String(Number(m)) : '';
+  if (ds) ds.value = d ? String(Number(d)) : '';
+}
+
 /* ---------------- 首页命盘 ---------------- */
 const pt = (cx, cy, r, deg) => {
   const a = ((deg - 90) * Math.PI) / 180;
@@ -406,8 +458,8 @@ export function saveCard(r) {
   g.lineWidth = 1;
   g.strokeRect(56, 56, W - 112, H - 112);
 
-  const serif = '"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC",serif';
   const sans = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
+  const serif = sans; /* 字体统一 v2.3：分享图也用黑体，保留别名避免遗漏 */
 
   g.fillStyle = 'rgba(36,31,23,.55)';
   g.font = `20px ${sans}`;

@@ -85,7 +85,7 @@ const VERDICTS = {
     '三处合看，才敢说一句。',
     '相、掌、命三者不必同，不同处正是可改处。',
     '命是底牌，运是出牌的顺序。',
-    '合参不是求一个准，是找一个着力点。',
+    '综合看相不是求一个准，是找一个着力点。',
     '知命不是认命，是知道力气该往哪使。',
   ],
   compass: [
@@ -344,7 +344,7 @@ export function buildCombo(face, palm, birth) {
 
   return {
     type: 'combo',
-    title: '合参批注',
+    title: '综合看相批注',
     heading: '综合相',
     glyph: '合',
     overall,
@@ -428,7 +428,7 @@ export function buildCompass({ heading, birthYear, gender, door }) {
     45, 92,
   );
 
-  const summary = `坐${sitting.n}向${facing.n}，即${GUAS[houseGua].dir}方坐山、${GUAS[facing.gua].dir}方朝向，宅卦属${houseGua}（${houseGroup}）。命卦为${mGua}（${mingGroup}），${match ? '命宅同组，气口相合' : '命宅异组，宜借方位化解'}。`;
+  const summary = `坐${sitting.n}向${facing.n}，即${GUAS[houseGua].dir}方坐山、${GUAS[facing.gua].dir}方朝向，宅卦属${houseGua}（${houseGroup}）。命卦为${mGua}（${mingGroup}），${match ? '命宅同组，气口相合' : '命宅不同组，方位上多留意'}。`;
 
   return {
     type: 'compass',

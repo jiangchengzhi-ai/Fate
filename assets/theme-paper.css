@@ -33,6 +33,14 @@
   --paper-ink-2:rgba(36,31,23,.66);
   --paper-line:rgba(36,31,23,.20);
 
+  /* 排版分级（DESIGN.md v2 · Typography）——同类元素一律走 token */
+  --fs-display:30px;   /* 报告大标题 */
+  --fs-title:21px;     /* 页面 / 步骤标题 */
+  --fs-subtitle:18px;  /* 卡片 / 区块标题 */
+  --fs-body:17px;      /* 正文 */
+  --fs-label:14px;     /* 表单标签、次要信息 */
+  --fs-caption:13px;   /* 提示、注释、出处 */
+
   --pad:20px;
 }
 
@@ -58,7 +66,7 @@ body{
 /* ---------- 标题与正文 ---------- */
 .home-title,.page-title,.rep-title,h1,h2{
   color:var(--text);
-  font-family:var(--serif);
+  font-family:var(--sans);
   font-weight:400;
 }
 .home-sub,.lead,.foot,.q-hint,.rec-meta,.rep-meta{
@@ -260,11 +268,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .linklike{background:none;border:0;padding:2px 0;color:var(--brass);font:inherit;font-size:13px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .linklike:hover{color:var(--cinnabar)}
 .remember-note{color:var(--brass);font-size:13px;letter-spacing:.04em;margin:-6px 0 14px}
-.home-brandline{font-family:var(--serif);color:var(--brass);font-size:14px;letter-spacing:.22em;margin:26px 0 4px}
+.home-brandline{font-family:var(--sans);color:var(--brass);font-size:14px;letter-spacing:.22em;margin:26px 0 4px}
 
 /* ---------- 批注落款：墨鹤 ---------- */
 .rep-crane{width:34px;height:auto;opacity:.92;margin:0 0 6px}
-.rep-foot .meta{font-size:12px}
+.rep-foot .meta{font-size:var(--fs-caption)}
 
 /* ==========================================================================
    一句话录入 + 圆角与层次（v3 交互）
@@ -280,15 +288,260 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .gate-glyph{border-radius:12px}
 
 .quick{position:relative;background:linear-gradient(180deg,#FFFDF8 0%,#FBF6EA 100%);border:1px solid #E3D7C1;padding:18px 16px 10px;box-shadow:0 12px 30px rgba(36,31,23,.07);margin:0 0 22px}
-.quick-q{font-family:var(--serif);font-size:18px;letter-spacing:.04em;color:var(--text);margin:0 0 12px}
+.quick-q{font-family:var(--sans);font-size:18px;letter-spacing:.04em;color:var(--text);margin:0 0 12px}
 .quick-input{width:100%;min-height:88px;border-radius:16px;border:1px solid #D8CCB4;background:#FFFDF7;color:var(--text);font:inherit;font-size:16px;line-height:1.7;padding:14px 14px;resize:none;outline:none}
 .quick-input:focus{border-color:var(--brass);background:#FFFEF9}
 .quick-input::placeholder{color:#A2967F}
 .quick-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
-.quick-chips button{border:1px dashed #CFC0A6;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.quick-chips button{border:1px dashed #CFC0A6;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:var(--fs-caption);cursor:pointer}
 .quick-chips button:active{background:rgba(140,107,63,.08)}
 .quick-read{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 2px}
 .qr{display:inline-flex;align-items:center;gap:7px;background:#F3EAD8;border:1px solid #E6D9C1;border-radius:12px;padding:7px 11px;font-size:13.5px;color:var(--text)}
-.qr i{font-style:normal;color:var(--brass);font-size:11px;letter-spacing:.1em}
+.qr i{font-style:normal;color:var(--brass);font-size:var(--fs-caption);letter-spacing:.1em}
 .quick-err{color:var(--cinnabar);font-size:13px;margin:10px 0 0}
 .quick-link{display:inline-block;background:none;border:0;color:var(--brass);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:12px 0 8px;cursor:pointer}
+
+/* ---------- 通俗总评：先说人话结论，再给能照着做的事 ---------- */
+.plain-summary{background:transparent!important;border-color:var(--paper-line)}
+.plain-summary h3{color:var(--text)}
+.plain-lead{font-size:17px;line-height:1.85;color:var(--text);margin:0 0 14px}
+.plain-summary .tags{margin:0 0 14px}
+.plain-rows{border-top:1px solid var(--line);margin:0 0 14px}
+.plain-row{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.plain-row b{font-weight:400;color:var(--brass);font-size:14px;letter-spacing:.06em;line-height:1.85;white-space:nowrap}
+.plain-cell span{display:block;color:var(--text-2);font-size:16px;line-height:1.8}
+.plain-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.plain-tags em{
+  font-style:normal;font-size:13px;line-height:1.5;
+  padding:4px 10px;border-radius:11px;
+  color:var(--brass);background:#F3EAD7;border:1px solid #E6D9BE;
+}
+.plain-note{font-size:13px;line-height:1.7;color:var(--text-3);margin:0}
+@media (max-width:380px){.plain-row{grid-template-columns:56px 1fr;gap:8px}.plain-row b{font-size:13px}}
+
+/* ---------- 详细排盘：术语默认折叠，想看再展开 ---------- */
+.detail-blocks{margin:0 0 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.detail-blocks summary{cursor:pointer;color:var(--brass);font-size:14px;letter-spacing:.06em;padding:14px 2px;list-style:none}
+.detail-blocks summary::-webkit-details-marker{display:none}
+.detail-blocks summary::before{content:'＋ ';font-size:var(--fs-caption)}
+.detail-blocks[open] summary::before{content:'－ '}
+.detail-blocks .rep-sec{margin:0;border:0;padding:16px 0;border-top:1px dashed var(--line)}
+.detail-blocks .rep-sec h3{font-size:16px}
+
+/* ==========================================================================
+   排版分级统一（v2.3）——全站单一黑体族，不再混用衬线体
+   v2.2 曾把标题设为宋体、正文设为黑体，视觉上两套字族并存显得矛盾；
+   v2.3 全部收敛到黑体，层次改由「字号 + 字重 + 字距 + 颜色」拉开。
+   ========================================================================== */
+:root{--lh:1.85}
+
+/* 标题：黑体，靠字号与字距分级，不加粗 */
+.home-title{font-size:var(--fs-display);line-height:1.3;letter-spacing:.12em}
+.page-head h1,.q-head h2,.step{font-size:var(--fs-title);line-height:1.45;letter-spacing:.1em}
+.gate-name,.rep-sec h3,.detail-blocks .rep-sec h3,.quick-q,.rec-title{font-size:var(--fs-subtitle);line-height:1.6;letter-spacing:.06em}
+
+/* 正文：统一到 body */
+body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-size:var(--fs-body);line-height:var(--lh)}
+.input,select,textarea,input[type=date],input[type=number]{font-size:var(--fs-body)}
+
+/* 标签 / 次要信息：label —— 关键修复，原 11.5px 过小 */
+.field > label,.gate-desc,.seg-item,.opt,.chip,.qr,.ready-name,.ready-note,.ready-state,
+.plain-row b,.detail-blocks summary,.remember-note,.linklike,.field-err,.quick-err,.quick-link,.home-help,
+.home-sub{font-size:var(--fs-label)}
+
+/* 提示 / 注释 / 出处：caption 小字 —— 有意比正文小一级 */
+.foot,.notice-card p,.q-hint,.rec-meta,.rep-foot .meta,.rep-sub,.plain-note,
+.dock-info,.cp-read .hint,.rep-legacy,.adv summary{font-size:var(--fs-caption)}
+
+/* ---------- 常显区小字收口（v2.6 / EGM-A5）：app.css 里的历史小字统一抬到 13px 下限 ----------
+   仅 HTML 阅读文字；SVG 图形坐标标注（radar/dial/compass）与纯序号前缀保留原值（见 DESIGN.md Known Gaps）。 */
+.rep-tag,
+.rep-score .unit,
+.rep-score .lvl span,
+.tri-key,.tri-val,
+.elem,
+.verdict small,
+.llm-note,
+.cite-note,
+.rep-item p,
+.dim,
+.sheet p,.sheet .cancel,
+.photo-box span,
+.hist-date,
+.sec-head .more,
+.kb-stats{font-size:var(--fs-caption)}
+
+/* 按钮：UI 动作文字与全站一致 */
+.btn,.btn-ghost,.btn-line,.btn-sm{font-family:var(--sans);font-size:var(--fs-label)}
+.btn-primary{font-size:var(--fs-body)}
+
+/* ---------- 表单分区（v2.4）：起课等表单页，把散落说明收成「两模块+一折叠须知」 ---------- */
+.lead-compact{font-size:var(--fs-body);margin-bottom:20px}
+.form-block{margin:0 0 18px;padding:16px 16px 18px;border:1px solid var(--line);border-radius:2px;background:#FBF7EE}
+.form-block .step{margin:0 0 14px;letter-spacing:.06em}
+.form-block .field:first-of-type{margin-top:0}
+.form-block .cp-actions{margin-top:16px}
+.rule-list{margin:6px 0 0;padding:0;list-style:none}
+.rule-list li{position:relative;margin:0 0 8px;padding-left:16px;font-size:var(--fs-caption);line-height:1.8;color:var(--text-2)}
+.rule-list li:last-child{margin-bottom:0}
+.rule-list li::before{content:"";position:absolute;left:0;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--brass)}
+.rule-list a{color:var(--brass);border-bottom:1px solid var(--brass-soft)}
+
+/* 必填就地标注（v2.4）：填好由「必填」变「已填」，不必去底栏数计数 */
+.req-tag{display:inline-block;margin-left:6px;padding:1px 6px;border:1px solid var(--brass-soft);border-radius:2px;
+  color:var(--brass);font-size:var(--fs-caption);font-style:normal;font-weight:400;letter-spacing:.04em;vertical-align:1px}
+.req-tag.is-done{border-color:var(--line-strong);color:var(--text-3)}
+
+/* ==========================================================================
+   开屏动画（v2.6）——墨鹤自宣纸晕开，字标收拢，朱砂落款
+   主标为墨鹤（品牌标志），「问」字印仅作右下小落款，符合 BRAND.md。
+   每个标签页会话只播一次；地址带 ?splash=1 可强制重播。
+   ========================================================================== */
+#splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 44%,#FCF9F2 0%,#F6F1E6 58%,#EDE3D1 100%);
+  opacity:1;transition:opacity .55s ease}
+#splash.splash-out{opacity:0;pointer-events:none}
+
+.splash-inner{position:relative;display:flex;flex-direction:column;align-items:center}
+
+/* 墨晕：鹤背后一圈极淡的水墨扩散 */
+.splash-halo{
+  position:absolute;top:56px;left:50%;width:280px;height:280px;margin-left:-140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(36,31,23,.09) 0%,rgba(36,31,23,.035) 42%,transparent 70%);
+  opacity:0;transform:scale(.35);pointer-events:none;
+  animation:splash-halo 1.5s ease-out .12s forwards}
+@keyframes splash-halo{
+  0%{opacity:0;transform:scale(.35)}
+  45%{opacity:1}
+  100%{opacity:.55;transform:scale(1.15)}}
+
+/* 墨鹤主标：从模糊墨迹中晕开定形 */
+.splash-crane{
+  position:relative;z-index:1;width:132px;height:135px;
+  opacity:0;filter:blur(16px);transform:scale(.84) translateY(10px);
+  animation:splash-crane-in 1.15s cubic-bezier(.16,.8,.3,1) .16s forwards}
+@keyframes splash-crane-in{
+  0%{opacity:0;filter:blur(16px);transform:scale(.84) translateY(10px)}
+  55%{opacity:1;filter:blur(2.5px)}
+  100%{opacity:1;filter:blur(0);transform:scale(1) translateY(0)}}
+/* 鹤眼一点朱砂，最后点亮 */
+.splash-crane .eye{opacity:0;animation:splash-fade-in .5s ease 1s forwards}
+
+/* 字标：宋体（品牌标志，唯一保留衬线处），字距由宽收拢 */
+.splash-brand{
+  margin-top:12px;
+  font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif;
+  font-size:40px;font-weight:400;color:var(--text);letter-spacing:.36em;
+  text-indent:.36em;line-height:1.2;
+  opacity:0;transform:scale(.97);
+  animation:splash-brand-in .8s cubic-bezier(.22,.61,.36,1) .82s forwards}
+@keyframes splash-brand-in{
+  from{opacity:0;transform:scale(.97);letter-spacing:.52em;text-indent:.52em}
+  to{opacity:1;transform:scale(1);letter-spacing:.36em;text-indent:.36em}}
+
+/* 落款：小字淡入 */
+.splash-tagline{
+  margin-top:20px;font-size:var(--fs-caption);color:var(--text-3);letter-spacing:.28em;text-indent:.28em;
+  opacity:0;animation:splash-fade-in .6s ease 1.08s forwards}
+@keyframes splash-fade-in{to{opacity:1}}
+
+/* 问印：副标，只作小落款，盖在标语下方，轻落回弹 */
+.splash-seal{
+  position:relative;margin-top:18px;width:30px;height:30px;display:grid;place-items:center;
+  border:1.5px solid var(--seal);border-radius:3px;color:var(--seal);
+  font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif;
+  font-size:17px;line-height:1;opacity:0;
+  transform:translateY(-12px) rotate(-14deg) scale(1.3);
+  animation:splash-seal-in .45s cubic-bezier(.2,.9,.3,1.3) 1.2s forwards}
+@keyframes splash-seal-in{
+  0%{opacity:0;transform:translateY(-12px) rotate(-14deg) scale(1.3)}
+  60%{opacity:1;transform:translateY(0) rotate(-9deg) scale(.94)}
+  100%{opacity:1;transform:translateY(0) rotate(-9deg) scale(1)}}
+
+/* 系统开启「减少动态效果」时：直接静态呈现，不做位移动画 */
+@media (prefers-reduced-motion:reduce){
+  #splash .splash-halo,#splash .splash-crane,#splash .splash-crane .eye,
+  #splash .splash-brand,#splash .splash-seal,#splash .splash-tagline{
+    animation:none;opacity:1;transform:none;filter:none}
+}
+
+/* 公历生日三段下拉（v2.8）：三个 select 共用一行，空值时提示文字用弱色 */
+.date3 select{min-width:0;padding-left:10px;padding-right:8px}
+.date3 select:invalid,.date3 select:has(option[value=""]:checked){color:var(--text-3)}
+.date3 select option{color:var(--text)}
+
+/* ==========================================================================
+   SVG 图形内嵌标注放大（v2.7 / EGM 后续）
+   原标注 8–11px（viewBox 单位），长辈看不清。几何坐标一律不动（避免标签错位、
+   撑破 viewBox），只提高字号与渲染容器尺寸；小屏由 width:100% 自动收缩。
+   字号为 viewBox 单位，屏幕实际大小 = 字号 × (容器渲染宽 / viewBox 宽)。
+   ========================================================================== */
+/* 雷达图：viewBox 260，容器 260→300（缩放 1.15）；标签半径 102+字宽仍 < 260，不裁切 */
+.radar{max-width:300px}
+.radar .lab{font-size:12px;fill:rgba(36,31,23,.72)}
+.radar .val{font-size:11px;fill:rgba(36,31,23,.55)}
+/* 罗盘：viewBox 320，容器 360（缩放 1.125）；24 山间隔约 38 单位，13px 不会挤 */
+.cp-shan{font-size:13px}
+.cp-shan.hot{font-size:14px}
+.cp-gua{font-size:13px;fill-opacity:.6}
+/* 命盘：viewBox 320，容器 372（缩放 1.16）。 wedge-t 是内联字号（已 22–26），无需覆盖 */
+.dial .gua{font-size:15px}
+.dial .core-s{font-size:10px}
+
+/* ==========================================================================
+   结果页重排（v2.9）：分数与人话注解分层、总评标签化、专业表格收噪
+   原则：一眼看懂（分数+一句话）→ 照着做（短句+关键词）→ 想深究（折叠）
+   ========================================================================== */
+/* 分数区：数字在左、等级与白话注解在右，垂直居中，不再互相挤压 */
+.rep-score{align-items:center;gap:16px}
+.rep-score .score-num{display:flex;align-items:baseline;gap:6px;flex:none}
+.rep-score .score-num .n{font-size:58px;line-height:1}
+.rep-score .score-num .unit{padding-bottom:0;white-space:nowrap}
+.rep-score .score-lvl{
+  margin-left:auto;text-align:right;flex:1;min-width:0;
+  padding-left:14px;border-left:1px solid var(--line);
+}
+.rep-score .score-lvl b{
+  display:block;font-size:17px;font-weight:400;letter-spacing:.16em;
+  color:var(--cinnabar);margin-bottom:6px;
+}
+.rep-score .score-lvl span{
+  display:block;font-size:13px;line-height:1.7;
+  color:var(--text-2);letter-spacing:.02em;
+}
+@media (max-width:380px){
+  .rep-score .score-num .n{font-size:50px}
+  .rep-score .score-lvl span{font-size:12px}
+}
+/* 总评小标题与结论之间留白更从容 */
+.plain-summary .plain-lead{margin-bottom:16px}
+.plain-summary .plain-rows{margin-bottom:12px}
+/* 调候建议折叠：与详细排盘同一套视觉语言 */
+.adv-notes{margin:0 0 6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.adv-notes summary{
+  cursor:pointer;list-style:none;color:var(--brass);
+  font-size:var(--fs-label);line-height:1.8;letter-spacing:.04em;
+  padding:12px 0;
+}
+.adv-notes summary::-webkit-details-marker{display:none}
+.adv-notes summary::before{content:"+ ";color:var(--cinnabar)}
+.adv-notes[open] summary::before{content:"− "}
+.adv-notes .rep-list{margin:0 0 14px}
+
+/* ---------- 阶段二·字号收口：把遗漏的「实质阅读文字」抬到下限 ----------
+   例外（刻意保留原值）：罗盘方位字(.dir-core/.cp-shan)、题序(.q-num/.ready-idx)、
+   SVG 图形内标注(radar/dial)、品牌落款(.brand)。它们是图形或序号的一部分，抬大反而破版。 */
+.method-desc,            /* 相/堪舆门类的方法描述 */
+.photo-box,              /* 上传照片按钮文字 */
+.field > label,          /* 表单字段名 */
+.ready-note,             /* 生辰填写提示 */
+.ready-state,            /* 填写状态「已成/填写」 */
+.hist-empty, .empty,     /* 空状态说明 */
+.btn-sm,                 /* 小按钮 */
+.q-hint                  /* 逐项填写的题下提示 */
+{ font-size:var(--fs-caption) }
+
+/* 时辰格里的钟点范围是紧凑数值注解，抬到 11px 读得清又不撑破四列网格 */
+.hour span{font-size:11px}
+/* 「不知道几点出生？按正午 12:00 算」是完整句子，抬到下限 */
+.hour-unknown span{font-size:var(--fs-caption)}

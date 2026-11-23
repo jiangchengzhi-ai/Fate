@@ -94,7 +94,8 @@ export function yinzhaView() {
           stopSensor = null;
         }
       };
-      window.addEventListener('hashchange', cleanup, { once: true });
+      // 离开页面时停指南针：用自定义事件而非 hashchange，受限面板里地址栏不变也能清理
+      window.addEventListener('ft:leave', cleanup, { once: true });
 
       const paint = () => {
         const facing = mountainAt(heading);

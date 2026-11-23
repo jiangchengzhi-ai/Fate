@@ -10,11 +10,11 @@ const HOUR_WORDS = [
   ['晚上', '戌'], ['晚间', '戌'],
 ];
 
-const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+const NLP_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
 export function hourFromClock(h) {
   const n = ((Number(h) % 24) + 24) % 24;
-  return ZHI[Math.floor(((n + 1) % 24) / 2)];
+  return NLP_ZHI[Math.floor(((n + 1) % 24) / 2)];
 }
 
 export function parseBirth(text, provinces = []) {

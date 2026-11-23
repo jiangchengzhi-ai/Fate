@@ -7,6 +7,10 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
+/* 墨鹤主标：从品牌 SVG 提取路径，内联进开屏，避免单文件引用外部图裂图 */
+const cranePath = (read('assets/brand/crane-small.svg').match(/<path d="([^"]+)"/) || [])[1] || '';
+if (!cranePath) { console.error('打包失败：未找到墨鹤路径 assets/brand/crane-small.svg'); process.exit(1); }
+
 const ORDER = [
   'assets/js/data.js',
   'assets/js/nlp.js',
@@ -93,9 +97,9 @@ const api = {
     return r;
   },
   async interpret() { throw new Error('离线版不接模型；需要时请启动本地服务'); },
-  async visionStatus() { return { ready: false, model: 'offline', kinds: ['face', 'palm'] }; },
+  async visionStatus() { return { ready: false, model: 'offline', offline: true, kinds: ['face', 'palm'] }; },
   async vision(kind) {
-    const e = new Error('离线包不接视觉模型，请用启动.bat 打开在线版');
+    const e = new Error('照片识别暂时用不了');
     e.status = 503;
     throw e;
   },
@@ -103,17 +107,96 @@ const api = {
 };
 `;
 
+/* 节气数据在服务端靠 import.meta.url 读文件；离线包是普通 <script>，
+   一旦保留 import.meta，整段脚本会在解析期抛错 → 页面全白。这里改成内联。 */
+const JIEQI_LINE = "const JIEQI = JSON.parse(fs.readFileSync(new URL('../knowledge/jieqi.json', import.meta.url), 'utf8'));";
+const toolsSrcRaw = read('server/tools.mjs');
+if (!toolsSrcRaw.includes(JIEQI_LINE)) {
+  console.error('打包失败：tools.mjs 的节气读取行已变化，请同步更新 build-offline.mjs');
+  process.exit(1);
+}
+const toolsSrc = toolsSrcRaw.replace(JIEQI_LINE, `const JIEQI = ${read('knowledge/jieqi.json').trim()};`);
+
+/* lunar.mjs 用 createRequire 加载 vendored CJS 农历库，离线版改为
+   模拟 module.exports 后直接取 Solar/Lunar，避免 require/import.meta。 */
+const LUNAR_REQ = /const require = createRequire\(import\.meta\.url\);\s*\n\s*const \{ Solar, Lunar \} = require\('\.\.\/vendor\/lunar-javascript\.cjs'\);/;
+const lunarSrcRaw = read('server/lunar.mjs');
+if (!LUNAR_REQ.test(lunarSrcRaw)) {
+  console.error('打包失败：lunar.mjs 的 require 行已变化，请同步更新 build-offline.mjs');
+  process.exit(1);
+}
+const lunarSrc = lunarSrcRaw.replace(LUNAR_REQ, 'const { Solar, Lunar } = __m_lunar_vendor;');
+const lunarVendor = `
+const __m_lunar_vendor = (() => {
+  const module = { exports: {} };
+  ${read('vendor/lunar-javascript.cjs')}
+  return module.exports;
+})();`;
+
+/* 每个服务端模块各自包一层闭包：tools/solar/bazi/dst 的顶层 GAN/ZHI/pad
+   等符号大量重名，平铺会直接语法报错。闭包导出后再显式解构所需符号。 */
+const wrapModule = (src, name) => {
+  const names = new Set();
+  for (const m of src.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|var|class)\s+([A-Za-z_$][\w$]*)/gm)) names.add(m[1]);
+  for (const m of src.matchAll(/^export\s*\{([^}]+)\}/gm)) {
+    for (const p of m[1].split(',')) {
+      const t = p.trim().split(/\s+as\s+/).pop().trim();
+      if (t) names.add(t);
+    }
+  }
+  if (!names.size) throw new Error(`打包失败：${name} 没有识别到导出符号`);
+  return `const __m_${name} = (() => {\n${strip(src)}\nreturn { ${[...names].join(', ')} };\n})();`;
+};
+
+const TOOL_DEPS = [
+  ['fortune', read('server/fortune.mjs'), ['fortuneSheet']],
+  ['solar', read('server/solar.mjs'), ['solarCorrection', 'toMinutes', 'fromMinutes', 'zhiOfMinutes', 'midMinutesOfZhi']],
+  ['cities', read('server/cities.mjs'), ['cityByName']],
+  ['lunar', lunarSrc, ['lunarToSolar']],
+  ['dst', read('server/dst-cn.mjs'), ['inChinaDST']],
+  ['bazi', read('server/bazi.mjs'), ['deepen']],
+  ['relations', read('server/relations.mjs'), ['isClash', 'isHe', 'isStemHe', 'dayRelations', 'dayEnergy', 'dayAdvice']],
+];
+
 const toolsWrap = `
-/* ---------- 工具层：与 Node 服务同一份代码，包进闭包避免重名 ---------- */
+/* ---------- 工具层：8 个模块各自隔离，函数与常量不互相污染 ---------- */
 const __TOOLS = (() => {
-${strip(read('server/fortune.mjs'))}
-${strip(read('server/tools.mjs'))}
-return { paipan, xiaoliuren, zeri, bazhai, yangzhai, yinzha };
+${lunarVendor}
+${TOOL_DEPS.map(([n, src, used]) => `${wrapModule(src, n)}\nconst { ${used.join(', ')} } = __m_${n};`).join('\n')}
+${wrapModule(toolsSrc, 'tools')}
+return __m_tools;
 })();
 `;
 
-const js = [toolsWrap, shim, ...ORDER.map((f) => `\n/* ===== ${f} ===== */\n${strip(read(f))}`)].join('\n');
+/* file:// 下埋点请求会撞 CORS，离线版直接短路 /api/ */
+const offlineFetchShim = `
+const __realFetch = globalThis.fetch.bind(globalThis);
+globalThis.fetch = (url, opt) => {
+  if (typeof url === 'string' && url.startsWith('/api/')) {
+    return Promise.resolve(new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
+  }
+  return __realFetch(url, opt);
+};
+`;
+
+/* 工具层放最后：cities.mjs 顶层引用 cities-cn.js 的 PROVINCES，
+   必须先让 ORDER 里的全局常量完成初始化，否则触发 TDZ。 */
+const js = [offlineFetchShim, shim, ...ORDER.map((f) => `\n/* ===== ${f} ===== */\n${strip(read(f))}`), toolsWrap].join('\n');
 const css = read('assets/app.css') + '\n' + read('assets/theme-paper.css');
+
+/* 构建期自检：离线包是普通 <script>，任何 Node 专属语法都会在解析期
+   让整段脚本停摆，页面全白。宁可构建失败，也不产出白屏文件。 */
+const forbidden = js.match(/import\.meta|fs\.readFileSync|from\s*['"]node:|\brequire\s*\(/g);
+if (forbidden) {
+  console.error('打包失败：产物含 Node 专属语法 ' + [...new Set(forbidden)].join('、') + '，离线版会白屏');
+  process.exit(1);
+}
+try {
+  new Function(js);
+} catch (e) {
+  console.error('打包失败：产物脚本语法错误 → ' + e.message);
+  process.exit(1);
+}
 
 const html = `<!doctype html>
 <html lang="zh-CN">
@@ -125,6 +208,18 @@ const html = `<!doctype html>
 <style>${css}</style>
 </head>
 <body>
+  <div id="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <span class="splash-halo"></span>
+      <svg class="splash-crane" viewBox="0 0 160 164" role="img" aria-label="问鹤 墨鹤标">
+        <path d="${cranePath}" fill="#241F17" fill-rule="evenodd"/>
+        <circle class="eye" cx="121.50" cy="22.00" r="2.12" fill="#A33B2B"/>
+      </svg>
+      <div class="splash-brand">问鹤</div>
+      <div class="splash-tagline">问一句，有出处</div>
+      <div class="splash-seal">问</div>
+    </div>
+  </div>
   <div id="app" class="shell"></div>
   <div id="layer" class="layer"></div>
   <script>${js.replace(/<\/script/gi, '<\\/script')}</script>

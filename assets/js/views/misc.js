@@ -53,7 +53,7 @@ export function historyView() {
 
     <div data-listwrap>${listHtml(reports)}</div>
 
-    <footer class="foot" data-foot>共 ${reports.length} 页，存在本机浏览器里</footer>`;
+    <footer class="foot" data-foot>共 ${reports.length} 页，存在这台设备上</footer>`;
 
   const mount = () => {
     const root = $('#app .view');
@@ -77,7 +77,7 @@ export function historyView() {
           const wrap = $('[data-listwrap]', root);
           if (wrap) wrap.innerHTML = listHtml(left);
           const foot = $('[data-foot]', root);
-          if (foot) foot.textContent = `共 ${left.length} 页，存在本机浏览器里`;
+          if (foot) foot.textContent = `共 ${left.length} 页，存在这台设备上`;
           if (!left.length) $('[data-clear]', root)?.remove();
           if (removed) {
             toast('已删除这页批注', {
@@ -88,7 +88,7 @@ export function historyView() {
                 const w = $('[data-listwrap]', root);
                 if (w) w.innerHTML = listHtml(back);
                 const f = $('[data-foot]', root);
-                if (f) f.textContent = `共 ${back.length} 页，存在本机浏览器里`;
+                if (f) f.textContent = `共 ${back.length} 页，存在这台设备上`;
                 toast('已恢复');
               },
             });
@@ -127,45 +127,46 @@ export function aboutView() {
 
     <header class="page-head">
       <a class="back" href="#/" data-back><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>返回</a>
-      <h1>相法</h1>
+      <h1>关于问鹤</h1>
       <span></span>
     </header>
 
     <section class="sec" style="margin-top:16px">
       <div class="sec-head"><h2>这是什么</h2></div>
       <p class="lead" style="margin-top:14px">
-        问鹤以五门组织：命、卜、相、堪舆、择日。相与堪舆在本机推演，命、卜、择日由本机 Node 服务里的工具层排算。
-        五类古籍已内化为本机知识库，用来生成批注，不在页面逐条列出。
+        问鹤有五门：命、卜、相、堪舆、择日。用的都是古人传下来的老办法，
+        配上收录的古籍，在你自己手机上算出结果、写成批注。
+        内容只是传统文化里认识自己的一种角度，当参考看就好。
       </p>
     </section>
 
     <section class="sec">
-      <div class="sec-head"><h2>怎么算</h2></div>
+      <div class="sec-head"><h2>结果是怎么来的</h2></div>
       <p class="lead" style="margin-top:14px">
-        相法每题挂六维增减，按题内均值中心化后计分；综合相把面相四成、手相三成七、五行二成五合在一起。
-        命用四柱与五行强弱，卜用小六壬月日时三数，择日用建除十二神，堪舆用八宅的东西四宅与门位。
-        所有工具都是确定性函数：同样输入，永远同样输出。
+        各门按各自的传统规则来：命理看四柱五行，问一事看月日时，看相看面相手相，
+        择日看日子，看房子看坐向方位。
+        同一份资料、同一个时间，算出来的结果都一样——它是一套固定的规则，不是随手编的。
       </p>
     </section>
 
     <section class="sec">
-      <div class="sec-head"><h2>数据在哪</h2></div>
+      <div class="sec-head"><h2>你的资料存在哪</h2></div>
       <p class="lead" style="margin-top:14px">
-        全部在你浏览器的 localStorage 里。照片默认只存在本机；只有你点「按照片预填」时，它才会发给一次视觉模型，
-        服务端不保存，识别完即弃，写入批注时也会丢掉。
-        换设备、换浏览器、清缓存都会消失，这里没有账号，也没有云端。
+        你的记录和填空都存在这台设备上，我们没有账号，也不会传到网上。
+        只有你主动用「按照片预填」时，照片才会发出去识别一次，用完就丢，我们不留底。
+        换手机、换浏览器或清理浏览器数据，记录就会不见，想留着可以截图保存。
       </p>
     </section>
 
     <section class="sec">
-      <div class="sec-head"><h2>不做什么</h2></div>
+      <div class="sec-head"><h2>我们不做什么</h2></div>
       <p class="lead" style="margin-top:14px">
-        不预测具体事件，不判断吉凶祸福，不替代医疗、投资、婚恋与法律意见。
-        相学是一套古人观察人的语言，它的价值在于提供一个换角度看待自己的位置，
-        而不是给你一个结论。分数低不代表命不好，只代表这套规则认为你该往哪边多用一点力。
+        不预测具体事件，不判断吉凶祸福，也不能代替医疗、投资、感情和法律上的决定。
+        分数低不是说你不好，只表示这套老规则觉得你这方面可以多用点心。
+        把它当成一面镜子，别当成一句判词。
       </p>
     </section>
 
-    <footer class="foot">问鹤 0.1 · 本机规则版 · 2026</footer>`,
+    <footer class="foot">问鹤 0.1 · 2026</footer>`,
   };
 }

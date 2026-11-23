@@ -37,11 +37,17 @@ const mock = http.createServer((req, res) => {
 await new Promise((r) => mock.listen(MOCK, '127.0.0.1', r));
 
 const { server } = await import('../server/server.mjs');
+const { makeSession, cookie } = await import('../server/auth.mjs');
 await new Promise((r) => setTimeout(r, 400));
+
+/* 服务端已启用白名单鉴权（所有 /api/* 需登录态）。
+   测试自造一个合法 session，不依赖 data/access.json、不污染真实白名单。 */
+const testCookie = cookie('ft_session', makeSession({ phone: 'test', name: '测试' })).split(';')[0];
+const AUTH = { cookie: testCookie };
 
 const post = (body) => fetch(`http://127.0.0.1:${APP}/api/interpret`, {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
+  headers: { 'content-type': 'application/json', ...AUTH },
   body: JSON.stringify(body),
 });
 
@@ -52,13 +58,14 @@ const payload = {
   question: '我适合换工作吗',
 };
 
-const status = await (await fetch(`http://127.0.0.1:${APP}/api/llm/status`)).json();
+const status = await (await fetch(`http://127.0.0.1:${APP}/api/llm/status`, { headers: AUTH })).json();
 console.log('status', status);
 
 const first = await post(payload);
 const a = await first.json();
 console.log('first', first.status, JSON.stringify(a).slice(0, 160));
 
+const callsBeforeSecond = calls;
 const second = await post(payload);
 const b = await second.json();
 console.log('second cached =', b.cached);
@@ -75,7 +82,7 @@ ok(status.ready === true && status.model === 'mock-1', '状态已就绪');
 ok(first.status === 200 && a.text.includes('第一段'), '返回模型文本');
 ok(sawCite, 'prompt 中带上了引文');
 ok(sawChart, 'prompt 中带上了排盘');
-ok(b.cached === true && calls === 1, '第二次命中缓存，未重复调用');
+ok(b.cached === true && calls === callsBeforeSecond, '第二次命中缓存，未重复调用');
 ok(bad.status === 400, '缺排盘时返回 400');
 
 await new Promise((r) => server.close(r));

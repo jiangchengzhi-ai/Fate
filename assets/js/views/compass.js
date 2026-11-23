@@ -28,7 +28,7 @@ export function compassView() {
       <header class="page-head">
         <a class="back" href="#/" data-back><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>返回</a>
         <h1>阳宅</h1>
-        <a class="tb-link right" href="#/about">相法</a>
+        <a class="tb-link right" href="#/about">关于</a>
       </header>
 
       <p class="lead">先定房屋坐向，再看门、床、灶、书桌各在何方。站在屋内中心，让手机顶部指向大门方向；没有传感器就拖动转盘。</p>
@@ -64,14 +64,14 @@ export function compassView() {
       <section class="sec" style="margin-top:26px">
         <h2 class="step"><b>二</b>填宅主</h2>
 
-        <div class="field">
-          <label for="byear">出生年 · 公历</label>
+        <div class="field" data-req="year">
+          <label for="byear">出生年 · 公历 <em class="req-tag" data-req-tag>必填</em></label>
           <input class="input" id="byear" type="number" inputmode="numeric" min="1900" max="2100"
             placeholder="例如 1994" value="${birth.year || ''}" data-year>
         </div>
 
-        <div class="field">
-          <label>性别 · 用于命卦</label>
+        <div class="field" data-req="gender">
+          <label>性别 · 用于命卦 <em class="req-tag" data-req-tag>必填</em></label>
           <div class="opts">
             <button class="opt" type="button" data-gender="male" aria-pressed="${birth.gender === 'male'}">男</button>
             <button class="opt" type="button" data-gender="female" aria-pressed="${birth.gender === 'female'}">女</button>
@@ -79,8 +79,8 @@ export function compassView() {
         </div>
 
         <h2 class="step"><b>三</b>选入户门</h2>
-        <div class="field">
-          <label>门开在哪一边</label>
+        <div class="field" data-req="door">
+          <label>门开在哪一边 <em class="req-tag" data-req-tag>必填</em></label>
           <div class="dir-grid" role="group" aria-label="入户门方位">
             <button class="dir-btn" type="button" data-door="乾" aria-pressed="${door === '乾'}"><b>西北</b><span>乾</span></button>
             <button class="dir-btn" type="button" data-door="坎" aria-pressed="${door === '坎'}"><b>北</b><span>坎</span></button>
@@ -121,7 +121,6 @@ export function compassView() {
     </div>
 
     <div class="dock">
-      <div class="dock-info"><b data-count>0/3</b>必填</div>
       <button class="btn btn-primary" type="button" data-submit disabled>看宅运</button>
     </div>`;
 
@@ -133,13 +132,21 @@ export function compassView() {
     const dirEl = $('[data-dir]', root);
     const hint = $('[data-hint]', root);
     const submit = $('[data-submit]', root);
-    const countEl = $('[data-count]', root);
 
-    const readyCount = () => (birth.year ? 1 : 0) + (birth.gender ? 1 : 0) + (door ? 1 : 0);
-    const ready = () => !!(birth.year && birth.gender && door);
+    const filled = { year: !!birth.year, gender: !!birth.gender, door: !!door };
+    const ready = () => filled.year && filled.gender && filled.door;
 
     const refreshDock = () => {
-      countEl.textContent = `${readyCount()}/3`;
+      filled.year = !!birth.year;
+      filled.gender = !!birth.gender;
+      filled.door = !!door;
+      root.querySelectorAll('[data-req]').forEach((f) => {
+        const tag = f.querySelector('[data-req-tag]');
+        if (!tag) return;
+        const done = filled[f.dataset.req];
+        tag.textContent = done ? '已填' : '必填';
+        tag.classList.toggle('is-done', done);
+      });
       submit.disabled = !ready();
     };
 
@@ -209,12 +216,19 @@ export function compassView() {
     const sensorBtn = $('[data-sensor]', root);
     if (!('DeviceOrientationEvent' in window)) sensorBtn.style.display = 'none';
 
+    const stopSensor = () => {
+      if (!sensorOn) return;
+      window.removeEventListener('deviceorientationabsolute', sensorHandler, true);
+      window.removeEventListener('deviceorientation', sensorHandler, true);
+      sensorOn = false;
+      if (sensorBtn) sensorBtn.textContent = '启用指南针';
+    };
+    // 离开页面时停指南针：用自定义事件而非 hashchange，受限面板里地址栏不变也能清理
+    window.addEventListener('ft:leave', stopSensor, { once: true });
+
     sensorBtn.addEventListener('click', async () => {
       if (sensorOn) {
-        window.removeEventListener('deviceorientationabsolute', sensorHandler, true);
-        window.removeEventListener('deviceorientation', sensorHandler, true);
-        sensorOn = false;
-        sensorBtn.textContent = '启用指南针';
+        stopSensor();
         hint.textContent = '已关闭传感器，可继续拖动转盘';
         return;
       }

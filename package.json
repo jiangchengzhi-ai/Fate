@@ -8,7 +8,9 @@
     "start": "node server/server.mjs",
     "dev": "node server/server.mjs --port 5173",
     "ingest": "node scripts/ingest.mjs knowledge/sources",
-    "test": "node tests/tools.test.mjs && node tests/llm.test.mjs",
+    "test": "node scripts/check.mjs",
+    "prepublish-check": "node scripts/prepublish.mjs",
+    "test:unit": "node scripts/check.mjs",
     "test:tools": "node tests/tools.test.mjs",
     "test:llm": "node tests/llm.test.mjs"
   },

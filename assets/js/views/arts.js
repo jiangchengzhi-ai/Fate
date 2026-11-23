@@ -5,7 +5,7 @@ import { parseBirth } from '../nlp.js';
 import { lunarParts, zhiIndexNow, nowLabel } from '../lunar.js';
 import { makeRecord, levelOf } from '../engine.js';
 import { store } from '../store.js';
-import { $, esc, toast, go, goReplace } from '../ui.js';
+import { $, $$, esc, toast, go, goReplace, solarDateHTML, readSolarDate, setSolarDate } from '../ui.js';
 
 const today = () => {
   const d = new Date();
@@ -32,7 +32,6 @@ function shell(title, body, dock) {
       ${body}
     </div>
     <div class="dock">
-      <div class="dock-info"><b>一步</b>出结果</div>
       ${dock}
     </div>`;
 }
@@ -50,7 +49,9 @@ export function finish(result, extra) {
     blocks: extra.blocks,
     citations: result.citations || [],
     advice: extra.advice || [],
-    meta: extra.meta || undefined,
+    meta: (extra.meta || result.fortune || result.yong)
+      ? { ...(extra.meta || {}), ...(result.fortune ? { fortune: result.fortune } : {}), ...(result.yong ? { yong: result.yong } : {}) }
+      : undefined,
     verdict: pickLine(VERDICT[result.type] || VERDICT.bu),
   });
   store.addReport(rec);
@@ -62,8 +63,8 @@ export function mingView() {
   return {
     html: shell('命理', `
       <div class="seg">
-        <a class="seg-item is-on" href="#/ming">看自己</a>
-        <a class="seg-item" href="#/hepan">看两人</a>
+        <a class="seg-item is-on" href="#/ming">看我自己</a>
+        <a class="seg-item" href="#/hepan">看两人合不合</a>
       </div>
       <p class="lead">填生日和时辰，看清自己的性格结构与当下节奏。</p>
       <div class="quick" data-quick>
@@ -89,8 +90,8 @@ export function mingView() {
       </div>
 
       <div class="field" data-solar-only>
-        <label for="md">出生日期 · 公历</label>
-        <input class="input" type="date" id="md" data-date max="${today()}" min="1900-01-01">
+        <label>出生那天 · 公历</label>
+        ${solarDateHTML('md')}
         <p class="field-err" data-err="date" role="alert" hidden></p>
         <p class="field-hint"><button type="button" class="linklike" data-example>不知道填什么？看个示例</button></p>
       </div>
@@ -120,23 +121,24 @@ export function mingView() {
             <b>不知道几点出生？</b><span>按正午 12:00 算</span></button>
         </div>
       </div>
-      <div class="field">
-        <label for="mp">出生地 · 省（不填也能算）</label>
-        <select class="input" id="mp" data-province>
-          <option value="">不校正</option>
-          ${PROVINCES.map((p) => `<option value="${p.name}">${p.name}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label for="mc">出生地 · 市</label>
-        <select class="input" id="mc" data-city>
-          <option value="">先选省</option>
-        </select>
-      </div>
-      <details class="adv">
-        <summary>手动填经度（选不到城市时用）</summary>
+      <details class="adv birth-place">
+        <summary>出生在哪座城市？（选填，填了时辰更准）</summary>
+        <p class="field-hint">不填就按北京时间算，多数人不用填。</p>
         <div class="field">
-          <label for="mlng">经度 · 东经</label>
+          <label for="mp">省份</label>
+          <select class="input" id="mp" data-province>
+            <option value="">不填（按北京时间算）</option>
+            ${PROVINCES.map((p) => `<option value="${p.name}">${p.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label for="mc">城市</label>
+          <select class="input" id="mc" data-city>
+            <option value="">先选省份</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mlng">城市没找到？直接填所在地的数字（北京 116.4，上海 121.5）</label>
           <input class="input" id="mlng" type="number" step="0.1" min="73" max="135" placeholder="例如 116.4" data-lng>
         </div>
       </details>
@@ -163,7 +165,7 @@ export function mingView() {
         const prov = PROVINCES.find((x) => x.name === provName);
         citySel.innerHTML = prov
           ? prov.cities.map((c) => `<option value="${c.name}">${c.name}</option>`).join('')
-          : '<option value="">先选省</option>';
+          : '<option value="">先选省份</option>';
       };
       provinceSel?.addEventListener('change', (e) => fillCities(e.target.value));
 
@@ -171,8 +173,7 @@ export function mingView() {
       const readSaved = () => { try { return JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch { return null; } };
       const saved = readSaved();
       if (saved) {
-        const di = $('[data-date]', root);
-        if (saved.date && di && saved.date <= today()) di.value = saved.date;
+        if (saved.date && saved.date <= today()) setSolarDate(root, 'md', saved.date);
         if (saved.hour) root.querySelector(`[data-hour="${saved.hour}"]`)?.click();
         if (saved.gender) root.querySelector(`[data-gender="${saved.gender}"]`)?.click();
         if (saved.province && provinceSel) {
@@ -183,24 +184,27 @@ export function mingView() {
         if (saved.date || saved.province) $('[data-remember]', root).hidden = false;
       }
 
+      const dateBox = () => $('[data-date3="md"]', root);
+      const markDate = (on) => {
+        $$('[data-date3="md"] select', root).forEach((s) => {
+          s.classList.toggle('is-err', on);
+          if (on) s.setAttribute('aria-invalid', 'true'); else s.removeAttribute('aria-invalid');
+        });
+      };
       const showErr = (msg) => {
         const err = $('[data-err="date"]', root);
-        const inp = $('[data-date]', root);
         err.textContent = msg;
         err.hidden = false;
-        inp.classList.add('is-err');
-        inp.setAttribute('aria-invalid', 'true');
-        inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        inp.focus({ preventScroll: true });
+        markDate(true);
+        dateBox()?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        $('[data-d3y]', dateBox())?.focus({ preventScroll: true });
       };
       const clearErr = () => {
         const err = $('[data-err="date"]', root);
-        const inp = $('[data-date]', root);
         if (err) err.hidden = true;
-        inp.classList.remove('is-err');
-        inp.removeAttribute('aria-invalid');
+        markDate(false);
       };
-      $('[data-date]', root)?.addEventListener('input', clearErr);
+      $$('[data-date3="md"] select', root).forEach((s) => s.addEventListener('change', clearErr));
 
       const quick = $('[data-quick]', root);
       const qi = $('[data-quick-input]', root);
@@ -214,7 +218,7 @@ export function mingView() {
         const bits = [
           ['日期', parsed.date || '还差'],
           ['时辰', parsed.hour ? parsed.hour + '时' : '不清楚（按正午）'],
-          ['出生地', parsed.city || parsed.province || '不校正'],
+          ['出生地', parsed.city || parsed.province || '按北京时间算'],
         ];
         if (parsed.gender) bits.push(['性别', parsed.gender === 'male' ? '男' : '女']);
         qr.innerHTML = bits.map(([k, v]) => '<span class="qr"><i>' + k + '</i>' + v + '</span>').join('');
@@ -223,8 +227,7 @@ export function mingView() {
       };
 
       const applyParsed = (parsed) => {
-        const di = $('[data-date]', root);
-        if (parsed.date) di.value = parsed.date;
+        if (parsed.date) setSolarDate(root, 'md', parsed.date);
         if (parsed.hour) root.querySelector('[data-hour="' + parsed.hour + '"]')?.click();
         else if (root.querySelector('[data-unknown]')?.getAttribute('aria-pressed') !== 'true') root.querySelector('[data-unknown]')?.click();
         if (parsed.gender) root.querySelector('[data-gender="' + parsed.gender + '"]')?.click();
@@ -275,8 +278,7 @@ export function mingView() {
         }
         const ex = e.target.closest('[data-example]');
         if (ex) {
-          const di = $('[data-date]', root);
-          di.value = '1990-06-15';
+          setSolarDate(root, 'md', '1990-06-15');
           clearErr();
           root.querySelector('[data-hour="午"]')?.click();
           root.querySelector('[data-gender="male"]')?.click();
@@ -299,8 +301,8 @@ export function mingView() {
           qe.hidden = true;
           applyParsed(parsed);
         }
-        const date = cal === 'lunar' ? '' : $('[data-date]', root).value;
-        if (cal === 'solar' && !date) { showErr('请先选出生日期，再点「看命理」'); return; }
+        const date = cal === 'lunar' ? '' : readSolarDate(root, 'md');
+        if (cal === 'solar' && !date) { showErr('请把出生的年、月、日选齐，再点「看命理」'); return; }
         clearErr();
         const btn = $('[data-go]', root);
         btn.disabled = true;
@@ -417,30 +419,41 @@ export function buView() {
 
   return {
     html: shell('起课', `
-      <p class="lead">心里想一件事，选好时间，就能起课看眼下顺不顺。</p>
+      <p class="lead lead-compact">想好一件事，选个时间。</p>
 
-      <div class="field">
-        <label for="bq">要问的事</label>
-        <input class="input" type="text" id="bq" data-question maxlength="60" placeholder="例如：这次面试能不能过 / 这个月适合搬家吗">
-        <p class="q-hint" style="margin-left:0">一事一占，问得越具体越好；同一件事不要反复起课。</p>
-        <p class="q-hint" style="margin-left:0">小六壬只断此刻吉凶。若问「哪天合适」，请用 <a href="#/ze" style="color:var(--brass-hi);border-bottom:1px solid var(--brass-soft)">择日</a>。</p>
-      </div>
-
-      ${sel('农历月', 'month', 12, now.month)}
-      ${sel('农历日', 'day', 30, now.day)}
-
-      <div class="field">
-        <label>时辰</label>
-        <div class="hour-grid">
-          ${HOURS.map((h, i) => `<button class="hour" type="button" data-hi="${i + 1}" aria-pressed="${i + 1 === initHour}">
-            <b>${h.label}</b><span>${h.range}</span></button>`).join('')}
+      <section class="form-block">
+        <h2 class="step"><b>一</b>问什么事</h2>
+        <div class="field">
+          <label for="bq">要问的事</label>
+          <input class="input" type="text" id="bq" data-question maxlength="60" placeholder="例如：这次面试能不能过 / 这个月适合搬家吗">
         </div>
-      </div>
+      </section>
 
-      <div class="cp-actions">
-        <button class="btn btn-ghost btn-sm" type="button" data-now>用当前时间</button>
-      </div>
-      <p class="foot">当前：<span data-now-label>${now.month}月${now.day}日</span>　一事一占，同一件事别反复起课。</p>
+      <section class="form-block">
+        <h2 class="step"><b>二</b>选个时间</h2>
+        ${sel('农历月', 'month', 12, now.month)}
+        ${sel('农历日', 'day', 30, now.day)}
+        <div class="field">
+          <label>时辰</label>
+          <div class="hour-grid">
+            ${HOURS.map((h, i) => `<button class="hour" type="button" data-hi="${i + 1}" aria-pressed="${i + 1 === initHour}">
+              <b>${h.label}</b><span>${h.range}</span></button>`).join('')}
+          </div>
+        </div>
+        <div class="cp-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-now>用当前时间</button>
+        </div>
+      </section>
+
+      <details class="detail-blocks">
+        <summary>起课须知 · 点开看</summary>
+        <ul class="rule-list">
+          <li>一次只问一件事，问得越具体越好；同一件事别反复起课。</li>
+          <li>只看此刻吉凶。想问「哪天合适」，请用 <a href="#/ze">择日</a>。</li>
+        </ul>
+      </details>
+
+      <p class="foot">当前：<span data-now-label>${now.month}月${now.day}日</span></p>
     `, '<button class="btn btn-primary" type="button" data-go>起 课</button>'),
     mount: () => {
       const root = $('#app .view');
@@ -646,34 +659,47 @@ export function zeView() {
 export function hepanView() {
   const hourOpts = HOURS.map((h) => `<option value="${h.v}">${h.label}</option>`).join('')
     + '<option value="unknown" selected>不清楚（按正午）</option>';
-  const person = (k, label) => `
-    <div class="field"><label>${label}生日</label>
-      <input class="input" type="date" data-${k}-date max="${today()}" min="1900-01-01"></div>
-    <div class="field"><label>${label}时辰</label>
+  const person = (k) => `
+    <div class="field"><label>出生那天</label>
+      ${solarDateHTML(k)}</div>
+    <div class="field"><label>时辰</label>
       <select class="input" data-${k}-hour>${hourOpts}</select></div>
-    <div class="field"><label>${label}性别</label>
+    <div class="field"><label>性别</label>
       <select class="input" data-${k}-g><option value="male">男</option><option value="female">女</option></select></div>`;
 
   return {
     html: shell('合盘', `
       <div class="seg">
-        <a class="seg-item" href="#/ming">看自己</a>
-        <a class="seg-item is-on" href="#/hepan">看两人</a>
+        <a class="seg-item" href="#/ming">看我自己</a>
+        <a class="seg-item is-on" href="#/hepan">看两人合不合</a>
       </div>
-      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。时辰不清楚就选「不清楚」，按正午算。</p>
-      <h2 class="step"><b>一</b>第一个人</h2>
-      ${person('a', '他/她')}
-      <h2 class="step"><b>二</b>第二个人</h2>
-      ${person('b', '对方')}
+      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。可以给两人填个称呼，报告里就好认。时辰不清楚就选「不清楚」，按正午算。</p>
+      <h2 class="step"><b>一</b><span data-role-title="a">你</span></h2>
+      <div class="field"><label>称呼（选填）</label>
+        <input class="input" type="text" data-a-name maxlength="10" placeholder="你" autocomplete="off"></div>
+      ${person('a')}
+      <h2 class="step"><b>二</b><span data-role-title="b">对方</span></h2>
+      <div class="field"><label>称呼（选填）</label>
+        <input class="input" type="text" data-b-name maxlength="10" placeholder="对方" autocomplete="off"></div>
+      ${person('b')}
       <p class="foot">合盘只看日柱与五行互补，不替代相处与沟通。</p>
     `, '<button class="btn btn-primary" type="button" data-go>看 合 盘</button>'),
     mount: () => {
       const root = $('#app .view');
+      // 称呼实时联动标题；留空回落到默认称呼
+      const nameOf = (k, fallback) => ($(`[data-${k}-name]`, root).value || '').trim() || fallback;
+      [['a', '你'], ['b', '对方']].forEach(([k, fallback]) => {
+        $(`[data-${k}-name]`, root).addEventListener('input', (e) => {
+          $(`[data-role-title="${k}"]`, root).textContent = e.target.value.trim() || fallback;
+        });
+      });
       root.addEventListener('click', async (e) => {
         if (!e.target.closest('[data-go]')) return;
-        const aDate = $('[data-a-date]', root).value;
-        const bDate = $('[data-b-date]', root).value;
-        if (!aDate || !bDate) return toast('两个人的生日都要填');
+        const aDate = readSolarDate(root, 'a');
+        const bDate = readSolarDate(root, 'b');
+        if (!aDate || !bDate) return toast('两个人的出生年、月、日都要选齐');
+        const nameA = nameOf('a', '你');
+        const nameB = nameOf('b', '对方');
         const btn = $('[data-go]', root);
         btn.disabled = true;
         btn.textContent = '合 盘 中';
@@ -688,11 +714,11 @@ export function hepanView() {
             title: '合盘批注',
             heading: '合盘',
             glyph: '合',
-            subtitle: `${pa}　×　${pb}`,
+            subtitle: `${nameA}（${pa}）　×　${nameB}（${pb}）`,
             overall: r.overall,
             level: levelOf(r.overall),
             blocks: [
-              { kind: 'table', title: '双方四柱', head: ['', '第一个', '第二个'], rows: [
+              { kind: 'table', title: '双方四柱', head: ['', nameA, nameB], rows: [
                 ['四柱', pa, pb],
                 ['日主', r.a.dayMaster, r.b.dayMaster],
                 ['喜用', r.a.yong.filter(Boolean).join('、'), r.b.yong.filter(Boolean).join('、')],

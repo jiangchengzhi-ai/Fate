@@ -4,10 +4,10 @@ import { store } from '../store.js';
 const MARK = `<img class="brand-mark" src="./assets/brand/crane.svg" alt="">`;
 
 const GATES = [
-  { glyph: '命', name: '命理', desc: '填生日和时辰，看清自己的结构', href: '#/ming' },
-  { glyph: '卜', name: '占卜', desc: '心里想一件事，看眼下顺不顺', href: '#/bu' },
-  { glyph: '相', name: '看相', desc: '上传照片，看面相或手相', href: '#/face' },
-  { glyph: '堪', name: '风水', desc: '看房子的坐向与布局', href: '#/compass' },
+  { glyph: '命', name: '命理', desc: '填生日和时辰，看自己的性格和节奏', href: '#/ming' },
+  { glyph: '卜', name: '问一事', desc: '心里想一件事，看眼下顺不顺', href: '#/bu' },
+  { glyph: '相', name: '看相', desc: '面相、手相、综合相，挑一个看', href: '#/c/xiang' },
+  { glyph: '堪', name: '风水', desc: '阳宅、阴宅，挑一个看', href: '#/c/kan' },
   { glyph: '择', name: '择日', desc: '挑好日子：结婚、搬家、开业', href: '#/ze' },
 ];
 
@@ -43,7 +43,7 @@ export function homeView() {
 
     ${noticeSeen() ? '' : `
     <div class="notice-card" data-notice>
-      <p>仅供娱乐参考，不能代替专业意见。</p>
+      <p>这里的说法来自古籍与固定规则，图个明白，不作准数。真遇到难事，还是要找医生、律师这些专业人士。</p>
       <button type="button" data-notice-close>知道了</button>
     </div>`}
 
@@ -66,8 +66,8 @@ export function homeView() {
     <a class="gate-card gate-sub" href="#/hepan">
       <span class="gate-glyph">合</span>
       <span class="gate-text">
-        <span class="gate-name">两人合盘</span>
-        <span class="gate-desc">两个人的日柱与五行，看合不合</span>
+        <span class="gate-name">看两人合不合</span>
+        <span class="gate-desc">填两个人的生日，看相处节奏</span>
       </span>
       <span class="gate-arrow">›</span>
     </a>
@@ -75,11 +75,11 @@ export function homeView() {
 ${recentHtml}
 
     <div class="home-help">
-      看不清字？可以把手机字号调大，页面会跟着放大。
+      看不清字？可以把手机字号调大，页面会跟着放大。<br>
       <a href="#/about">关于这个软件</a>
     </div>
 
-    <footer class="foot">仅供娱乐参考</footer>
+    <footer class="foot">问鹤 · 传统文化娱乐参考</footer>
     `,
     mount: () => {
       const notice = document.querySelector('[data-notice]');

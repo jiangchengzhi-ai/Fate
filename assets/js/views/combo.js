@@ -1,13 +1,7 @@
 import { HOURS } from '../data.js';
 import { buildCombo, makeRecord, elementsOf, ganzhi } from '../engine.js';
 import { store } from '../store.js';
-import { $, esc, toast, go } from '../ui.js';
-
-const todayStr = () => {
-  const d = new Date();
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-};
+import { $, esc, toast, go, solarDateHTML, readSolarDate } from '../ui.js';
 
 export function comboView() {
   const st = store.get();
@@ -22,7 +16,7 @@ export function comboView() {
     <div class="ready-row">
       <span class="ready-idx">${idx}</span>
       <span class="ready-name">${name}</span>
-      <span class="ready-state ${done ? 'done' : 'todo'}">${done ? '已成' : `<a href="${href}">${href.includes('face') ? '去观面' : href.includes('palm') ? '去看掌' : '填写'}</a>`}</span>
+      <span class="ready-state ${done ? 'done' : 'todo'}">${done ? '已成' : `<a href="${href === '#birth' ? '#/combo' : href}"${href === '#birth' ? ' data-scroll-birth' : ''}>${href.includes('face') ? '去观面' : href.includes('palm') ? '去看掌' : '填写'}</a>`}</span>
       <span class="ready-note">${esc(note)}</span>
     </div>`;
 
@@ -30,11 +24,11 @@ export function comboView() {
     <div class="flow">
       <header class="page-head">
         <a class="back" href="#/" data-back><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>返回</a>
-        <h1>合参</h1>
-        <a class="tb-link right" href="#/about">相法</a>
+        <h1>综合看相</h1>
+        <a class="tb-link right" href="#/about">关于</a>
       </header>
 
-      <p class="lead">面看底子，掌看作为，命看时令。三处合看，才不必把一句话说死。缺一处，就少一个参照。</p>
+      <p class="lead">把面相、手相、生日三样合起来看自己，比只看一样更稳。<b>这是看一个人，不是看两个人合不合。</b>缺一处，就少一个参照。</p>
 
       <div class="ready">
         ${row('一', '面相', face ? `已录：${face.overall} 分 · ${face.dateLabel}` : '尚未观面', !!face, '#/face')}
@@ -43,9 +37,8 @@ export function comboView() {
       </div>
 
       <div class="field" id="birth">
-        <label for="bdate">出生日期 · 公历</label>
-        <input class="input" type="date" id="bdate" data-date max="${todayStr()}" min="1900-01-01"
-          value="${birth.year ? `${birth.year}-${String(birth.month).padStart(2, '0')}-${String(birth.day).padStart(2, '0')}` : ''}">
+        <label>出生那天 · 公历</label>
+        ${solarDateHTML('bdate', birth.year ? `${birth.year}-${String(birth.month).padStart(2, '0')}-${String(birth.day).padStart(2, '0')}` : '')}
       </div>
 
       <div class="field">
@@ -73,7 +66,7 @@ export function comboView() {
 
     <div class="dock">
       <div class="dock-info"><b data-count>${readyCount()}/3</b>已齐备</div>
-      <button class="btn btn-primary" type="button" data-submit ${isComplete() ? '' : 'disabled'}>合参</button>
+      <button class="btn btn-primary" type="button" data-submit ${isComplete() ? '' : 'disabled'}>看结果</button>
     </div>`;
 
   const mount = () => {
@@ -95,7 +88,7 @@ export function comboView() {
       if (state3) {
         const ok = !!(birth.year && birth.hour && birth.gender);
         state3.className = `ready-state ${ok ? 'done' : 'todo'}`;
-        state3.innerHTML = ok ? '已成' : '<a href="#birth">填写</a>';
+        state3.innerHTML = ok ? '已成' : '<a href="#/combo" data-scroll-birth>填写</a>';
       }
       const notes = root.querySelectorAll('.ready-note');
       if (notes[2]) {
@@ -108,15 +101,22 @@ export function comboView() {
     };
 
     root.addEventListener('change', (e) => {
-      const input = e.target.closest('[data-date]');
-      if (!input || !input.value) return;
-      const [y, m, d] = input.value.split('-').map(Number);
+      if (!e.target.closest('[data-date3="bdate"]')) return;
+      const v = readSolarDate(root, 'bdate');
+      if (!v) return;
+      const [y, m, d] = v.split('-').map(Number);
       birth = { ...birth, year: y, month: m, day: d };
       store.patch({ birth });
       refresh();
     });
 
     root.addEventListener('click', (e) => {
+      const birthLink = e.target.closest('[data-scroll-birth]');
+      if (birthLink) {
+        e.preventDefault();
+        $('#birth', root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
       const h = e.target.closest('[data-hour]');
       if (h) {
         birth = { ...birth, hour: h.dataset.hour };
