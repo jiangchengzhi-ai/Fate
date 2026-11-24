@@ -20,6 +20,8 @@ import { recordView, recordEvent, recordModel, snapshot, today, flush } from './
 import { loginPage, adminPage } from './pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const OPEN_ACCESS = process.env.WENHE_OPEN_ACCESS === '1';
+const GUEST = { phone: 'guest', name: '访客', admin: false };
 const PORT = Number(process.argv.find((a, i, arr) => arr[i - 1] === '--port') || process.env.PORT || 5173);
 const HOST = process.argv.find((a, i, arr) => arr[i - 1] === '--host') || process.env.HOST || '127.0.0.1';
 
@@ -232,9 +234,11 @@ const server = http.createServer(async (req, res) => {
 
     /* ---------------- 访问控制 ---------------- */
     const session = readSession(req);
+    const who = session || (OPEN_ACCESS ? GUEST : null);
     const adminSess = readAdmin(req);
 
     if (p === '/login' && req.method === 'GET') {
+      if (OPEN_ACCESS && !session) return redirect(res, '/');
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
       return res.end(loginPage());
     }
@@ -253,7 +257,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/logout') {
-      return redirect(res, '/login', { 'set-cookie': [clearCookie('ft_session'), clearCookie('ft_admin')] });
+      return redirect(res, OPEN_ACCESS ? '/' : '/login', { 'set-cookie': [clearCookie('ft_session'), clearCookie('ft_admin')] });
     }
 
     if (p === '/admin' || p === '/admin/') {
@@ -330,14 +334,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/stats/event' && req.method === 'POST') {
-      if (!session) return json(res, 401, { error: '未登录' });
+      if (!who) return json(res, 401, { error: '未登录' });
       const body = await readBody(req);
-      if (body.path) recordView(String(body.path), session.phone);
-      if (body.name) recordEvent(String(body.name), session.phone);
+      if (body.path) recordView(String(body.path), who.phone);
+      if (body.name) recordEvent(String(body.name), who.phone);
       return json(res, 200, { ok: true });
     }
 
-    if (!session && !p.startsWith('/assets/') && p !== '/favicon.ico') {
+    if (!who && !p.startsWith('/assets/') && p !== '/favicon.ico') {
       if (p.startsWith('/api/')) return json(res, 401, { error: '未登录' });
       return redirect(res, '/login');
     }
