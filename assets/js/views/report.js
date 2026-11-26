@@ -5,7 +5,7 @@ import { $, esc, radarSVG, copyText, saveCard, recordToText, toast } from '../ui
 
 const SEAL = ['相', '由', '心', '生'];
 
-const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
+const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', kan: '阴宅', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
 const AGAIN = { face: '#/face', palm: '#/palm', combo: '#/combo', compass: '#/compass', ming: '#/ming', bu: '#/bu', ze: '#/ze', kan: '#/yinzha', hepan: '#/hepan' };
 const SCORE_LABEL = { compass: '宅运', kan: '地气', ming: '命格', bu: '课象', ze: '日课', hepan: '合盘' };
 
@@ -40,7 +40,7 @@ function chartText(rec) {
 
 const llmInner = (llm) => `
   ${String(llm.text).split(/\n+/).filter(Boolean).map((p) => `<p class="llm-text">${esc(p)}</p>`).join('')}
-  <p class="llm-note">AI 解读，可能出错；排盘数字与引文以上文为准。<b>AI 建议，仅供娱乐。</b></p>`;
+  <p class="llm-note">AI 解读，可能出错；排盘数字以正文为准。<b>AI 建议，仅供娱乐。</b></p>`;
 
 const llmBlock = (llm) => `<section class="rep-sec llm"><h3>AI 建议 · 仅供娱乐</h3>${llmInner(llm)}</section>`;
 
@@ -65,6 +65,43 @@ const ELEM_CAREER_SHORT = {
   水: ['贸易', '物流', '航运', '咨询'],
 };
 
+/* ==========================================================================
+   专业词 → 人话：总结里保留专业名词作“出处锚点”，紧跟一句白话翻译。
+   读者既看得懂，也看得出这话有师承、不是随口编的。
+   ========================================================================== */
+const PATTERN_PLAIN = {
+  食神格: '脑子活、有手艺、能把想法做成东西，靠表达和输出吃饭更顺',
+  伤官格: '有才气、不服输，适合靠创意和口才出头，注意别太对冲',
+  正官格: '讲规矩、扛得住责任，在有秩序的环境里稳步走到前面',
+  七杀格: '压力大的地方反而出成绩，适合有挑战、能压实力的活',
+  正财格: '踏实经营、稳定进账是长项，来得慢但站得稳',
+  偏财格: '来钱的路子活、机会多，适合灵活经营，也别贪快',
+  正印格: '学得快、有人愿意帮，靠专业和口碑立身最稳',
+  偏印格: '思路独特、爱钻研，适合专精或冷门的领域',
+  比肩格: '独立、要强，靠自己和同伴一起打拼比单打独斗强',
+  劫财格: '独立、要强，合作前把分工和利益说清楚更好',
+};
+const TEN_GOD_DO = {
+  七杀: '压力里带着机会，稳住别硬碰，把事做扎实',
+  正官: '适合把规矩立起来，重要决定多听一句再拍板',
+  正财: '踏实做事能见到回报，适合把收入这件事做实',
+  偏财: '机会多但也有起伏，别贪快，落袋为安',
+  食神: '靠手艺和表达出成绩，适合把想法做出来',
+  伤官: '有表现机会，但话别说太满，留三分余地',
+  正印: '贵人和学习运不错，适合进修、考证、找人带',
+  偏印: '适合钻研专业里深的东西，别钻牛角尖',
+  比肩: '容易有竞争，合作前把分工说清楚',
+  劫财: '容易有竞争，合作前把分工和利益说明白',
+};
+const GUA_LEAD = {
+  大安: '事情稳、不用急，守着现状等它自己落地',
+  留连: '事情容易拖，反复确认再落笔，别催太紧',
+  速喜: '喜信来得快，该出手时别犹豫',
+  赤口: '提防口舌是非，话少说、合同细看',
+  小吉: '有贵人从中说项，配合别人推进比单打独斗顺',
+  空亡: '多半落空，止住脚步比硬冲明智',
+};
+
 const kvRows = (rec, title) =>
   (rec.blocks || []).find((b) => b.title === title && b.kind === 'kv')?.rows || [];
 
@@ -83,14 +120,33 @@ function fortuneOf(rec) {
 
 function plainSummary(rec) {
   const rows = [];
-  let lead = '';
+  let verdict = '';   // 一句话结论：这段到底说什么
+  let why = '';       // 有出处的白话解释：凭什么这么说（保留专业名词作锚点）
+  let action = '';    // 行动指引：现在最该做的一件事
   let note = '';
 
   if (rec.type === 'ming') {
     const f = fortuneOf(rec);
-    lead = /身旺/.test(rec.summary || '')
-      ? '你的底子偏“自己扛”那一类：精力足、主意正，眼下容易用力太猛，什么都想自己兜着。'
-      : '你更吃“有人搭把手、按节奏来”的做事方式：硬撑容易累，借力反而走得远。';
+    const judge = Object.fromEntries(kvRows(rec, '判读'));
+    const patt = Object.fromEntries(kvRows(rec, '格局'));
+    const lyn = Object.fromEntries(kvRows(rec, '流年'));
+    const elems = (rec.blocks || []).find((b) => b.title === '五行' && b.kind === 'elems')?.items || [];
+    const strong = /身旺/.test(judge['身强弱'] || rec.summary || '');
+    const useRaw = f?.use?.length ? f.use : (rec.meta?.yong || String(judge['喜用'] || '').split('、').filter(Boolean));
+    const use = (useRaw || []).filter(Boolean);
+    const patName = patt['格局'] && patt['格局'] !== '未取' ? patt['格局'] : '';
+    const sorted = [...elems].sort((a, b) => b.v - a.v);
+    const top = sorted[0]?.e || '某一行';
+    const low = sorted[sorted.length - 1]?.e || '另一行';
+
+    verdict = strong
+      ? '你的底子偏“自己扛”那一类：精力足、主意正，眼下真正的功课不是不够拼，而是别用力太猛。'
+      : '你更吃“有人搭把手、按节奏来”那一套：硬撑容易累，借力反而走得远。';
+    why = `排盘判你“${judge['身强弱'] || (strong ? '身旺' : '身弱')}”${patName ? `、格局是“${patName}”` : ''}——说人话就是，${patName && PATTERN_PLAIN[patName] ? PATTERN_PLAIN[patName] : '按自己的节奏做事，不必套死路子'}。五行里${top}偏多、${low}偏少，${use.length ? `传统上建议往${use.join('、')}这边调，补的是状态，不是改命。` : '顺着自己的节奏挑事做就好。'}`;
+    const tg = lyn['十神'] || '';
+    const yearTag = (lyn['流年'] || '').replace(/\s+/g, '');
+    action = `${yearTag ? yearTag + '年' : '眼下'}${tg ? `走“${tg}”运` : ''}：${TEN_GOD_DO[tg] || '稳住节奏，把该做的事一件件做扎实。'}`;
+
     if (f?.colors) {
       const [main, alt] = String(f.colors).split('；');
       rows.push({ k: '穿什么', v: `${main}为主${alt ? `，${alt.replace(/^次选\s*/, '')}换着穿` : ''}。贴身的围巾、包、内搭用上一点就够，不用整套换。` });
@@ -98,10 +154,6 @@ function plainSummary(rec) {
     if (f?.direction || f?.cities) {
       rows.push({ k: '住哪儿', v: `${f?.direction || '东西向都行'}更顺手；长期生活可留意${f?.cities || '自己熟悉的城市'}。换个房间朝向也算。` });
     }
-    const judge = Object.fromEntries(kvRows(rec, '判读'));
-    const use = f?.use?.length
-      ? f.use
-      : (rec.meta?.yong || String(judge['喜用'] || '').split('、').filter(Boolean));
     const careerTags = use.flatMap((e) => ELEM_CAREER_SHORT[e] || []);
     rows.push({ k: '做什么', v: use.length
       ? '传统说法里偏下面这些方向——当个参考，别当成“现在就得换工作”。'
@@ -111,51 +163,97 @@ function plainSummary(rec) {
     if (f?.sports) rows.push({ k: '动一动', v: `${f.sports}。一周两三次就够，量力而行。` });
     note = '以上按传统五行喜用推演，属娱乐参考；不是医嘱，也不是职业建议。';
   } else if (rec.type === 'face' || rec.type === 'palm' || rec.type === 'combo') {
-    lead = rec.type === 'combo'
-      ? '把面相、手相、生日三样放一起看，比只看一样更稳。'
-      : `你给人的第一印象偏“${rec.traits?.[0] || '稳'}”这一类。`;
+    const t0 = rec.traits?.[0] || '稳';
+    verdict = rec.type === 'combo'
+      ? `面相、手相、生日三样合起来看，比只看一样更稳——你给人的第一印象偏“${t0}”。`
+      : `你给人的第一印象偏“${t0}”这一类。`;
+    const dims = rec.dims || [];
+    if (dims.length) {
+      const s = [...dims].sort((a, b) => b.v - a.v);
+      why = `六个维度里，${s[0].label}最出挑（${s[0].v}分），${s[s.length - 1].label}相对弱一点（${s[s.length - 1].v}分）。这些维度是本项目的自定权重，看个趋势就好，别把它当成打分评判。`;
+    } else {
+      why = `${rec.strengths?.[0] ? stripPrefix(rec.strengths[0]) : '整体气质是长期养成的，不是一两个特征能定死。'}${rec.cautions?.[0] ? ` 也要留意：${stripPrefix(rec.cautions[0])}。` : ''}`;
+    }
+    action = rec.advice?.[0] || '当个参考，别把自己看窄，长处接着用、短板慢慢补。';
     if (rec.strengths?.[0]) rows.push({ k: '你的长处', v: stripPrefix(rec.strengths[0]) });
     if (rec.cautions?.[0]) rows.push({ k: '留意的', v: stripPrefix(rec.cautions[0]) });
-    if (rec.advice?.[0]) rows.push({ k: '可以这么调', v: rec.advice[0] });
+    if (rec.advice?.[1]) rows.push({ k: '可以这么调', v: rec.advice[1] });
     if (rec.type === 'combo') rows.push({ k: '别搞混', v: '这是三样合起来看你自己，不是看两个人合不合，两者不是一回事。' });
-    note = '六维权重与分数为本项目自定，不是古籍原文；照片只作辅助。当个参考，别把自己看窄。';
+    note = '六维权重与照片识别为本项目自定，不是古籍原文；照片只作辅助。当个参考，别把自己看窄。';
   } else if (rec.type === 'compass' || rec.type === 'kan') {
-    lead = rec.meta?.match
-      ? '按你说的朝向，这房子跟你挺合拍，不用大改。'
-      : '按你说的朝向，房子跟你不太同组，但不用改门，微调就够。';
+    const m = rec.meta || {};
+    verdict = m.match
+      ? '按你说的朝向，这房子跟你挺合拍，不用大改，住得舒服最要紧。'
+      : '按你说的朝向，房子跟你不算同组，但不用改门，微调几处就够。';
+    why = `八宅把宅和命各分八卦：这套是“${m.houseGua || '—'}宅”、你是“${m.mGua || '—'}命”，${m.sitting?.n && m.facing?.n ? `坐${m.sitting.n}向${m.facing.n}。` : ''}宅命相配看的是住着顺不顺，不是摆件灵不灵。`;
     const labels = ['床头朝哪', '身体弱时', '哪里放东西', '记住这句'];
-    (rec.advice || []).slice(0, 4).forEach((a, i) => rows.push({ k: labels[i] || '建议', v: a }));
+    (rec.advice || []).forEach((a, i) => rows.push({ k: labels[i] || '建议', v: a }));
+    action = rec.advice?.[0] || '先顾好采光、通风和动线，比摆什么更实在。';
     note = '方位是传统参考；采光、通风、动线比摆件更实在。不构成装修或购房建议。';
   } else if (rec.type === 'bu') {
     const m = String(rec.summary || '').match(/落([^（(]+)[（(]([^）)]+)[）)]。(.*)/);
-    lead = m
-      ? `这件事眼下落在“${m[1].trim()}”——说白了：${m[3].split('。')[0]}。`
+    const gua = m?.[1]?.trim() || '这一课';
+    const rest = m?.[3] || '';
+    const wang = (() => {
+      const rows2 = kvRows(rec, '类象');
+      const r = Object.fromEntries(rows2);
+      return { text: r['旺衰'] || '', timing: r['应期'] || '' };
+    })();
+    verdict = m
+      ? `你问的这件事，眼下落在“${gua}”：${GUA_LEAD[gua] || rest.split('。')[0]}。`
       : '这件事眼下先看清节奏，再决定动不动。';
-    if (m?.[3]) rows.push({ k: '眼下怎么走', v: m[3] });
+    why = `${wang.text ? wang.text : '按落宫看，气势有强有弱'}${wang.timing ? ` 应期上，${wang.timing}。` : '。'}小六壬是把起课的那一刻切下来看，说的是当时的势头，不是给你下判决。`;
+    // 行动指引取落宫本义里的“怎么做”，避免和依据里的旺衰判断重复
+    const guaBody = (rec.blocks || []).find((b) => b.title === '宫位本义')?.text || '';
+    const how = String(guaBody).split('。').filter(Boolean).find((s) => /宜|可|先|宜与|配合/.test(s));
+    action = how ? how + '。' : '先把节奏放慢，把话说清楚再动。';
+    if (rest) rows.push({ k: '眼下怎么走', v: rest });
     if (rec.advice?.[0]) rows.push({ k: '提醒', v: rec.advice[0] });
     note = '小六壬取的是当下切片，一件事问一次就够；不构成决定依据。';
   } else if (rec.type === 'ze') {
     const picks = (rec.blocks || []).find((b) => b.title === '可选的日子');
     const list = picks?.rows || [];
-    lead = list.length
-      ? `这段时间比较合适的是 ${list.slice(0, 3).map((r) => r[0]).join('、')} 这几天。`
+    const basisRows = Object.fromEntries(kvRows(rec, '首选日的依据'));
+    verdict = list.length
+      ? `办这件事，最合适的是 ${list.slice(0, 3).map((r) => r[0]).join('、')} 这几天，越靠前越顺。`
       : '这段时间没有特别合适的日子，先按自己的节奏推进。';
+    why = basisRows['为什么合适']
+      ? `首选那天之所以合适：${basisRows['为什么合适']}。这是把建除吉凶、黄道黑道和你本命生肖合起来看的结果，日子只是一部分，事还得人来办。`
+      : '这是把建除吉凶、黄道黑道和本命生肖合起来看的结果，日子只是一部分，事还得人来办。';
+    action = basisRows['当天吉时']
+      ? `当天挑 ${String(basisRows['当天吉时']).split('、').slice(0, 2).join('、')} 办正事更顺；其余时段也不是不能用。`
+      : '日子定了就别反复改，把精力放在把事办扎实上。';
     if (list.length) rows.push({ k: '怎么挑', v: `一共挑出 ${list.length} 个可选日子，越靠前越合适；具体安排还得看你自己。` });
     if (rec.advice?.[0]) rows.push({ k: '挑日子的分寸', v: rec.advice[0] });
     note = '建除只论日辰，不代替对具体事项的判断；婚丧嫁娶请结合实际情况。';
   } else if (rec.type === 'hepan') {
-    lead = (rec.overall || 0) >= 70
-      ? '两个人的节奏比较合得来，遇事商量着来，默契会越来越足。'
-      : '两个人的节奏有差异，但差异本身不是问题，先说清楚再动。';
-    kvRows(rec, '关系').slice(0, 2).forEach(([k, v]) => rows.push({ k, v }));
-    if (rec.advice?.[0]) rows.push({ k: '相处提醒', v: rec.advice[0] });
-    note = '只看日柱与五行，不涉及双方家庭、价值观与现实条件；合得来还得靠相处。';
+    const dims = rec.scores || rec.dims || [];
+    const hi = (rec.overall || 0) >= 70;
+    const s = [...dims].sort((a, b) => b.v - a.v);
+    verdict = hi
+      ? '两个人整体挺合拍：节奏对得上，遇事商量着来，默契会越磨越好。'
+      : '两个人的节奏有差异，但差异本身不是问题——先把话说清楚，再一起动。';
+    why = s.length
+      ? `从四柱、纳音、生肖、十神几个角度合起来看，${s[0].label}这一项最投缘（${s[0].v}分），${s[s.length - 1].label}稍微需要磨合（${s[s.length - 1].v}分）。分数是把各家说法凑到一起的参考，不是相处及格线。`
+      : '从四柱、纳音、生肖、十神几个传统角度合起来看，分数是把各家说法凑到一起的参考，不是相处及格线。';
+    action = rec.advice?.[0] || '合得来还得靠相处，多留一点耐心给差异。';
+    kvRows(rec, '关系明细').slice(0, 2).forEach(([k, v]) => rows.push({ k, v }));
+    if (rec.advice?.[1]) rows.push({ k: '相处提醒', v: rec.advice[1] });
+    note = '从四柱、纳音、生肖、五行、十神几个传统角度看相处倾向，不涉及双方家庭、价值观与现实条件；合得来还得靠相处。';
   } else {
     return null; // 没把握的类型保留原文，不瞎编
   }
 
-  return { lead, rows, note };
+  return { verdict, why, action, rows, note };
 }
+
+/* 批语：按分句拆成独立的行，每句独占一行。
+   典籍金句前后半字数相等，断行天然整齐，绝不会出现虚词孤悬行尾。 */
+const verdictLines = (s) => String(s || '')
+  .replace(/^[「"“]|」|["”]$/g, '')
+  .split(/[，,、；;]/)
+  .map((x) => x.trim().replace(/[。.]$/, '').trim())
+  .filter(Boolean);
 
 function summaryBlock(rec) {
   const p = plainSummary(rec);
@@ -165,11 +263,15 @@ function summaryBlock(rec) {
   return `
   <section class="rep-sec plain-summary">
     <h3>总评</h3>
-    <p class="plain-lead">${esc(p.lead)}</p>
-    ${rec.traits?.length ? `<div class="tags">${rec.traits.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-    <div class="plain-rows">
-      ${p.rows.map((r) => `<div class="plain-row"><b>${esc(r.k)}</b><div class="plain-cell"><span>${esc(r.v)}</span>${r.tags?.length ? `<div class="plain-tags">${r.tags.map((t) => `<em>${esc(t)}</em>`).join('')}</div>` : ''}</div></div>`).join('')}
+    <div class="sum-core">
+      <p class="sum-verdict">${esc(p.verdict)}</p>
+      <p class="sum-why"><span class="sum-kicker">凭什么这么说</span>${esc(p.why)}</p>
+      <p class="sum-action"><span class="sum-arrow">→</span><span>${esc(p.action)}</span></p>
     </div>
+    ${rec.traits?.length ? `<div class="tags">${rec.traits.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+    ${p.rows.length ? `<div class="plain-rows">
+      ${p.rows.map((r) => `<div class="plain-row"><b>${esc(r.k)}</b><div class="plain-cell"><span>${esc(r.v)}</span>${r.tags?.length ? `<div class="plain-tags">${r.tags.map((t) => `<em>${esc(t)}</em>`).join('')}</div>` : ''}</div></div>`).join('')}
+    </div>` : ''}
     <p class="plain-note">${esc(p.note)}</p>
   </section>`;
 }
@@ -233,6 +335,23 @@ function radarBlock(rec) {
           <span class="v">${d.v}</span>
         </div>`).join('')}
     </div>
+  </section>`;
+}
+
+function scoresBlock(rec) {
+  if (!rec.scores?.length) return '';
+  return `
+  <section class="rep-sec">
+    <h3>几个方面</h3>
+    <div class="dim-list">
+      ${rec.scores.map((s) => `
+        <div class="dim">
+          <span class="dim-name">${esc(s.label)}</span>
+          <span class="bar"><i style="width:${Number(s.v) || 0}%"></i></span>
+          <span class="v">${esc(s.v)}</span>
+        </div>`).join('')}
+    </div>
+    <p class="muted" style="margin-top:10px">${esc(rec.scores.map((s) => `${s.label}：${s.note}`).join('　'))}</p>
   </section>`;
 }
 
@@ -329,9 +448,18 @@ function blocksBlock(rec) {
     if (rec.type === 'ming' && MING_DETAIL_TITLES.has(b.title)) detailed.push(sec);
     else normal.push(sec);
   });
-  return normal.join('') + (detailed.length
-    ? `<details class="detail-blocks"><summary>详细排盘 · 想看干支术语再展开</summary>${detailed.join('')}</details>`
-    : '');
+  if (!detailed.length) return normal.join('');
+
+  // 命理：术语建议与排盘明细同属"想深究"层，合并进同一个入口，
+  // 不让用户在两个看不懂的标题之间做选择题。
+  let extra = '';
+  if (rec.type === 'ming') {
+    const mingAdvice = (rec.advice || []).filter((a) => !a.includes('颜色、饮食、运动、城市'));
+    if (mingAdvice.length) {
+      extra = `<section class="rep-sec"><h3>更多建议</h3><ul class="rep-list">${mingAdvice.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></section>`;
+    }
+  }
+  return normal.join('') + `<details class="detail-blocks"><summary>展开看完整分析</summary>${detailed.join('')}${extra}</details>`;
 }
 
 /* 分数旁的等级注解也翻成人话 */
@@ -345,19 +473,9 @@ const LEVEL_PLAIN = {
 };
 
 function adviceBlock(rec) {
-  let advice = rec.advice || [];
-  if (rec.type === 'ming') {
-    advice = advice.filter((a) => !a.includes('颜色、饮食、运动、城市'));
-    if (!advice.length) return '';
-    // 命理的调候建议带干支术语，属于专业层：收进折叠，想看再展开，不抢总评的人话结论
-    return `
-    <details class="adv-notes">
-      <summary>排盘调候建议 · 想看术语再展开</summary>
-      <ul class="rep-list">
-        ${advice.map((a) => `<li>${esc(a)}</li>`).join('')}
-      </ul>
-    </details>`;
-  }
+  const advice = rec.advice || [];
+  // 命理建议已并进 blocksBlock 的「展开看完整分析」，这里不再单独出一个入口
+  if (rec.type === 'ming') return '';
   return listBlock('可做之事', advice);
 }
 
@@ -435,6 +553,16 @@ const BASIS = {
     ],
     custom: '综合看相的权重与分数为本项目自定。',
   },
+  hepan: {
+    school: '四柱合参 · 纳音五行',
+    rules: [
+      '年、月、日、时四柱逐柱对照，看双方干支的生克与合化。',
+      '纳音按六十甲子取五行，参双方纳音的生克关系。',
+      '生肖按地支六合、三合、相冲取象；五行按八字本气计数看互补。',
+      '十神按日主与对方各柱的关系取象，只作相处的参考。',
+    ],
+    custom: '合盘的总分、维度权重与等级为本项目自定，不对应古籍条文；仅作娱乐参考。',
+  },
 };
 
 function basisBlock(rec) {
@@ -442,7 +570,7 @@ function basisBlock(rec) {
   if (!b) return '';
   return `
   <details class="basis">
-    <summary>推演依据 · ${esc(b.school)}</summary>
+    <summary>这些判断的依据 · ${esc(b.school)}</summary>
     <ul>${b.rules.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
     <p class="basis-assume">统一假设：按北京时间，未校正真太阳时；立春换年；结果不构成任何决策依据。</p>
     <p class="basis-custom">${esc(b.custom)}</p>
@@ -560,6 +688,7 @@ export function reportView(id) {
 
           ${rec.blocks ? blocksBlock(rec) : ''}
 
+          ${scoresBlock(rec)}
           ${rec.type === 'compass' ? compassBlock(rec) : ''}
 
           ${rec.dims ? radarBlock(rec) : ''}
@@ -573,9 +702,11 @@ export function reportView(id) {
           ${adviceBlock(rec)}
           ${rec.llm ? llmBlock(rec.llm) : ''}
 
+          ${visionBlock(rec)}
+          ${basisBlock(rec)}
+
           <div class="verdict">
-            <small>批 语</small>
-            「${esc(rec.verdict)}」
+            ${verdictLines(rec.verdict).map((line) => `<span class="vline">${esc(line)}</span>`).join('')}
           </div>
 
           <footer class="rep-foot">
@@ -599,9 +730,11 @@ export function reportView(id) {
     `,
     mount: () => {
       const root = $('#app .view');
-      $('[data-copy]', root)?.addEventListener('click', () => copyText(recordToText(rec)));
+      // 复制与存图都跟报告页同源：用说人话的三段式，不再导出引擎原始摘要
+      const plain = plainSummary(rec);
+      $('[data-copy]', root)?.addEventListener('click', () => copyText(recordToText(rec, plain)));
       $('[data-card]', root)?.addEventListener('click', () => {
-        try { saveCard(rec); } catch { toast('生成失败，请重试'); }
+        try { saveCard(rec, plain); } catch { toast('生成失败，请重试'); }
       });
 
       const btn = $('[data-llm]', root);

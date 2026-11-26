@@ -203,7 +203,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B1210">
+<meta name="theme-color" content="#EAE3D5">
 <title>fatetell · 离线预览</title>
 <style>${css}</style>
 </head>
@@ -212,12 +212,11 @@ const html = `<!doctype html>
     <div class="splash-inner">
       <span class="splash-halo"></span>
       <svg class="splash-crane" viewBox="0 0 160 164" role="img" aria-label="问鹤 墨鹤标">
-        <path d="${cranePath}" fill="#241F17" fill-rule="evenodd"/>
-        <circle class="eye" cx="121.50" cy="22.00" r="2.12" fill="#A33B2B"/>
+        <path d="${cranePath}" fill="#1F1A13" fill-rule="evenodd"/>
+        <circle class="eye" cx="121.50" cy="22.00" r="2.12" fill="#99371F"/>
       </svg>
       <div class="splash-brand">问鹤</div>
       <div class="splash-tagline">问一句，有出处</div>
-      <div class="splash-seal">问</div>
     </div>
   </div>
   <div id="app" class="shell"></div>

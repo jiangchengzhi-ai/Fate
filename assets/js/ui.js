@@ -417,12 +417,16 @@ export async function copyText(text) {
   }
 }
 
-export function recordToText(r) {
+export function recordToText(r, plain) {
+  // 与报告页同源：优先用说人话的三段式，没有则回退引擎原文
+  const core = plain
+    ? [plain.verdict, `凭什么这么说：${plain.why}`, `→ ${plain.action}`]
+    : [r.summary];
   const lines = [
     `问鹤 ／ ${r.title}`,
     `${r.dateLabel || ''}　${r.level?.name || ''}　${r.overall} 分`,
     '',
-    r.summary,
+    ...core,
     '',
     ...(r.dims || []).map((d) => `${d.label} ${d.v}`),
     '',
@@ -437,26 +441,26 @@ export function recordToText(r) {
 }
 
 /* ---------------- 分享卡 ---------------- */
-export function saveCard(r) {
+export function saveCard(r, plain) {
   const W = 1080;
   const H = 1350;
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
 
-  const bg = g.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#F1EBDB');
-  bg.addColorStop(0.55, '#E9E1CF');
-  bg.addColorStop(1, '#E1D7C1');
+  // 素纸卡：单层发丝线 + 竖向微渐层，与报告页纸卡同一套语言（v2.7）
+  const bg = g.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#FBF7EE');
+  bg.addColorStop(1, '#F6F1E6');
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
 
-  g.strokeStyle = 'rgba(36,31,23,.35)';
+  g.strokeStyle = 'rgba(36,31,23,.20)';
   g.lineWidth = 2;
-  g.strokeRect(42, 42, W - 84, H - 84);
-  g.strokeStyle = 'rgba(36,31,23,.18)';
-  g.lineWidth = 1;
-  g.strokeRect(56, 56, W - 112, H - 112);
+  g.beginPath();
+  if (g.roundRect) g.roundRect(40, 40, W - 80, H - 80, 36);
+  else g.rect(40, 40, W - 80, H - 80); /* 老 WebView 降级为直角 */
+  g.stroke();
 
   const sans = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
   const serif = sans; /* 字体统一 v2.3：分享图也用黑体，保留别名避免遗漏 */
@@ -468,8 +472,8 @@ export function saveCard(r) {
   g.font = `54px ${serif}`;
   g.fillText(r.heading || r.title, 100, 214);
 
-  g.fillStyle = 'rgba(36,31,23,.5)';
-  g.font = `22px ${sans}`;
+  g.fillStyle = 'rgba(36,31,23,.6)';
+  g.font = `24px ${sans}`;
   g.fillText(`${r.dateLabel || ''}　${r.meta?.birth?.year ? r.meta.birth.year + ' 年生' : ''}`, 100, 254);
 
   g.strokeStyle = 'rgba(36,31,23,.25)';
@@ -477,51 +481,81 @@ export function saveCard(r) {
 
   g.fillStyle = '#241F17';
   g.font = `210px ${serif}`;
-  g.fillText(String(r.overall), 96, 500);
+  const scoreText = String(r.overall ?? '—');
+  const scoreW = g.measureText(scoreText).width;
+  g.fillText(scoreText, 96, 500);
 
-  g.fillStyle = 'rgba(36,31,23,.45)';
-  g.font = `24px ${serif}`;
-  g.fillText('分', 330, 500);
+  // 「分」是单位，按数字实际宽度贴在其右下，字号/对比度提到能看清
+  g.fillStyle = 'rgba(36,31,23,.72)';
+  g.font = `46px ${serif}`;
+  g.fillText('分', 96 + scoreW + 14, 500);
 
   g.fillStyle = '#A33B2B';
   g.font = `40px ${serif}`;
   g.textAlign = 'right';
   g.fillText(r.level?.name || '', W - 100, 470);
-  g.fillStyle = 'rgba(36,31,23,.45)';
-  g.font = `20px ${sans}`;
+  g.fillStyle = 'rgba(36,31,23,.55)';
+  g.font = `22px ${sans}`;
   g.fillText(r.level?.note || '', W - 100, 506);
   g.textAlign = 'left';
 
-  // 摘要
-  g.fillStyle = 'rgba(36,31,23,.85)';
-  g.font = `26px ${serif}`;
-  wrapText(g, r.summary || '', 100, 600, W - 200, 44, 5);
+  // 三段式总结：与报告页同源（plain 由页面传入），无则回退引擎原文
+  let y = 600;
+  if (plain) {
+    // 结论——最大、最深，一眼看懂
+    g.fillStyle = '#241F17';
+    g.font = `32px ${serif}`;
+    y = wrapText(g, plain.verdict, 100, y, W - 200, 48, 3);
+    y += 26;
+    // 凭什么这么说——小一号，带小标题
+    g.fillStyle = 'rgba(36,31,23,.45)';
+    g.font = `19px ${sans}`;
+    g.fillText('凭什么这么说', 100, y);
+    y += 34;
+    g.fillStyle = 'rgba(36,31,23,.78)';
+    g.font = `23px ${serif}`;
+    y = wrapText(g, plain.why, 100, y, W - 200, 38, 5);
+    y += 22;
+    // 行动指引——箭头起头，给一件能做的事
+    g.fillStyle = '#8B2F22';
+    g.font = `23px ${serif}`;
+    y = wrapText(g, `→ ${plain.action}`, 100, y, W - 200, 38, 3);
+  } else {
+    g.fillStyle = 'rgba(36,31,23,.82)';
+    g.font = `26px ${serif}`;
+    y = wrapText(g, r.summary || '', 100, y, W - 200, 44, 6);
+  }
 
-  // 六维
-  let y = 800;
-  (r.dims || []).slice(0, 6).forEach((d) => {
-    g.fillStyle = 'rgba(36,31,23,.6)';
-    g.font = `20px ${sans}`;
-    g.fillText(d.label, 100, y);
-    g.fillStyle = 'rgba(36,31,23,.13)';
-    g.fillRect(190, y - 12, W - 340, 6);
-    g.fillStyle = '#A33B2B';
-    g.fillRect(190, y - 12, (W - 340) * (d.v / 100), 6);
-    g.fillStyle = 'rgba(36,31,23,.55)';
-    g.font = `20px ${serif}`;
-    g.textAlign = 'right';
-    g.fillText(String(d.v), W - 100, y);
-    g.textAlign = 'left';
-    y += 42;
-  });
+  // 六维：只有报告本身有维度时才画，避免留一大片空白
+  const dims = (r.dims || []).slice(0, 6);
+  if (dims.length) {
+    y += 40;
+    dims.forEach((d) => {
+      g.fillStyle = 'rgba(36,31,23,.68)';
+      g.font = `22px ${sans}`;
+      g.fillText(d.label, 100, y);
+      g.fillStyle = 'rgba(36,31,23,.13)';
+      g.fillRect(190, y - 12, W - 340, 6);
+      g.fillStyle = '#A33B2B';
+      g.fillRect(190, y - 12, (W - 340) * (d.v / 100), 6);
+      // 维度分数也是数字，加大加清晰，别跟主分数一样犯小的毛病
+      g.fillStyle = 'rgba(36,31,23,.82)';
+      g.font = `30px ${serif}`;
+      g.textAlign = 'right';
+      g.fillText(String(d.v), W - 100, y + 4);
+      g.textAlign = 'left';
+      y += 42;
+    });
+  }
 
-  // 批语
+  // 批语：位置随内容量浮动，不再固定在 H-300 造成空白
+  const lineY = Math.max(y + 46, H - 620);
   g.strokeStyle = 'rgba(36,31,23,.22)';
-  g.beginPath(); g.moveTo(100, H - 300); g.lineTo(W - 100, H - 300); g.stroke();
+  g.beginPath(); g.moveTo(100, lineY); g.lineTo(W - 100, lineY); g.stroke();
   g.fillStyle = '#2A2318';
   g.font = `30px ${serif}`;
   g.textAlign = 'center';
-  g.fillText(`「${r.verdict}」`, W / 2, H - 230);
+  g.fillText(`「${r.verdict}」`, W / 2, lineY + 66);
   g.textAlign = 'left';
 
   // 印
@@ -555,21 +589,32 @@ export function saveCard(r) {
 
 function wrapText(g, text, x, y, maxW, lineH, maxLines) {
   const chars = [...text];
+  // 中文排版避头/避尾：收尾标点不能落在行首，起首括号不能留在行尾
+  const NO_HEAD = /[，。、；：？！）】》」』〕〉%‰…·]/;
+  const NO_TAIL = /[（【《「『〔〈]/;
   let line = '';
   let lines = 0;
   for (const ch of chars) {
     const test = line + ch;
     if (g.measureText(test).width > maxW && line) {
+      // 需要避头/避尾时，把上一行末字一起带到下一行，避免标点孤悬行首
+      let carry = '';
+      const arr = [...line];
+      if (arr.length > 1 && (NO_HEAD.test(ch) || NO_TAIL.test(arr[arr.length - 1]))) {
+        carry = arr.pop();
+        line = arr.join('');
+      }
       g.fillText(line, x, y);
       y += lineH;
       lines++;
-      line = ch;
+      line = carry + ch;
       if (lines >= maxLines - 1) break;
     } else {
       line = test;
     }
   }
-  if (line && lines < maxLines) g.fillText(line, x, y);
+  if (line && lines < maxLines) { g.fillText(line, x, y); y += lineH; }
+  return y; // 返回下一行的 y，供调用方排后续内容
 }
 
 

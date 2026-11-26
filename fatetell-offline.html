@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B1210">
+<meta name="theme-color" content="#EAE3D5">
 <title>fatetell · 离线预览</title>
 <style>/* ==========================================================================
    fatetell — 相与盘
@@ -12,31 +12,31 @@
 
 :root{
   color-scheme:dark;
-  --ink:#0B1210;
-  --ink-2:#0F1916;
-  --ink-3:#15211D;
+  --ink:#EAE3D5;
+  --ink-2:#F1EADB;
+  --ink-3:#E1D8C6;
 
-  --brass:#A98A4E;
-  --brass-hi:#CBA968;
-  --brass-soft:rgba(169,138,78,.26);
-  --brass-faint:rgba(169,138,78,.12);
+  --brass:#7A5230;
+  --brass-hi:#8F6338;
+  --brass-soft:rgba(122,82,48,.26);
+  --brass-faint:rgba(122,82,48,.10);
 
-  --cinnabar:#A33B2B;
-  --cinnabar-hi:#BE4C39;
-  --cinnabar-deep:#8B2F22;
-  --seal:#9C3325;
+  --cinnabar:#99371F;
+  --cinnabar-hi:#AC4227;
+  --cinnabar-deep:#7E2C16;
+  --seal:#99371F;
 
-  --text:#E9E4D6;
-  --text-2:rgba(233,228,214,.72);
-  --text-3:rgba(233,228,214,.54);
-  --line:rgba(233,228,214,.10);
-  --line-strong:rgba(233,228,214,.18);
+  --text:#1F1A13;
+  --text-2:#332C22;
+  --text-3:#615747;
+  --line:#D5CAB5;
+  --line-strong:#BDB095;
 
-  --paper:#EDE7D8;
-  --paper-2:#E5DDCB;
-  --paper-ink:#241F17;
-  --paper-ink-2:rgba(36,31,23,.66);
-  --paper-line:rgba(36,31,23,.20);
+  --paper:#EAE3D5;
+  --paper-2:#E1D8C6;
+  --paper-ink:#1F1A13;
+  --paper-ink-2:rgba(31,26,19,.70);
+  --paper-line:rgba(31,26,19,.20);
 
   /* 字体统一 v2.3：全站单一黑体族，层次靠字号/字重/字距/颜色，不再靠切换衬线体 */
   --sans:"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
@@ -55,7 +55,7 @@ body{
   margin:0;
   min-height:100dvh;
   background:
-    radial-gradient(1100px 700px at 50% -12%, rgba(169,138,78,.11), transparent 62%),
+    radial-gradient(1100px 700px at 50% -12%, rgba(122,82,48,.11), transparent 62%),
     radial-gradient(800px 600px at 106% 96%, rgba(74,124,111,.10), transparent 60%),
     var(--ink);
   color:var(--text);
@@ -155,8 +155,8 @@ img{display:block;max-width:100%}
 .dial{width:100%;max-width:372px;margin:0 auto;display:block;overflow:visible}
 .dial .wedge{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dial .wedge-fill{fill:rgba(233,228,214,.028);stroke:rgba(233,228,214,.10);stroke-width:1;transition:fill .45s var(--ease),stroke .45s var(--ease)}
-.dial .wedge:hover .wedge-fill,.dial .wedge:focus-visible .wedge-fill{fill:rgba(169,138,78,.13);stroke:var(--brass-hi);stroke-opacity:.75}
-.dial .wedge:active .wedge-fill{fill:rgba(169,138,78,.2)}
+.dial .wedge:hover .wedge-fill,.dial .wedge:focus-visible .wedge-fill{fill:rgba(122,82,48,.13);stroke:var(--brass-hi);stroke-opacity:.75}
+.dial .wedge:active .wedge-fill{fill:rgba(122,82,48,.2)}
 .dial .wedge-t{font-family:var(--sans);font-size:25px;fill:var(--text);letter-spacing:.1em}
 .dial .wedge-sub{font-family:var(--sans);font-size:8.5px;fill:var(--text-3);letter-spacing:.28em}
 .dial .tick{stroke:var(--brass);stroke-opacity:.45}
@@ -336,7 +336,7 @@ img{display:block;max-width:100%}
 .opt:active{transform:translateY(1px)}
 .opt[aria-pressed="true"]{
   border-color:var(--brass-hi);
-  background:rgba(169,138,78,.13);
+  background:rgba(122,82,48,.13);
   color:var(--text);
   box-shadow:inset 0 0 0 1px rgba(203,169,104,.22);
 }
@@ -435,24 +435,35 @@ img{display:block;max-width:100%}
 .ready{
   display:flex;flex-direction:column;
   border:1px solid var(--line);
+  border-radius:20px;
+  overflow:hidden;
   margin-top:18px;
 }
 .ready-row{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
+  display:flex;
   align-items:center;
-  gap:13px;
-  padding:14px 15px;
+  justify-content:space-between;
+  gap:14px;
+  padding:15px 18px;
   border-bottom:1px solid var(--line);
 }
 .ready-row:last-child{border-bottom:0}
-.ready-idx{font-family:var(--sans);font-size:12px;color:var(--brass);width:14px}
-.ready-name{font-family:var(--sans);font-size:14.5px;letter-spacing:.1em}
-.ready-note{grid-column:2;font-size:11.5px;color:var(--text-3);margin-top:-6px}
-.ready-state{font-size:11.5px;letter-spacing:.08em;color:var(--text-3)}
-.ready-state.done{color:var(--brass-hi)}
-.ready-state.done::before{content:"";display:inline-block;width:4px;height:4px;background:var(--brass-hi);margin-right:6px;vertical-align:2px}
-.ready-state.todo::before{content:"";display:inline-block;width:4px;height:4px;border:1px solid var(--text-3);margin-right:6px;vertical-align:2px}
+.ready-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ready-name{font-family:var(--sans);font-size:15px;letter-spacing:.08em;color:var(--text)}
+.ready-note{font-size:12.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ready-go{
+  flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  height:38px;padding:0 17px;
+  border:1px solid var(--brass-soft);
+  border-radius:999px;
+  color:var(--brass-hi);
+  font-family:var(--sans);font-size:13.5px;letter-spacing:.06em;
+  text-decoration:none;
+  transition:background .2s var(--ease),border-color .2s var(--ease);
+}
+.ready-go:hover{background:rgba(140,107,63,.09);border-color:var(--brass)}
+.ready-row.is-done .ready-go{color:var(--text-3);border-color:var(--line-strong)}
 
 /* ---------- 字段 ---------- */
 .field{margin-top:16px}
@@ -470,7 +481,7 @@ img{display:block;max-width:100%}
   letter-spacing:.04em;
   appearance:none;
 }
-.input:focus{outline:none;border-color:var(--brass);background:rgba(169,138,78,.06)}
+.input:focus{outline:none;border-color:var(--brass);background:rgba(122,82,48,.06)}
 .input::-webkit-calendar-picker-indicator{filter:invert(.75) sepia(.4);cursor:pointer}
 select.input{background-image:linear-gradient(45deg,transparent 50%,var(--brass) 50%),linear-gradient(135deg,var(--brass) 50%,transparent 50%);background-position:calc(100% - 18px) 21px,calc(100% - 13px) 21px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px}
 select.input option{background:#0F1916;color:#E9E4D6}
@@ -528,12 +539,12 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   transition:all .22s var(--ease);
 }
 .dir-btn:hover{border-color:var(--brass-soft);color:var(--text)}
-.dir-btn[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(169,138,78,.13);color:var(--text)}
+.dir-btn[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(122,82,48,.13);color:var(--text)}
 .dir-btn.empty{visibility:hidden}
 .dir-core{display:grid;place-items:center;color:var(--text-3);font-size:9.5px;letter-spacing:.2em}
 
 /* ---------- 罗盘结果表 ---------- */
-.tbl{border-top:1px solid rgba(36,31,23,.22);margin-top:8px}
+.tbl{border-top:1px solid rgba(31,26,19,.22);margin-top:8px}
 .tbl-head{
   display:grid;
   grid-template-columns:60px 1fr auto;
@@ -541,7 +552,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   padding:7px 0 6px;
   font-size:9.5px;
   letter-spacing:.18em;
-  color:rgba(36,31,23,.56);
+  color:rgba(31,26,19,.56);
 }
 .tbl-row{
   display:grid;
@@ -549,21 +560,21 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   gap:10px;
   align-items:center;
   padding:11px 0;
-  border-bottom:1px solid rgba(36,31,23,.13);
+  border-bottom:1px solid rgba(31,26,19,.13);
   font-size:13px;
 }
-.tbl-row .d{font-family:var(--sans);letter-spacing:.14em;color:rgba(36,31,23,.92)}
+.tbl-row .d{font-family:var(--sans);letter-spacing:.14em;color:rgba(31,26,19,.92)}
 .tbl-row .s{font-family:var(--sans);letter-spacing:.14em;color:var(--cinnabar);font-size:13.5px}
-.tbl-row .t{font-size:10.5px;color:rgba(36,31,23,.62);letter-spacing:.02em;text-align:right}
+.tbl-row .t{font-size:10.5px;color:rgba(31,26,19,.62);letter-spacing:.02em;text-align:right}
 .tbl-row.bad .s{color:var(--cinnabar);opacity:.8}
-.tbl-row.good .d::before{content:"";display:inline-block;width:4px;height:4px;background:rgba(36,31,23,.55);border-radius:50%;margin-right:7px;vertical-align:2px}
+.tbl-row.good .d::before{content:"";display:inline-block;width:4px;height:4px;background:rgba(31,26,19,.55);border-radius:50%;margin-right:7px;vertical-align:2px}
 .tbl-row.bad .d::before{content:"";display:inline-block;width:4px;height:4px;background:var(--cinnabar);border-radius:50%;margin-right:7px;vertical-align:2px}
 
 .verdict-line{
   margin-top:16px;
   padding:14px 15px;
   border:1px solid var(--brass-soft);
-  background:linear-gradient(180deg, rgba(169,138,78,.08), rgba(169,138,78,.02));
+  background:rgba(122,82,48,.06);
   font-family:var(--sans);
   font-size:13.5px;
   line-height:1.9;
@@ -575,28 +586,21 @@ select.input option:checked{background:#233028;color:#F5EBD6}
    宣纸批注
    ========================================================================== */
 .paper-wrap{margin-top:16px}
+/* 素纸卡：去掉旧版三层硬描边，按 v2.7 规范用纸色微渐层 + 单层发丝线 + 圆角做分层 */
 .paper{
   position:relative;
-  background:
-    radial-gradient(120% 80% at 20% 0%, rgba(255,255,255,.55), transparent 55%),
-    radial-gradient(100% 70% at 100% 100%, rgba(120,96,58,.10), transparent 60%),
-    linear-gradient(155deg, #F0EADB 0%, #E9E1CF 48%, #E2D9C4 100%);
+  background:var(--ink-2);
   color:var(--paper-ink);
-  border:1px solid rgba(36,31,23,.42);
-  padding:7px;
-  box-shadow:0 30px 70px -34px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.5) inset;
-}
-.paper::after{
-  content:"";
-  position:absolute;
-  inset:3px;
-  border:1px solid rgba(36,31,23,.16);
-  pointer-events:none;
+  border:1px solid var(--paper-line, rgba(31,26,19,.20));
+  border-radius:20px;
+  padding:0;
+  box-shadow:0 6px 20px -14px rgba(31,26,19,.16);
 }
 .paper-inner{
   position:relative;
-  border:1px solid rgba(36,31,23,.30);
-  padding:22px 20px 18px;
+  border:0;
+  border-radius:20px;
+  padding:28px 24px 24px;
   overflow:hidden;
 }
 .rep-side{
@@ -607,14 +611,14 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   font-family:var(--sans);
   font-size:11px;
   letter-spacing:.34em;
-  color:rgba(36,31,23,.56);
+  color:rgba(31,26,19,.56);
   pointer-events:none;
 }
 .rep-head{position:relative;padding-right:26px}
 .rep-kicker{
   font-size:10.5px;
   letter-spacing:.16em;
-  color:rgba(36,31,23,.62);
+  color:rgba(31,26,19,.62);
 }
 .rep-title{
   font-family:var(--sans);
@@ -661,7 +665,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   color:var(--cinnabar);
   text-indent:.24em;
 }
-.rep-score .lvl span{font-size:10px;letter-spacing:.14em;color:rgba(36,31,23,.5);display:block;margin-top:3px}
+.rep-score .lvl span{font-size:10px;letter-spacing:.14em;color:rgba(31,26,19,.5);display:block;margin-top:3px}
 
 .rep-sec{margin-top:20px;padding-top:15px;border-top:1px solid var(--paper-line);position:relative}
 .rep-sec h3{
@@ -674,21 +678,21 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   gap:9px;
 }
 .rep-sec h3::before{content:"";width:5px;height:5px;background:var(--cinnabar);flex:none}
-.rep-sec p{font-size:13px;line-height:1.95;letter-spacing:.02em;color:rgba(36,31,23,.86);margin-top:9px}
+.rep-sec p{font-size:13px;line-height:1.95;letter-spacing:.02em;color:rgba(31,26,19,.86);margin-top:9px}
 .rep-sec .dim-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .dim{display:grid;grid-template-columns:52px 1fr 30px;align-items:center;gap:10px;font-size:12px;letter-spacing:.06em}
-.dim .bar{height:3px;background:rgba(36,31,23,.13);position:relative;overflow:hidden}
+.dim .bar{height:3px;background:rgba(31,26,19,.13);position:relative;overflow:hidden}
 .dim .bar i{position:absolute;inset:0 auto 0 0;background:var(--cinnabar);opacity:.85;width:0;transition:width 1s var(--ease)}
-.dim .v{font-family:var(--sans);text-align:right;color:rgba(36,31,23,.72);font-variant-numeric:tabular-nums}
-.dim-name{color:rgba(36,31,23,.66)}
+.dim .v{font-family:var(--sans);text-align:right;color:rgba(31,26,19,.72);font-variant-numeric:tabular-nums}
+.dim-name{color:rgba(31,26,19,.66)}
 
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .tag{
   font-size:11.5px;
   letter-spacing:.08em;
   padding:3px 9px 4px;
-  border:1px solid rgba(36,31,23,.28);
-  color:rgba(36,31,23,.8);
+  border:1px solid rgba(31,26,19,.28);
+  color:rgba(31,26,19,.8);
   background:rgba(255,255,255,.14);
 }
 .tag.red{border-color:rgba(163,59,43,.45);color:var(--cinnabar)}
@@ -699,30 +703,30 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   line-height:1.85;
   padding-left:17px;
   position:relative;
-  color:rgba(36,31,23,.84);
+  color:rgba(31,26,19,.84);
 }
 .rep-list li::before{
   content:"";
   position:absolute;
   left:2px;top:.78em;
   width:5px;height:1px;
-  background:rgba(36,31,23,.45);
+  background:rgba(31,26,19,.45);
 }
 .rep-list li b{font-weight:600;letter-spacing:.04em}
 
 .verdict{
-  margin:22px 0 4px;
-  padding:18px 6px 16px;
+  margin:14px 0 4px;
+  padding:12px 2px 6px;
   border-top:1px solid var(--paper-line);
-  border-bottom:1px solid var(--paper-line);
   text-align:center;
   font-family:var(--sans);
   font-size:17px;
   line-height:2;
-  letter-spacing:.14em;
+  letter-spacing:.1em;
   color:#2A2318;
 }
-.verdict small{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.3em;color:rgba(36,31,23,.4);margin-bottom:10px}
+.verdict .vline{display:block}
+.verdict small{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.3em;color:rgba(31,26,19,.4);margin-bottom:10px}
 
 .rep-foot{
   display:flex;
@@ -731,7 +735,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   gap:14px;
   margin-top:20px;
 }
-.rep-foot .meta{font-size:9.5px;line-height:1.9;letter-spacing:.05em;color:rgba(36,31,23,.56);max-width:20em}
+.rep-foot .meta{font-size:9.5px;line-height:1.9;letter-spacing:.05em;color:rgba(31,26,19,.56);max-width:20em}
 .seal{
   width:48px;height:48px;
   flex:none;
@@ -752,28 +756,28 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 
 /* 雷达图 */
 .radar{display:block;width:100%;max-width:260px;margin:12px auto 0}
-.radar .grid{fill:none;stroke:rgba(36,31,23,.16);stroke-width:.7}
-.radar .axis{stroke:rgba(36,31,23,.12);stroke-width:.7}
+.radar .grid{fill:none;stroke:rgba(31,26,19,.16);stroke-width:.7}
+.radar .axis{stroke:rgba(31,26,19,.12);stroke-width:.7}
 .radar .shape{fill:rgba(163,59,43,.14);stroke:var(--cinnabar);stroke-width:1.2;stroke-linejoin:round}
 .radar .dot{fill:var(--cinnabar)}
-.radar .lab{font-family:var(--sans);font-size:9.5px;fill:rgba(36,31,23,.62);letter-spacing:.08em}
-.radar .val{font-family:var(--sans);font-size:8px;fill:rgba(36,31,23,.4)}
+.radar .lab{font-family:var(--sans);font-size:9.5px;fill:rgba(31,26,19,.62);letter-spacing:.08em}
+.radar .val{font-family:var(--sans);font-size:8px;fill:rgba(31,26,19,.4)}
 
 /* 三源对照 */
 .tri{display:flex;flex-direction:column;gap:0;margin-top:12px;border-top:1px solid var(--paper-line)}
 .tri-row{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--paper-line)}
 .tri-key{font-family:var(--sans);font-size:10.5px;letter-spacing:.2em;color:var(--cinnabar);padding-top:2px}
-.tri-val{font-size:12px;line-height:1.85;color:rgba(36,31,23,.82)}
+.tri-val{font-size:12px;line-height:1.85;color:rgba(31,26,19,.82)}
 
 /* 五行条 */
 .elem-bars{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .elem{display:grid;grid-template-columns:30px 1fr 34px;gap:10px;align-items:center;font-size:11.5px}
-.elem .ch{font-family:var(--sans);font-size:13px;letter-spacing:.1em;color:rgba(36,31,23,.8)}
-.elem .bar{height:4px;background:rgba(36,31,23,.12);position:relative}
+.elem .ch{font-family:var(--sans);font-size:13px;letter-spacing:.1em;color:rgba(31,26,19,.8)}
+.elem .bar{height:4px;background:rgba(31,26,19,.12);position:relative}
 .elem .bar i{position:absolute;inset:0 auto 0 0;width:0;transition:width .9s var(--ease)}
-.elem .pct{font-family:var(--sans);text-align:right;color:rgba(36,31,23,.55)}
+.elem .pct{font-family:var(--sans);text-align:right;color:rgba(31,26,19,.55)}
 .elem[data-e="木"] .bar i{background:#4F7355}
-.elem[data-e="火"] .bar i{background:#A33B2B}
+.elem[data-e="火"] .bar i{background:var(--cinnabar)}
 .elem[data-e="土"] .bar i{background:#9C7B45}
 .elem[data-e="金"] .bar i{background:#8A8778}
 .elem[data-e="水"] .bar i{background:#3F5A66}
@@ -877,14 +881,14 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 .hour b{font-family:var(--sans);font-weight:400;font-size:13px;letter-spacing:.06em;color:var(--text-2)}
 .hour span{font-size:8.5px;color:var(--text-3);letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .hour:hover{border-color:var(--brass-soft)}
-.hour[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(169,138,78,.13)}
+.hour[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(122,82,48,.13)}
 .hour[aria-pressed="true"] b{color:var(--text)}
 
 .elem-preview{margin-top:18px}
 .elem-preview:empty{display:none}
 .preview-line{
   border:1px solid var(--brass-soft);
-  background:rgba(169,138,78,.055);
+  background:rgba(122,82,48,.055);
   padding:11px 13px;
   font-size:12px;
   letter-spacing:.06em;
@@ -892,22 +896,23 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 }
 .preview-line span{font-family:var(--sans);color:var(--brass-hi);letter-spacing:.12em}
 
-/* ---------- 就绪列表微调 ---------- */
-.ready-row{grid-template-columns:16px 1fr auto;row-gap:3px;column-gap:10px;padding:13px 14px}
-.ready-note{margin-top:0}
-.ready-state a{color:var(--brass-hi);border-bottom:1px solid var(--brass-soft)}
+/* ---------- 就绪列表窄屏微调 ---------- */
+@media(max-width:420px){
+  .ready-row{padding:13px 14px;gap:10px}
+  .ready-go{height:36px;padding:0 14px}
+}
 
 /* ---------- 三停 / 逐项 ---------- */
 .stops{display:flex;flex-direction:column;gap:9px;margin-top:12px}
 .stop{display:grid;grid-template-columns:26px 60px 1fr 24px;gap:9px;align-items:center}
-.stop-l{font-family:var(--sans);font-size:11.5px;letter-spacing:.1em;color:rgba(36,31,23,.8);white-space:nowrap}
-.stop-h{font-size:9.5px;line-height:1.3;color:rgba(36,31,23,.60);letter-spacing:0;white-space:nowrap}
-.stop .bar{height:3px;background:rgba(36,31,23,.12);position:relative;overflow:hidden}
+.stop-l{font-family:var(--sans);font-size:11.5px;letter-spacing:.1em;color:rgba(31,26,19,.8);white-space:nowrap}
+.stop-h{font-size:9.5px;line-height:1.3;color:rgba(31,26,19,.60);letter-spacing:0;white-space:nowrap}
+.stop .bar{height:3px;background:rgba(31,26,19,.12);position:relative;overflow:hidden}
 .stop .bar i{position:absolute;inset:0 auto 0 0;background:var(--cinnabar);opacity:.82}
-.stop-v{font-family:var(--sans);font-size:11px;text-align:right;color:rgba(36,31,23,.55)}
+.stop-v{font-family:var(--sans);font-size:11px;text-align:right;color:rgba(31,26,19,.55)}
 
 .rep-items{display:flex;flex-direction:column;margin-top:8px}
-.rep-item{padding:11px 0;border-bottom:1px solid rgba(36,31,23,.12)}
+.rep-item{padding:11px 0;border-bottom:1px solid rgba(31,26,19,.12)}
 .rep-item:last-child{border-bottom:0;padding-bottom:0}
 .ri-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .ri-head h4{
@@ -915,7 +920,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   font-size:12.5px;
   font-weight:400;
   letter-spacing:.16em;
-  color:rgba(36,31,23,.58);
+  color:rgba(31,26,19,.58);
 }
 .ri-head span{
   font-size:10px;
@@ -924,7 +929,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   border:1px solid rgba(163,59,43,.28);
   padding:1px 6px;
 }
-.rep-item p{margin-top:6px;font-size:12.5px;line-height:1.9;color:rgba(36,31,23,.84)}
+.rep-item p{margin-top:6px;font-size:12.5px;line-height:1.9;color:rgba(31,26,19,.84)}
 
 .paper{animation:paper-in .7s var(--ease) both}
 @keyframes paper-in{
@@ -966,7 +971,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   border-bottom:1px solid var(--line);
   transition:background .22s var(--ease);
 }
-.method:hover{background:rgba(169,138,78,.05)}
+.method:hover{background:rgba(122,82,48,.05)}
 .method-name{font-family:var(--sans);font-size:16px;letter-spacing:.12em}
 .method-desc{grid-column:1;font-size:11.5px;color:var(--text-3);letter-spacing:.03em}
 .method-go{grid-column:2;grid-row:1 / span 2;align-self:center;color:var(--brass);font-size:15px}
@@ -1006,7 +1011,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
   transition:all .2s var(--ease);
 }
 .chip:hover{border-color:var(--brass-soft)}
-.chip[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(169,138,78,.12);color:var(--text)}
+.chip[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(122,82,48,.12);color:var(--text)}
 
 .hit{display:block;padding:14px 0;border-bottom:1px solid var(--line)}
 .hit-text{display:block;font-size:13.5px;line-height:1.9;color:var(--text)}
@@ -1035,25 +1040,25 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 .blk-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
 .blk-table th{
   font-family:var(--sans);font-weight:400;font-size:10px;letter-spacing:.14em;
-  color:rgba(36,31,23,.5);text-align:left;padding:0 8px 7px 0;border-bottom:1px solid var(--paper-line);
+  color:rgba(31,26,19,.5);text-align:left;padding:0 8px 7px 0;border-bottom:1px solid var(--paper-line);
 }
-.blk-table td{padding:8px 8px 8px 0;border-bottom:1px solid rgba(36,31,23,.12);color:rgba(36,31,23,.84)}
+.blk-table td{padding:8px 8px 8px 0;border-bottom:1px solid rgba(31,26,19,.12);color:rgba(31,26,19,.84)}
 .blk-table td.em{font-family:var(--sans);font-size:17px;letter-spacing:.1em;color:#241F17}
 .blk-kv{margin-top:10px}
-.blk-kv > div{display:grid;grid-template-columns:62px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid rgba(36,31,23,.12);font-size:12.5px}
-.blk-kv dt{color:rgba(36,31,23,.5);letter-spacing:.1em;font-family:var(--sans);font-size:11px}
-.blk-kv dd{margin:0;color:rgba(36,31,23,.86)}
+.blk-kv > div{display:grid;grid-template-columns:62px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid rgba(31,26,19,.12);font-size:12.5px}
+.blk-kv dt{color:rgba(31,26,19,.5);letter-spacing:.1em;font-family:var(--sans);font-size:11px}
+.blk-kv dd{margin:0;color:rgba(31,26,19,.86)}
 
 .cites .cite{margin:14px 0 0;padding-left:11px;border-left:2px solid rgba(163,59,43,.35)}
 .cite blockquote{margin:0;font-family:var(--sans);font-size:13.5px;line-height:1.95;letter-spacing:.04em;color:#2A2318}
-.cite figcaption{margin-top:6px;font-size:10px;letter-spacing:.04em;color:rgba(36,31,23,.5)}
-.cite-kind{margin-left:5px;padding:0 4px;border:1px solid rgba(36,31,23,.25)}
+.cite figcaption{margin-top:6px;font-size:10px;letter-spacing:.04em;color:rgba(31,26,19,.5)}
+.cite-kind{margin-left:5px;padding:0 4px;border:1px solid rgba(31,26,19,.25)}
 .cite-kind.ori{border-color:rgba(163,59,43,.4);color:var(--cinnabar)}
-.cite-note{margin-top:14px;font-size:10px;line-height:1.8;color:rgba(36,31,23,.56);letter-spacing:.02em}
+.cite-note{margin-top:14px;font-size:10px;line-height:1.8;color:rgba(31,26,19,.56);letter-spacing:.02em}
 
-.llm .llm-text{font-size:13px;line-height:1.98;color:rgba(36,31,23,.88);margin-top:9px;letter-spacing:.02em}
+.llm .llm-text{font-size:13px;line-height:1.98;color:rgba(31,26,19,.88);margin-top:9px;letter-spacing:.02em}
 .llm .llm-text + .llm-text{margin-top:9px}
-.llm .llm-note{font-size:9.5px;line-height:1.8;color:rgba(36,31,23,.56);margin-top:12px;letter-spacing:.02em}
+.llm .llm-note{font-size:9.5px;line-height:1.8;color:rgba(31,26,19,.56);margin-top:12px;letter-spacing:.02em}
 
 /* ---------- 小屏 / 大屏 ---------- */
 @media (max-width:379px){
@@ -1091,10 +1096,10 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 .rep-tag{
   margin-left:8px;
   padding-left:8px;
-  border-left:1px solid rgba(36,31,23,.25);
+  border-left:1px solid rgba(31,26,19,.25);
   font-size:9.5px;
   letter-spacing:.1em;
-  color:rgba(36,31,23,.45);
+  color:rgba(31,26,19,.45);
 }
 @media (max-width:430px){
   .legal-rail{right:2px;font-size:8.5px;letter-spacing:.24em;opacity:.8}
@@ -1109,7 +1114,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 }
 
 
-.notice-card{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin:14px 0 0;padding:11px 12px;border:1px solid var(--brass-soft);background:rgba(169,138,78,.06);font-size:11px;line-height:1.8;color:var(--text-2)}
+.notice-card{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin:14px 0 0;padding:11px 12px;border:1px solid var(--brass-soft);background:rgba(122,82,48,.06);font-size:11px;line-height:1.8;color:var(--text-2)}
 .notice-card b{font-family:var(--sans);font-weight:400;letter-spacing:.08em;color:var(--brass-hi)}
 .notice-card button{flex:none;font-size:11px;letter-spacing:.06em;color:var(--brass-hi);border-bottom:1px solid var(--brass-soft);padding-bottom:1px}
 
@@ -1128,10 +1133,10 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 
 /* ---------- critique fixes：对比度 / 触控 / 状态 ---------- */
 .hero-tag{color:var(--brass-hi);opacity:.95}
-.rep-tag{color:rgba(36,31,23,.62)}
-.cite figcaption{color:rgba(36,31,23,.64)}
-.stop-h{color:rgba(36,31,23,.66)}
-.blk-table th{color:rgba(36,31,23,.64)}
+.rep-tag{color:rgba(31,26,19,.62)}
+.cite figcaption{color:rgba(31,26,19,.64)}
+.stop-h{color:rgba(31,26,19,.66)}
+.blk-table th{color:rgba(31,26,19,.64)}
 .input::placeholder{color:rgba(233,228,214,.58)}
 .opt{min-height:44px}
 .chip{min-height:40px;padding:8px 14px}
@@ -1140,7 +1145,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 .sheet-open{overflow:hidden}
 .toast{display:flex;align-items:center;gap:14px}
 .toast-act{color:var(--brass-hi);font-size:12px;letter-spacing:.04em;border-bottom:1px solid var(--brass-soft);white-space:nowrap}
-.inline-warn{border:1px solid var(--brass-soft);background:rgba(169,138,78,.06);padding:14px;margin-top:16px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+.inline-warn{border:1px solid var(--brass-soft);background:rgba(122,82,48,.06);padding:14px;margin-top:16px;display:flex;gap:14px;align-items:center;justify-content:space-between}
 .inline-warn p{font-size:12px;line-height:1.8;color:var(--text-2);margin:0}
 .inline-warn .btn{flex:0 0 auto;white-space:nowrap}
 .more-toggle{width:100%;margin-top:18px;padding:13px;border:1px dashed var(--line-strong);color:var(--text-2);font-size:12.5px;letter-spacing:.08em;background:none}
@@ -1154,7 +1159,7 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 .auto-note{margin:16px 0 0;font-size:12.5px;line-height:1.85;color:var(--text-3)}
 .manual-link{display:block;margin:18px auto 0;padding:6px 2px;font-size:12px;letter-spacing:.08em;color:var(--text-3);border-bottom:1px solid var(--line);background:none}
 .manual-link:hover{color:var(--brass-hi);border-color:var(--brass-soft)}
-.llm-loading{font-size:12.5px;line-height:1.9;color:rgba(36,31,23,.66);letter-spacing:.04em}
+.llm-loading{font-size:12.5px;line-height:1.9;color:rgba(31,26,19,.66);letter-spacing:.04em}
 .llm-loading::after{content:'';display:inline-block;width:6px;height:6px;margin-left:8px;background:var(--cinnabar);animation:pulse 1.1s infinite}
 @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
 
@@ -1169,28 +1174,28 @@ select.input option:checked{background:#233028;color:#F5EBD6}
 
 
 /* ---------- 批注里的识别依据（折叠） ---------- */
-.vision-note{margin:18px 0 0;padding-top:12px;border-top:1px solid rgba(36,31,23,.16)}
-.vision-note summary{font-size:11.5px;letter-spacing:.12em;color:rgba(36,31,23,.62);cursor:pointer;list-style:none}
+.vision-note{margin:18px 0 0;padding-top:12px;border-top:1px solid rgba(31,26,19,.16)}
+.vision-note summary{font-size:11.5px;letter-spacing:.12em;color:rgba(31,26,19,.62);cursor:pointer;list-style:none}
 .vision-note summary::-webkit-details-marker{display:none}
-.vision-note summary::after{content:'＋';float:right;color:rgba(36,31,23,.5)}
+.vision-note summary::after{content:'＋';float:right;color:rgba(31,26,19,.5)}
 .vision-note[open] summary::after{content:'－'}
 .vision-note dl{margin:10px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
-.vision-note dl div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted rgba(36,31,23,.18);padding-bottom:3px}
-.vision-note dt{font-size:11px;color:rgba(36,31,23,.55);white-space:nowrap}
-.vision-note dd{margin:0;font-size:11.5px;color:rgba(36,31,23,.86);text-align:right}
-.vision-note p{margin:10px 0 0;font-size:10.5px;line-height:1.8;color:rgba(36,31,23,.55)}
+.vision-note dl div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted rgba(31,26,19,.18);padding-bottom:3px}
+.vision-note dt{font-size:11px;color:rgba(31,26,19,.55);white-space:nowrap}
+.vision-note dd{margin:0;font-size:11.5px;color:rgba(31,26,19,.86);text-align:right}
+.vision-note p{margin:10px 0 0;font-size:10.5px;line-height:1.8;color:rgba(31,26,19,.55)}
 
 
 /* ---------- 推演依据（折叠） ---------- */
-.basis{margin:18px 0 0;padding-top:12px;border-top:1px solid rgba(36,31,23,.16)}
-.basis summary{font-size:11.5px;letter-spacing:.12em;color:rgba(36,31,23,.62);cursor:pointer;list-style:none}
+.basis{margin:18px 0 0;padding-top:12px;border-top:1px solid rgba(31,26,19,.16)}
+.basis summary{font-size:11.5px;letter-spacing:.12em;color:rgba(31,26,19,.62);cursor:pointer;list-style:none}
 .basis summary::-webkit-details-marker{display:none}
-.basis summary::after{content:'＋';float:right;color:rgba(36,31,23,.5)}
+.basis summary::after{content:'＋';float:right;color:rgba(31,26,19,.5)}
 .basis[open] summary::after{content:'－'}
 .basis ul{margin:10px 0 0;padding-left:16px}
-.basis li{font-size:11.5px;line-height:1.9;color:rgba(36,31,23,.82);margin-bottom:2px}
+.basis li{font-size:11.5px;line-height:1.9;color:rgba(31,26,19,.82);margin-bottom:2px}
 .basis p{margin:10px 0 0;font-size:10.5px;line-height:1.8}
-.basis-assume{color:rgba(36,31,23,.55)}
+.basis-assume{color:rgba(31,26,19,.55)}
 .basis-custom{color:#8B2F22}
 
 
@@ -1227,7 +1232,7 @@ body{font-size:15px}
 .home-sub{margin:8px 0 0;font-size:15px;line-height:1.7;color:var(--text-2)}
 .gate-list{display:flex;flex-direction:column;gap:12px;margin:22px 0 0}
 .gate-card{display:flex;align-items:center;gap:16px;min-height:88px;padding:16px;border:1px solid var(--line-strong);background:rgba(233,228,214,.03);text-decoration:none;color:var(--text);border-radius:2px;transition:border-color .2s,background .2s}
-.gate-card:hover,.gate-card:focus-visible{border-color:var(--brass-soft);background:rgba(169,138,78,.08)}
+.gate-card:hover,.gate-card:focus-visible{border-color:var(--brass-soft);background:rgba(122,82,48,.08)}
 .gate-glyph{flex:0 0 52px;height:52px;display:grid;place-items:center;font-family:var(--sans);font-size:26px;color:var(--brass-hi);border:1px solid var(--brass-soft);border-radius:1px}
 .gate-text{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
 .gate-name{font-size:19px;letter-spacing:.08em}
@@ -1273,15 +1278,15 @@ body{font-size:15px}
 
 .seg{display:flex;gap:6px;margin:0 0 20px;padding:4px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
 .seg-item{flex:1;text-align:center;padding:11px 0;border-radius:9px;color:var(--text-2);font-size:14px;letter-spacing:.12em;text-decoration:none}
-.seg-item.is-on{background:rgba(169,138,78,.16);color:var(--text);border:1px solid rgba(169,138,78,.45)}
+.seg-item.is-on{background:rgba(122,82,48,.16);color:var(--text);border:1px solid rgba(122,82,48,.45)}
 .gate-sub{margin-top:20px}
 .hour-unknown{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 8px}
 .hour-unknown b{font-size:13px}
 .hour-unknown span{font-size:9px}
-.hour-unknown[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(169,138,78,.14)}
+.hour-unknown[aria-pressed="true"]{border-color:var(--brass-hi);background:rgba(122,82,48,.14)}
 .adv{margin:0 0 16px}
 .adv summary{cursor:pointer;color:var(--text-3);font-size:12px;letter-spacing:.08em;padding:8px 0}
-.btn-ghost[aria-pressed="true"]{border-color:var(--brass-hi);color:var(--text);background:rgba(169,138,78,.14)}
+.btn-ghost[aria-pressed="true"]{border-color:var(--brass-hi);color:var(--text);background:rgba(122,82,48,.14)}
 
 /* ==========================================================================
    问鹤 · 宣纸主题 v2（design-v2.0）
@@ -1292,31 +1297,38 @@ body{font-size:15px}
 :root{
   color-scheme: light;
 
-  --ink:#F6F1E6;
-  --ink-2:#FBF7EE;
-  --ink-3:#EFE7D6;
+  /* v3.0「沉宣」：纸色压灰、赭石去金气、朱砂转暗绛、墨色加深。
+     依据 BRAND.md「不用渐变、不用阴影、不用金色」与 Claude 暖中性策略。 */
+  --ink:#EAE3D5;
+  --ink-2:#F1EADB;
+  --ink-3:#E1D8C6;
 
-  --brass:#8C6B3F;
-  --brass-hi:#A9854F;
-  --brass-soft:rgba(140,107,63,.26);
-  --brass-faint:rgba(140,107,63,.10);
+  --brass:#7A5230;
+  --brass-hi:#8F6338;
+  --brass-soft:rgba(122,82,48,.26);
+  --brass-faint:rgba(122,82,48,.10);
 
-  --cinnabar:#A33B2B;
-  --cinnabar-hi:#B84A36;
-  --cinnabar-deep:#8B2F22;
-  --seal:#9C3325;
+  --cinnabar:#99371F;
+  --cinnabar-hi:#AC4227;
+  --cinnabar-deep:#7E2C16;
+  --seal:#99371F;
 
-  --text:#241F17;
-  --text-2:#3B342A;
-  --text-3:#6B6253;
-  --line:#DCD2BE;
-  --line-strong:#C9BCA2;
+  --text:#1F1A13;
+  --text-2:#332C22;
+  --text-3:#615747;
+  --line:#D5CAB5;
+  --line-strong:#BDB095;
 
-  --paper:#F6F1E6;
-  --paper-2:#EFE7D6;
-  --paper-ink:#241F17;
-  --paper-ink-2:rgba(36,31,23,.66);
-  --paper-line:rgba(36,31,23,.20);
+  --paper:#EAE3D5;
+  --paper-2:#E1D8C6;
+  --paper-ink:#1F1A13;
+  --paper-ink-2:rgba(31,26,19,.70);
+  --paper-line:rgba(31,26,19,.20);
+
+  /* 字重分级（同字族，不混字体）：标题有骨，正文从轻 */
+  --fw-display:600;
+  --fw-head:500;
+  --fw-body:400;
 
   /* 排版分级（DESIGN.md v2 · Typography）——同类元素一律走 token */
   --fs-display:30px;   /* 报告大标题 */
@@ -1330,9 +1342,8 @@ body{font-size:15px}
 }
 
 body{
-  background:
-    radial-gradient(900px 560px at 50% -10%, rgba(140,107,63,.07), transparent 62%),
-    linear-gradient(180deg, #F8F3E8 0%, #F6F1E6 38%, #F4EDDF 100%);
+  /* v3.0：去掉三层暖色渐层，纯纸色平涂——传统感来自留白与墨字，不来自渐变 */
+  background:var(--paper);
   color:var(--text-2);
   font-size:17px;
   line-height:1.85;
@@ -1340,7 +1351,7 @@ body{
 
 /* ---------- 顶栏 ---------- */
 .topbar{
-  background:rgba(246,241,230,.94);
+  background:rgba(234,227,213,.94);
   border-bottom:1px solid var(--line);
   color:var(--text);
 }
@@ -1352,7 +1363,7 @@ body{
 .home-title,.page-title,.rep-title,h1,h2{
   color:var(--text);
   font-family:var(--sans);
-  font-weight:400;
+  font-weight:var(--fw-display);
 }
 .home-sub,.lead,.foot,.q-hint,.rec-meta,.rep-meta{
   color:var(--text-3);
@@ -1366,20 +1377,20 @@ body{
   border-color:var(--line);
   box-shadow:none;
 }
-.gate-card{background:#FBF7EE}
-.gate-card:hover{border-color:var(--brass-soft);background:#FDFAF3}
+.gate-card{background:var(--ink-2)}
+.gate-card:hover{border-color:var(--brass);background:#F5EFE2}
 .gate-name{color:var(--text)}
 .gate-desc{color:var(--text-3)}
 .gate-glyph{
   color:var(--brass);
   border-color:var(--line-strong);
-  background:#F6EFE0;
+  background:#E8DDC7;
 }
 .gate-arrow{color:var(--brass)}
 
 /* ---------- 表单 ---------- */
 .input,select,textarea,input[type=date],input[type=number]{
-  background:#FFFDF7;
+  background:#F6F0E3;
   color:var(--text);
   border-color:var(--line-strong);
 }
@@ -1388,12 +1399,12 @@ body{
   outline:none;
   box-shadow:none;
 }
-.input::placeholder,input::placeholder{color:#9A8F7B}
+.input::placeholder,input::placeholder{color:#7A705E}
 label{color:var(--text-3)}
 
 /* ---------- 选项组：时辰 / 历法 / 性别 ---------- */
 .hour,.opt,.dir-btn{
-  background:#FBF7EE;
+  background:var(--ink-2);
   color:var(--text);
   border-color:var(--line);
 }
@@ -1401,7 +1412,7 @@ label{color:var(--text-3)}
 .hour span{color:var(--text-3)}
 .hour:hover,.opt:hover{border-color:var(--brass-soft)}
 .hour[aria-pressed="true"],.opt[aria-pressed="true"],.dir-btn[aria-pressed="true"]{
-  background:rgba(140,107,63,.13);
+  background:rgba(122,82,48,.13);
   border-color:var(--brass);
   color:var(--text);
 }
@@ -1410,7 +1421,7 @@ label{color:var(--text-3)}
 /* ---------- 按钮 ---------- */
 .btn-primary{
   background:var(--cinnabar);
-  color:#FBF7EE;
+  color:#F1EADB;
   border:1px solid var(--cinnabar-deep);
 }
 .btn-primary:hover{background:var(--cinnabar-hi)}
@@ -1431,40 +1442,40 @@ label{color:var(--text-3)}
 .rep-section h2{color:var(--text);border-color:var(--line)}
 .rep-kv dt{color:var(--text-3)}
 .rep-kv dd{color:var(--text)}
-.vision-note{background:#F8F2E4;border-color:var(--line)}
+.vision-note{background:#EDE4D2;border-color:var(--line)}
 .vision-note summary{color:var(--text)}
 .vision-measure,.vision-limit,.vision-basis{color:var(--text-3)}
 .vision-basis{border-top-color:var(--line)}
 
 /* ---------- 记录列表 ---------- */
-.rec{background:#FBF7EE}
+.rec{background:var(--ink-2)}
 .rec-title{color:var(--text)}
 .rec-go{color:var(--brass)}
-.rec-seal{background:var(--cinnabar);color:#FBF7EE}
+.rec-seal{background:var(--cinnabar);color:#F1EADB}
 
 /* ---------- 印章 / 标签 ---------- */
-.seal,.tag,.badge{background:var(--cinnabar);color:#FBF7EE}
+.seal,.tag,.badge{background:var(--cinnabar);color:#F1EADB}
 .rep-legacy{color:var(--cinnabar);border-color:var(--cinnabar)}
 
 /* ---------- 底部与提示 ---------- */
 .foot{border-top-color:var(--line)}
-.toast{background:#241F17;color:#F6F1E6}
+.toast{background:#1F1A13;color:#EAE3D5}
 hr,.sep{border-color:var(--line)}
 
 /* ---------- 罗盘：浅底校准 ---------- */
-.compass,.compass-wrap,.dial{background:#F8F3E8}
+.compass,.compass-wrap,.dial{background:#E6DECD}
 .compass-ring,.dial-ring{border-color:var(--line-strong)}
 .compass-label,.dial-label{color:var(--text-3)}
 
 /* ---------- 深色蒙版改纸色 ---------- */
-.photo-mask,.preview-mask{background:rgba(246,241,230,.86)}
+.photo-mask,.preview-mask{background:rgba(234,227,213,.90)}
 
 /* ---------- 页脚声明 ---------- */
 .footer-note,.disclaimer{color:var(--text-3)}
 
 /* ---------- 底部操作条：纸色渐隐 ---------- */
 .dock{
-  background:linear-gradient(180deg, rgba(246,241,230,0) 0%, rgba(246,241,230,.94) 30%, #F6F1E6 70%);
+  background:linear-gradient(180deg, rgba(234,227,213,0) 0%, rgba(234,227,213,.94) 34%, #EAE3D5 72%);
 }
 .dock-info{color:var(--text-3)}
 .dock-info b{color:var(--text)}
@@ -1502,7 +1513,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   transform:scale(.985);
 }
 .btn-primary:active{background:var(--cinnabar-deep)}
-.btn-ghost:active{background:rgba(140,107,63,.10)}
+.btn-ghost:active{background:rgba(122,82,48,.10)}
 
 /* 禁用 */
 .btn[disabled],.btn:disabled{opacity:.5;pointer-events:none}
@@ -1513,8 +1524,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   content:"";
   position:absolute;inset:0;margin:auto;
   width:18px;height:18px;
-  border:2px solid rgba(251,247,238,.4);
-  border-top-color:#FBF7EE;
+  border:2px solid rgba(241,234,219,.4);
+  border-top-color:#F1EADB;
   border-radius:50%;
   animation:paperSpin .8s linear infinite;
 }
@@ -1568,20 +1579,35 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .hour-unknown{border-radius:14px}
 .btn{border-radius:999px}
 .btn-primary{padding:14px 30px}
-.gate-card{background:linear-gradient(180deg,#FFFDF8,#FBF6EA);border-color:#E3D7C1;box-shadow:0 8px 22px rgba(36,31,23,.05)}
-.gate-card:active{box-shadow:0 4px 12px rgba(36,31,23,.05)}
+
+/* v3.0 同类收口：动作按钮不再伪装成下划线小字（与就绪卡胶囊按钮同一语言）。
+   正文内联链接的下划线是正当语义，保留不动。 */
+.notice-card{border-radius:18px}
+.notice-card button,.toast-act,.manual-link{
+  border:1px solid var(--line-strong);border-radius:999px;background:var(--ink-2);
+  color:var(--text-2);font-size:var(--fs-caption);letter-spacing:.04em;
+  padding:6px 14px;min-height:34px;text-decoration:none;line-height:1.4;
+}
+.notice-card button:hover,.toast-act:hover,.manual-link:hover{
+  border-color:var(--brass);color:var(--brass);background:#F5EFE2;
+}
+.manual-link:hover{color:var(--brass)}
+.form-block{border-radius:18px}
+.gate-card{background:var(--ink-2);border-color:var(--line);box-shadow:none}
+.gate-card:hover{background:#F5EFE2;border-color:var(--brass)}
+.gate-card:active{box-shadow:none}
 .gate-glyph{border-radius:12px}
 
-.quick{position:relative;background:linear-gradient(180deg,#FFFDF8 0%,#FBF6EA 100%);border:1px solid #E3D7C1;padding:18px 16px 10px;box-shadow:0 12px 30px rgba(36,31,23,.07);margin:0 0 22px}
+.quick{position:relative;background:var(--ink-2);border:1px solid var(--line);padding:18px 16px 10px;box-shadow:none;margin:0 0 22px}
 .quick-q{font-family:var(--sans);font-size:18px;letter-spacing:.04em;color:var(--text);margin:0 0 12px}
-.quick-input{width:100%;min-height:88px;border-radius:16px;border:1px solid #D8CCB4;background:#FFFDF7;color:var(--text);font:inherit;font-size:16px;line-height:1.7;padding:14px 14px;resize:none;outline:none}
-.quick-input:focus{border-color:var(--brass);background:#FFFEF9}
-.quick-input::placeholder{color:#A2967F}
+.quick-input{width:100%;min-height:88px;border-radius:16px;border:1px solid #C9BCA6;background:#F6F0E3;color:var(--text);font:inherit;font-size:16px;line-height:1.7;padding:14px 14px;resize:none;outline:none}
+.quick-input:focus{border-color:var(--brass);background:#FBF6EA}
+.quick-input::placeholder{color:#7A705E}
 .quick-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
-.quick-chips button{border:1px dashed #CFC0A6;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:var(--fs-caption);cursor:pointer}
-.quick-chips button:active{background:rgba(140,107,63,.08)}
+.quick-chips button{border:1px dashed #C4B69D;background:transparent;color:var(--text-3);border-radius:999px;padding:7px 12px;font:inherit;font-size:var(--fs-caption);cursor:pointer}
+.quick-chips button:active{background:rgba(122,82,48,.08)}
 .quick-read{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 2px}
-.qr{display:inline-flex;align-items:center;gap:7px;background:#F3EAD8;border:1px solid #E6D9C1;border-radius:12px;padding:7px 11px;font-size:13.5px;color:var(--text)}
+.qr{display:inline-flex;align-items:center;gap:7px;background:#E8DDC7;border:1px solid #D2C4A9;border-radius:12px;padding:7px 11px;font-size:13.5px;color:var(--text)}
 .qr i{font-style:normal;color:var(--brass);font-size:var(--fs-caption);letter-spacing:.1em}
 .quick-err{color:var(--cinnabar);font-size:13px;margin:10px 0 0}
 .quick-link{display:inline-block;background:none;border:0;color:var(--brass);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:12px 0 8px;cursor:pointer}
@@ -1599,19 +1625,32 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .plain-tags em{
   font-style:normal;font-size:13px;line-height:1.5;
   padding:4px 10px;border-radius:11px;
-  color:var(--brass);background:#F3EAD7;border:1px solid #E6D9BE;
+  color:var(--brass);background:#E8DDC7;border:1px solid #D2C4A9;
 }
 .plain-note{font-size:13px;line-height:1.7;color:var(--text-3);margin:0}
 @media (max-width:380px){.plain-row{grid-template-columns:56px 1fr;gap:8px}.plain-row b{font-size:13px}}
 
-/* ---------- 详细排盘：术语默认折叠，想看再展开 ---------- */
-.detail-blocks{margin:0 0 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.detail-blocks summary{cursor:pointer;color:var(--brass);font-size:14px;letter-spacing:.06em;padding:14px 2px;list-style:none}
+/* ---------- 展开块：专业细节合并为单一入口，只在整组顶部留一条线 ---------- */
+.detail-blocks{margin:14px 0 0;border:0;border-top:1px solid var(--paper-line)}
+.detail-blocks summary{
+  cursor:pointer;list-style:none;color:var(--brass);
+  font-size:var(--fs-label);line-height:1.7;letter-spacing:.04em;
+  padding:12px 2px;
+}
 .detail-blocks summary::-webkit-details-marker{display:none}
-.detail-blocks summary::before{content:'＋ ';font-size:var(--fs-caption)}
-.detail-blocks[open] summary::before{content:'－ '}
+/* chevron：向右→向下 */
+.detail-blocks summary::before{
+  content:'';display:inline-block;width:0;height:0;
+  border-left:5px solid currentColor;
+  border-top:4px solid transparent;border-bottom:4px solid transparent;
+  margin-right:8px;vertical-align:1px;transition:transform .18s ease;
+}
+.detail-blocks[open] summary::before{transform:rotate(90deg)}
 .detail-blocks .rep-sec{margin:0;border:0;padding:16px 0;border-top:1px dashed var(--line)}
 .detail-blocks .rep-sec h3{font-size:16px}
+/* 两个折叠块紧挨时，后一块自带的上边距会让前一块文字视觉偏上。
+   相邻时收掉重复留白，让「展开看完整分析」文字在上下分隔线间居中。 */
+.detail-blocks + .basis{margin-top:0}
 
 /* ==========================================================================
    排版分级统一（v2.3）——全站单一黑体族，不再混用衬线体
@@ -1620,17 +1659,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
    ========================================================================== */
 :root{--lh:1.85}
 
-/* 标题：黑体，靠字号与字距分级，不加粗 */
-.home-title{font-size:var(--fs-display);line-height:1.3;letter-spacing:.12em}
-.page-head h1,.q-head h2,.step{font-size:var(--fs-title);line-height:1.45;letter-spacing:.1em}
-.gate-name,.rep-sec h3,.detail-blocks .rep-sec h3,.quick-q,.rec-title{font-size:var(--fs-subtitle);line-height:1.6;letter-spacing:.06em}
+/* 标题：同字族黑体，靠字重+字号+字距分级（v3.0 恢复字重层级，让标题有骨力） */
+.home-title{font-size:var(--fs-display);line-height:1.3;letter-spacing:.12em;font-weight:var(--fw-display)}
+.page-head h1,.q-head h2,.step{font-size:var(--fs-title);line-height:1.45;letter-spacing:.1em;font-weight:var(--fw-head)}
+.gate-name,.rep-sec h3,.detail-blocks .rep-sec h3,.quick-q,.rec-title{font-size:var(--fs-subtitle);line-height:1.6;letter-spacing:.06em;font-weight:var(--fw-head)}
 
 /* 正文：统一到 body */
 body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-size:var(--fs-body);line-height:var(--lh)}
 .input,select,textarea,input[type=date],input[type=number]{font-size:var(--fs-body)}
 
 /* 标签 / 次要信息：label —— 关键修复，原 11.5px 过小 */
-.field > label,.gate-desc,.seg-item,.opt,.chip,.qr,.ready-name,.ready-note,.ready-state,
+.field > label,.gate-desc,.seg-item,.opt,.chip,.qr,.ready-name,.ready-go,
 .plain-row b,.detail-blocks summary,.remember-note,.linklike,.field-err,.quick-err,.quick-link,.home-help,
 .home-sub{font-size:var(--fs-label)}
 
@@ -1662,7 +1701,7 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
 
 /* ---------- 表单分区（v2.4）：起课等表单页，把散落说明收成「两模块+一折叠须知」 ---------- */
 .lead-compact{font-size:var(--fs-body);margin-bottom:20px}
-.form-block{margin:0 0 18px;padding:16px 16px 18px;border:1px solid var(--line);border-radius:2px;background:#FBF7EE}
+.form-block{margin:0 0 18px;padding:16px 16px 18px;border:1px solid var(--line);border-radius:18px;background:var(--ink-2)}
 .form-block .step{margin:0 0 14px;letter-spacing:.06em}
 .form-block .field:first-of-type{margin-top:0}
 .form-block .cp-actions{margin-top:16px}
@@ -1673,7 +1712,7 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
 .rule-list a{color:var(--brass);border-bottom:1px solid var(--brass-soft)}
 
 /* 必填就地标注（v2.4）：填好由「必填」变「已填」，不必去底栏数计数 */
-.req-tag{display:inline-block;margin-left:6px;padding:1px 6px;border:1px solid var(--brass-soft);border-radius:2px;
+.req-tag{display:inline-block;margin-left:6px;padding:1px 6px;border:1px solid var(--brass-soft);border-radius:999px;
   color:var(--brass);font-size:var(--fs-caption);font-style:normal;font-weight:400;letter-spacing:.04em;vertical-align:1px}
 .req-tag.is-done{border-color:var(--line-strong);color:var(--text-3)}
 
@@ -1683,7 +1722,7 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
    每个标签页会话只播一次；地址带 ?splash=1 可强制重播。
    ========================================================================== */
 #splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;
-  background:radial-gradient(circle at 50% 44%,#FCF9F2 0%,#F6F1E6 58%,#EDE3D1 100%);
+  background:var(--paper);
   opacity:1;transition:opacity .55s ease}
 #splash.splash-out{opacity:0;pointer-events:none}
 
@@ -1730,23 +1769,12 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
   opacity:0;animation:splash-fade-in .6s ease 1.08s forwards}
 @keyframes splash-fade-in{to{opacity:1}}
 
-/* 问印：副标，只作小落款，盖在标语下方，轻落回弹 */
-.splash-seal{
-  position:relative;margin-top:18px;width:30px;height:30px;display:grid;place-items:center;
-  border:1.5px solid var(--seal);border-radius:3px;color:var(--seal);
-  font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif;
-  font-size:17px;line-height:1;opacity:0;
-  transform:translateY(-12px) rotate(-14deg) scale(1.3);
-  animation:splash-seal-in .45s cubic-bezier(.2,.9,.3,1.3) 1.2s forwards}
-@keyframes splash-seal-in{
-  0%{opacity:0;transform:translateY(-12px) rotate(-14deg) scale(1.3)}
-  60%{opacity:1;transform:translateY(0) rotate(-9deg) scale(.94)}
-  100%{opacity:1;transform:translateY(0) rotate(-9deg) scale(1)}}
+/* v3.0：开屏红「问」印已移除——墨鹤点睛 + 字标 + 标语即收尾，不再多盖一枚红章 */
 
 /* 系统开启「减少动态效果」时：直接静态呈现，不做位移动画 */
 @media (prefers-reduced-motion:reduce){
   #splash .splash-halo,#splash .splash-crane,#splash .splash-crane .eye,
-  #splash .splash-brand,#splash .splash-seal,#splash .splash-tagline{
+  #splash .splash-brand,#splash .splash-tagline{
     animation:none;opacity:1;transform:none;filter:none}
 }
 
@@ -1798,29 +1826,41 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
   .rep-score .score-num .n{font-size:50px}
   .rep-score .score-lvl span{font-size:12px}
 }
+/* ---------- 总评三段式：结论 / 依据 / 行动 ---------- */
+.sum-core{
+  margin:2px 0 16px;padding:2px 0 2px 15px;
+  border-left:2px solid var(--brass);
+}
+.sum-verdict{
+  font-size:17px;line-height:1.7;font-weight:600;color:var(--text);
+  margin:0 0 12px;
+}
+.sum-why{
+  font-size:var(--fs-body);line-height:1.8;color:var(--text-2);
+  margin:0 0 11px;
+}
+.sum-kicker{
+  display:block;font-size:var(--fs-caption);font-weight:400;color:var(--brass);
+  letter-spacing:.08em;margin-bottom:3px;
+}
+.sum-action{
+  display:flex;gap:9px;align-items:flex-start;
+  font-size:var(--fs-body);line-height:1.75;color:var(--text);
+  margin:0;padding-top:11px;border-top:1px dashed var(--line);
+}
+.sum-arrow{color:var(--cinnabar);font-weight:600;line-height:1.75;flex:none}
 /* 总评小标题与结论之间留白更从容 */
 .plain-summary .plain-lead{margin-bottom:16px}
 .plain-summary .plain-rows{margin-bottom:12px}
-/* 调候建议折叠：与详细排盘同一套视觉语言 */
-.adv-notes{margin:0 0 6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.adv-notes summary{
-  cursor:pointer;list-style:none;color:var(--brass);
-  font-size:var(--fs-label);line-height:1.8;letter-spacing:.04em;
-  padding:12px 0;
-}
-.adv-notes summary::-webkit-details-marker{display:none}
-.adv-notes summary::before{content:"+ ";color:var(--cinnabar)}
-.adv-notes[open] summary::before{content:"− "}
-.adv-notes .rep-list{margin:0 0 14px}
+.detail-blocks .rep-list{margin:4px 0 14px}
 
 /* ---------- 阶段二·字号收口：把遗漏的「实质阅读文字」抬到下限 ----------
-   例外（刻意保留原值）：罗盘方位字(.dir-core/.cp-shan)、题序(.q-num/.ready-idx)、
+   例外（刻意保留原值）：罗盘方位字(.dir-core/.cp-shan)、题序(.q-num)、
    SVG 图形内标注(radar/dial)、品牌落款(.brand)。它们是图形或序号的一部分，抬大反而破版。 */
 .method-desc,            /* 相/堪舆门类的方法描述 */
 .photo-box,              /* 上传照片按钮文字 */
 .field > label,          /* 表单字段名 */
-.ready-note,             /* 生辰填写提示 */
-.ready-state,            /* 填写状态「已成/填写」 */
+.ready-note,             /* 就绪卡的说明文字 */
 .hist-empty, .empty,     /* 空状态说明 */
 .btn-sm,                 /* 小按钮 */
 .q-hint                  /* 逐项填写的题下提示 */
@@ -1837,12 +1877,11 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
     <div class="splash-inner">
       <span class="splash-halo"></span>
       <svg class="splash-crane" viewBox="0 0 160 164" role="img" aria-label="问鹤 墨鹤标">
-        <path d="M78.7,139.5C78.4,133.2 77.9,127.6 77.5,127.0C77.2,126.5 74.3,126.0 71.1,126.0C66.7,126.0 64.1,125.4 60.8,123.5C56.3,121.0 56.3,120.9 55.1,113.5C53.7,104.8 52.0,103.0 45.2,103.0C40.4,103.0 37.3,104.4 28.6,110.2C22.5,114.4 15.4,117.4 13.9,116.4C12.4,115.5 14.8,112.2 19.3,109.1C21.7,107.5 24.7,104.7 25.9,102.8C27.2,101.0 30.7,98.0 33.6,96.2C36.6,94.3 41.1,91.1 43.5,89.0C45.9,86.9 48.9,84.9 50.0,84.5C51.1,84.2 52.0,83.5 52.0,83.1C52.0,80.8 55.2,78.9 60.5,77.9C63.8,77.3 67.8,76.0 69.5,75.0C71.2,74.0 75.7,72.4 79.5,71.5C89.2,69.1 90.0,68.6 90.0,64.5C90.0,61.8 89.0,59.9 85.2,55.8C71.4,40.4 70.0,21.7 82.3,15.3C91.1,10.7 98.0,11.3 106.7,17.2C113.4,21.8 118.1,23.2 119.5,21.0C120.6,19.2 122.5,19.9 126.3,23.4C129.5,26.3 130.0,27.4 130.0,31.2C130.0,36.0 131.9,39.4 140.7,49.7C145.6,55.6 148.0,60.3 146.6,61.7C145.7,62.6 136.5,53.3 131.3,46.3C127.2,40.8 122.3,37.0 119.2,37.0C117.4,37.0 113.1,31.9 112.5,29.0C111.6,24.8 101.0,17.0 96.3,17.0C89.9,17.0 80.4,25.1 79.4,31.5C78.7,36.5 82.5,47.3 87.2,53.2C90.4,57.3 93.0,63.0 93.0,65.8C93.0,66.9 93.9,68.9 95.0,70.3C96.1,71.7 97.0,74.2 97.0,75.9C97.0,78.5 97.7,79.5 100.5,81.1C107.2,85.1 104.8,88.0 94.8,88.0C87.1,88.0 79.4,92.0 80.5,95.4C82.3,101.3 82.9,105.6 83.4,118.0C83.8,125.4 84.3,135.4 84.5,140.3C84.7,145.1 85.2,149.5 85.5,150.0C85.9,150.6 84.7,151.0 82.7,151.0C79.3,151.0 79.3,151.0 78.7,139.5Z M77.2,112.0C76.9,104.7 76.4,102.7 73.9,98.2C70.0,91.5 67.5,91.3 63.6,97.2C59.6,103.3 59.4,106.0 62.3,112.5C65.2,118.6 68.9,121.2 74.5,120.7C77.5,120.5 77.5,120.5 77.2,112.0Z" fill="#241F17" fill-rule="evenodd"/>
-        <circle class="eye" cx="121.50" cy="22.00" r="2.12" fill="#A33B2B"/>
+        <path d="M78.7,139.5C78.4,133.2 77.9,127.6 77.5,127.0C77.2,126.5 74.3,126.0 71.1,126.0C66.7,126.0 64.1,125.4 60.8,123.5C56.3,121.0 56.3,120.9 55.1,113.5C53.7,104.8 52.0,103.0 45.2,103.0C40.4,103.0 37.3,104.4 28.6,110.2C22.5,114.4 15.4,117.4 13.9,116.4C12.4,115.5 14.8,112.2 19.3,109.1C21.7,107.5 24.7,104.7 25.9,102.8C27.2,101.0 30.7,98.0 33.6,96.2C36.6,94.3 41.1,91.1 43.5,89.0C45.9,86.9 48.9,84.9 50.0,84.5C51.1,84.2 52.0,83.5 52.0,83.1C52.0,80.8 55.2,78.9 60.5,77.9C63.8,77.3 67.8,76.0 69.5,75.0C71.2,74.0 75.7,72.4 79.5,71.5C89.2,69.1 90.0,68.6 90.0,64.5C90.0,61.8 89.0,59.9 85.2,55.8C71.4,40.4 70.0,21.7 82.3,15.3C91.1,10.7 98.0,11.3 106.7,17.2C113.4,21.8 118.1,23.2 119.5,21.0C120.6,19.2 122.5,19.9 126.3,23.4C129.5,26.3 130.0,27.4 130.0,31.2C130.0,36.0 131.9,39.4 140.7,49.7C145.6,55.6 148.0,60.3 146.6,61.7C145.7,62.6 136.5,53.3 131.3,46.3C127.2,40.8 122.3,37.0 119.2,37.0C117.4,37.0 113.1,31.9 112.5,29.0C111.6,24.8 101.0,17.0 96.3,17.0C89.9,17.0 80.4,25.1 79.4,31.5C78.7,36.5 82.5,47.3 87.2,53.2C90.4,57.3 93.0,63.0 93.0,65.8C93.0,66.9 93.9,68.9 95.0,70.3C96.1,71.7 97.0,74.2 97.0,75.9C97.0,78.5 97.7,79.5 100.5,81.1C107.2,85.1 104.8,88.0 94.8,88.0C87.1,88.0 79.4,92.0 80.5,95.4C82.3,101.3 82.9,105.6 83.4,118.0C83.8,125.4 84.3,135.4 84.5,140.3C84.7,145.1 85.2,149.5 85.5,150.0C85.9,150.6 84.7,151.0 82.7,151.0C79.3,151.0 79.3,151.0 78.7,139.5Z M77.2,112.0C76.9,104.7 76.4,102.7 73.9,98.2C70.0,91.5 67.5,91.3 63.6,97.2C59.6,103.3 59.4,106.0 62.3,112.5C65.2,118.6 68.9,121.2 74.5,120.7C77.5,120.5 77.5,120.5 77.2,112.0Z" fill="#1F1A13" fill-rule="evenodd"/>
+        <circle class="eye" cx="121.50" cy="22.00" r="2.12" fill="#99371F"/>
       </svg>
       <div class="splash-brand">问鹤</div>
       <div class="splash-tagline">问一句，有出处</div>
-      <div class="splash-seal">问</div>
     </div>
   </div>
   <div id="app" class="shell"></div>
@@ -2977,36 +3016,27 @@ const ADVICE = {
   mind: '把想法写成三行：做什么、为什么、什么时候停。',
 };
 
+/* 批语：典籍对仗句，前后半字数相等，按分句各占一行，断行天然整齐。 */
 const VERDICTS = {
   face: [
-    '相不独论，骨肉之外看神。',
-    '面上有山河，心里要有一把尺。',
-    '三十岁前的脸是父母给的，三十岁后是自己修的。',
-    '气色比形状要紧，睡好一觉，胜过改三分相。',
-    '眉眼看人，口鼻看己。',
-    '相由心生——不是劝善，是提醒情绪会留下痕迹。',
+    '相由心生，境由心造。',
+    '有诸内者，必形于外。',
+    '眉目传情，口鼻观心。',
   ],
   palm: [
-    '掌纹会变，人的路也会。',
-    '线是过去的记录，不是未来的判决。',
-    '手是拿来做的，不是拿来看的。',
-    '三线之中，最该修的是那条还没长出来的。',
-    '握拳看命，摊开看运。',
-    '纹路越用越深，闲着手也会老。',
+    '掌纹虽定，心志可移。',
+    '一掌之内，可见生平。',
+    '相由心生，纹由运转。',
   ],
   combo: [
-    '三处合看，才敢说一句。',
-    '相、掌、命三者不必同，不同处正是可改处。',
-    '命是底牌，运是出牌的顺序。',
-    '综合看相不是求一个准，是找一个着力点。',
-    '知命不是认命，是知道力气该往哪使。',
+    '三处合看，方敢一言。',
+    '相命相参，其理自明。',
+    '命由我作，福自己求。',
   ],
   compass: [
-    '宅以形势为骨，以气为血。',
-    '方位只决定起点，日子是走出来的。',
-    '风水讲的是人与环境的相处，不是与环境的交易。',
-    '门是一宅之口，床是一身之根。',
-    '先通光、通气、通人，再谈吉凶。',
+    '藏风聚气，得水为上。',
+    '前有明堂，后有靠山。',
+    '门为宅口，床为身根。',
   ],
 };
 
@@ -3904,12 +3934,16 @@ async function copyText(text) {
   }
 }
 
-function recordToText(r) {
+function recordToText(r, plain) {
+  // 与报告页同源：优先用说人话的三段式，没有则回退引擎原文
+  const core = plain
+    ? [plain.verdict, `凭什么这么说：${plain.why}`, `→ ${plain.action}`]
+    : [r.summary];
   const lines = [
     `问鹤 ／ ${r.title}`,
     `${r.dateLabel || ''}　${r.level?.name || ''}　${r.overall} 分`,
     '',
-    r.summary,
+    ...core,
     '',
     ...(r.dims || []).map((d) => `${d.label} ${d.v}`),
     '',
@@ -3924,26 +3958,26 @@ function recordToText(r) {
 }
 
 /* ---------------- 分享卡 ---------------- */
-function saveCard(r) {
+function saveCard(r, plain) {
   const W = 1080;
   const H = 1350;
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
 
-  const bg = g.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#F1EBDB');
-  bg.addColorStop(0.55, '#E9E1CF');
-  bg.addColorStop(1, '#E1D7C1');
+  // 素纸卡：单层发丝线 + 竖向微渐层，与报告页纸卡同一套语言（v2.7）
+  const bg = g.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#FBF7EE');
+  bg.addColorStop(1, '#F6F1E6');
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
 
-  g.strokeStyle = 'rgba(36,31,23,.35)';
+  g.strokeStyle = 'rgba(36,31,23,.20)';
   g.lineWidth = 2;
-  g.strokeRect(42, 42, W - 84, H - 84);
-  g.strokeStyle = 'rgba(36,31,23,.18)';
-  g.lineWidth = 1;
-  g.strokeRect(56, 56, W - 112, H - 112);
+  g.beginPath();
+  if (g.roundRect) g.roundRect(40, 40, W - 80, H - 80, 36);
+  else g.rect(40, 40, W - 80, H - 80); /* 老 WebView 降级为直角 */
+  g.stroke();
 
   const sans = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
   const serif = sans; /* 字体统一 v2.3：分享图也用黑体，保留别名避免遗漏 */
@@ -3955,8 +3989,8 @@ function saveCard(r) {
   g.font = `54px ${serif}`;
   g.fillText(r.heading || r.title, 100, 214);
 
-  g.fillStyle = 'rgba(36,31,23,.5)';
-  g.font = `22px ${sans}`;
+  g.fillStyle = 'rgba(36,31,23,.6)';
+  g.font = `24px ${sans}`;
   g.fillText(`${r.dateLabel || ''}　${r.meta?.birth?.year ? r.meta.birth.year + ' 年生' : ''}`, 100, 254);
 
   g.strokeStyle = 'rgba(36,31,23,.25)';
@@ -3964,51 +3998,81 @@ function saveCard(r) {
 
   g.fillStyle = '#241F17';
   g.font = `210px ${serif}`;
-  g.fillText(String(r.overall), 96, 500);
+  const scoreText = String(r.overall ?? '—');
+  const scoreW = g.measureText(scoreText).width;
+  g.fillText(scoreText, 96, 500);
 
-  g.fillStyle = 'rgba(36,31,23,.45)';
-  g.font = `24px ${serif}`;
-  g.fillText('分', 330, 500);
+  // 「分」是单位，按数字实际宽度贴在其右下，字号/对比度提到能看清
+  g.fillStyle = 'rgba(36,31,23,.72)';
+  g.font = `46px ${serif}`;
+  g.fillText('分', 96 + scoreW + 14, 500);
 
   g.fillStyle = '#A33B2B';
   g.font = `40px ${serif}`;
   g.textAlign = 'right';
   g.fillText(r.level?.name || '', W - 100, 470);
-  g.fillStyle = 'rgba(36,31,23,.45)';
-  g.font = `20px ${sans}`;
+  g.fillStyle = 'rgba(36,31,23,.55)';
+  g.font = `22px ${sans}`;
   g.fillText(r.level?.note || '', W - 100, 506);
   g.textAlign = 'left';
 
-  // 摘要
-  g.fillStyle = 'rgba(36,31,23,.85)';
-  g.font = `26px ${serif}`;
-  wrapText(g, r.summary || '', 100, 600, W - 200, 44, 5);
+  // 三段式总结：与报告页同源（plain 由页面传入），无则回退引擎原文
+  let y = 600;
+  if (plain) {
+    // 结论——最大、最深，一眼看懂
+    g.fillStyle = '#241F17';
+    g.font = `32px ${serif}`;
+    y = wrapText(g, plain.verdict, 100, y, W - 200, 48, 3);
+    y += 26;
+    // 凭什么这么说——小一号，带小标题
+    g.fillStyle = 'rgba(36,31,23,.45)';
+    g.font = `19px ${sans}`;
+    g.fillText('凭什么这么说', 100, y);
+    y += 34;
+    g.fillStyle = 'rgba(36,31,23,.78)';
+    g.font = `23px ${serif}`;
+    y = wrapText(g, plain.why, 100, y, W - 200, 38, 5);
+    y += 22;
+    // 行动指引——箭头起头，给一件能做的事
+    g.fillStyle = '#8B2F22';
+    g.font = `23px ${serif}`;
+    y = wrapText(g, `→ ${plain.action}`, 100, y, W - 200, 38, 3);
+  } else {
+    g.fillStyle = 'rgba(36,31,23,.82)';
+    g.font = `26px ${serif}`;
+    y = wrapText(g, r.summary || '', 100, y, W - 200, 44, 6);
+  }
 
-  // 六维
-  let y = 800;
-  (r.dims || []).slice(0, 6).forEach((d) => {
-    g.fillStyle = 'rgba(36,31,23,.6)';
-    g.font = `20px ${sans}`;
-    g.fillText(d.label, 100, y);
-    g.fillStyle = 'rgba(36,31,23,.13)';
-    g.fillRect(190, y - 12, W - 340, 6);
-    g.fillStyle = '#A33B2B';
-    g.fillRect(190, y - 12, (W - 340) * (d.v / 100), 6);
-    g.fillStyle = 'rgba(36,31,23,.55)';
-    g.font = `20px ${serif}`;
-    g.textAlign = 'right';
-    g.fillText(String(d.v), W - 100, y);
-    g.textAlign = 'left';
-    y += 42;
-  });
+  // 六维：只有报告本身有维度时才画，避免留一大片空白
+  const dims = (r.dims || []).slice(0, 6);
+  if (dims.length) {
+    y += 40;
+    dims.forEach((d) => {
+      g.fillStyle = 'rgba(36,31,23,.68)';
+      g.font = `22px ${sans}`;
+      g.fillText(d.label, 100, y);
+      g.fillStyle = 'rgba(36,31,23,.13)';
+      g.fillRect(190, y - 12, W - 340, 6);
+      g.fillStyle = '#A33B2B';
+      g.fillRect(190, y - 12, (W - 340) * (d.v / 100), 6);
+      // 维度分数也是数字，加大加清晰，别跟主分数一样犯小的毛病
+      g.fillStyle = 'rgba(36,31,23,.82)';
+      g.font = `30px ${serif}`;
+      g.textAlign = 'right';
+      g.fillText(String(d.v), W - 100, y + 4);
+      g.textAlign = 'left';
+      y += 42;
+    });
+  }
 
-  // 批语
+  // 批语：位置随内容量浮动，不再固定在 H-300 造成空白
+  const lineY = Math.max(y + 46, H - 620);
   g.strokeStyle = 'rgba(36,31,23,.22)';
-  g.beginPath(); g.moveTo(100, H - 300); g.lineTo(W - 100, H - 300); g.stroke();
+  g.beginPath(); g.moveTo(100, lineY); g.lineTo(W - 100, lineY); g.stroke();
   g.fillStyle = '#2A2318';
   g.font = `30px ${serif}`;
   g.textAlign = 'center';
-  g.fillText(`「${r.verdict}」`, W / 2, H - 230);
+  g.fillText(`「${r.verdict}」`, W / 2, lineY + 66);
   g.textAlign = 'left';
 
   // 印
@@ -4042,21 +4106,32 @@ function saveCard(r) {
 
 function wrapText(g, text, x, y, maxW, lineH, maxLines) {
   const chars = [...text];
+  // 中文排版避头/避尾：收尾标点不能落在行首，起首括号不能留在行尾
+  const NO_HEAD = /[，。、；：？！）】》」』〕〉%‰…·]/;
+  const NO_TAIL = /[（【《「『〔〈]/;
   let line = '';
   let lines = 0;
   for (const ch of chars) {
     const test = line + ch;
     if (g.measureText(test).width > maxW && line) {
+      // 需要避头/避尾时，把上一行末字一起带到下一行，避免标点孤悬行首
+      let carry = '';
+      const arr = [...line];
+      if (arr.length > 1 && (NO_HEAD.test(ch) || NO_TAIL.test(arr[arr.length - 1]))) {
+        carry = arr.pop();
+        line = arr.join('');
+      }
       g.fillText(line, x, y);
       y += lineH;
       lines++;
-      line = ch;
+      line = carry + ch;
       if (lines >= maxLines - 1) break;
     } else {
       line = test;
     }
   }
-  if (line && lines < maxLines) g.fillText(line, x, y);
+  if (line && lines < maxLines) { g.fillText(line, x, y); y += lineH; }
+  return y; // 返回下一行的 y，供调用方排后续内容
 }
 
 
@@ -4930,12 +5005,13 @@ function comboView() {
   const isComplete = () => !!(face && palm && birth.year && birth.hour && birth.gender);
   const readyCount = () => (face ? 1 : 0) + (palm ? 1 : 0) + (birth.year && birth.hour && birth.gender ? 1 : 0);
 
-  const row = (idx, name, note, done, href) => `
-    <div class="ready-row">
-      <span class="ready-idx">${idx}</span>
-      <span class="ready-name">${name}</span>
-      <span class="ready-state ${done ? 'done' : 'todo'}">${done ? '已成' : `<a href="${href === '#birth' ? '#/combo' : href}"${href === '#birth' ? ' data-scroll-birth' : ''}>${href.includes('face') ? '去观面' : href.includes('palm') ? '去看掌' : '填写'}</a>`}</span>
-      <span class="ready-note">${esc(note)}</span>
+  const row = (name, note, done, href, todoText, doneText) => `
+    <div class="ready-row ${done ? 'is-done' : ''}">
+      <div class="ready-info">
+        <span class="ready-name">${name}</span>
+        <span class="ready-note">${esc(note)}</span>
+      </div>
+      <a class="ready-go" href="${href === '#birth' ? '#/combo' : href}"${href === '#birth' ? ' data-scroll-birth' : ''}>${done ? doneText : todoText}</a>
     </div>`;
 
   const html = `
@@ -4949,9 +5025,9 @@ function comboView() {
       <p class="lead">把面相、手相、生日三样合起来看自己，比只看一样更稳。<b>这是看一个人，不是看两个人合不合。</b>缺一处，就少一个参照。</p>
 
       <div class="ready">
-        ${row('一', '面相', face ? `已录：${face.overall} 分 · ${face.dateLabel}` : '尚未观面', !!face, '#/face')}
-        ${row('二', '手相', palm ? `已录：${palm.overall} 分 · ${palm.dateLabel}` : '尚未看掌', !!palm, '#/palm')}
-        ${row('三', '生辰', birth.year ? `${ganzhi(birth.year)}年 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '未填'}` : '公历生日与时辰', !!(birth.year && birth.hour && birth.gender), '#birth')}
+        ${row('面相', face ? `已录 ${face.overall} 分 · ${face.dateLabel}` : '还没测', !!face, '#/face', '测面相', '重测')}
+        ${row('手相', palm ? `已录 ${palm.overall} 分 · ${palm.dateLabel}` : '还没测', !!palm, '#/palm', '测手相', '重测')}
+        ${row('生辰', birth.year ? `${ganzhi(birth.year)}年 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '未填'}` : '填公历生日与时辰', !!(birth.year && birth.hour && birth.gender), '#birth', '填生辰', '重填')}
       </div>
 
       <div class="field" id="birth">
@@ -5002,20 +5078,21 @@ function comboView() {
       } else {
         preview.innerHTML = '';
       }
-      const state3 = root.querySelectorAll('.ready-state')[2];
-      if (state3) {
-        const ok = !!(birth.year && birth.hour && birth.gender);
-        state3.className = `ready-state ${ok ? 'done' : 'todo'}`;
-        state3.innerHTML = ok ? '已成' : '<a href="#/combo" data-scroll-birth>填写</a>';
+      const rows = root.querySelectorAll('.ready-row');
+      const ok3 = !!(birth.year && birth.hour && birth.gender);
+      if (rows[2]) {
+        rows[2].classList.toggle('is-done', ok3);
+        const link = rows[2].querySelector('.ready-go');
+        if (link) link.textContent = ok3 ? '重填' : '填生辰';
       }
       const notes = root.querySelectorAll('.ready-note');
       if (notes[2]) {
         notes[2].textContent = birth.year
           ? `${birth.year}年${birth.month}月${birth.day}日 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '性别未填'}`
-          : '公历生日与时辰';
+          : '填公历生日与时辰';
       }
-      if (notes[0] && face) notes[0].textContent = `已录：${face.overall} 分 · ${face.dateLabel}`;
-      if (notes[1] && palm) notes[1].textContent = `已录：${palm.overall} 分 · ${palm.dateLabel}`;
+      if (notes[0] && face) notes[0].textContent = `已录 ${face.overall} 分 · ${face.dateLabel}`;
+      if (notes[1] && palm) notes[1].textContent = `已录 ${palm.overall} 分 · ${palm.dateLabel}`;
     };
 
     root.addEventListener('change', (e) => {
@@ -5486,7 +5563,7 @@ function compassView() {
 
 const SEAL = ['相', '由', '心', '生'];
 
-const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
+const KIND = { face: '面相', palm: '手相', combo: '综合相', compass: '罗盘风水', kan: '阴宅', ming: '四柱', bu: '小六壬', ze: '择日', hepan: '合盘' };
 const AGAIN = { face: '#/face', palm: '#/palm', combo: '#/combo', compass: '#/compass', ming: '#/ming', bu: '#/bu', ze: '#/ze', kan: '#/yinzha', hepan: '#/hepan' };
 const SCORE_LABEL = { compass: '宅运', kan: '地气', ming: '命格', bu: '课象', ze: '日课', hepan: '合盘' };
 
@@ -5521,7 +5598,7 @@ function chartText(rec) {
 
 const llmInner = (llm) => `
   ${String(llm.text).split(/\n+/).filter(Boolean).map((p) => `<p class="llm-text">${esc(p)}</p>`).join('')}
-  <p class="llm-note">AI 解读，可能出错；排盘数字与引文以上文为准。<b>AI 建议，仅供娱乐。</b></p>`;
+  <p class="llm-note">AI 解读，可能出错；排盘数字以正文为准。<b>AI 建议，仅供娱乐。</b></p>`;
 
 const llmBlock = (llm) => `<section class="rep-sec llm"><h3>AI 建议 · 仅供娱乐</h3>${llmInner(llm)}</section>`;
 
@@ -5546,6 +5623,43 @@ const ELEM_CAREER_SHORT = {
   水: ['贸易', '物流', '航运', '咨询'],
 };
 
+/* ==========================================================================
+   专业词 → 人话：总结里保留专业名词作“出处锚点”，紧跟一句白话翻译。
+   读者既看得懂，也看得出这话有师承、不是随口编的。
+   ========================================================================== */
+const PATTERN_PLAIN = {
+  食神格: '脑子活、有手艺、能把想法做成东西，靠表达和输出吃饭更顺',
+  伤官格: '有才气、不服输，适合靠创意和口才出头，注意别太对冲',
+  正官格: '讲规矩、扛得住责任，在有秩序的环境里稳步走到前面',
+  七杀格: '压力大的地方反而出成绩，适合有挑战、能压实力的活',
+  正财格: '踏实经营、稳定进账是长项，来得慢但站得稳',
+  偏财格: '来钱的路子活、机会多，适合灵活经营，也别贪快',
+  正印格: '学得快、有人愿意帮，靠专业和口碑立身最稳',
+  偏印格: '思路独特、爱钻研，适合专精或冷门的领域',
+  比肩格: '独立、要强，靠自己和同伴一起打拼比单打独斗强',
+  劫财格: '独立、要强，合作前把分工和利益说清楚更好',
+};
+const TEN_GOD_DO = {
+  七杀: '压力里带着机会，稳住别硬碰，把事做扎实',
+  正官: '适合把规矩立起来，重要决定多听一句再拍板',
+  正财: '踏实做事能见到回报，适合把收入这件事做实',
+  偏财: '机会多但也有起伏，别贪快，落袋为安',
+  食神: '靠手艺和表达出成绩，适合把想法做出来',
+  伤官: '有表现机会，但话别说太满，留三分余地',
+  正印: '贵人和学习运不错，适合进修、考证、找人带',
+  偏印: '适合钻研专业里深的东西，别钻牛角尖',
+  比肩: '容易有竞争，合作前把分工说清楚',
+  劫财: '容易有竞争，合作前把分工和利益说明白',
+};
+const GUA_LEAD = {
+  大安: '事情稳、不用急，守着现状等它自己落地',
+  留连: '事情容易拖，反复确认再落笔，别催太紧',
+  速喜: '喜信来得快，该出手时别犹豫',
+  赤口: '提防口舌是非，话少说、合同细看',
+  小吉: '有贵人从中说项，配合别人推进比单打独斗顺',
+  空亡: '多半落空，止住脚步比硬冲明智',
+};
+
 const kvRows = (rec, title) =>
   (rec.blocks || []).find((b) => b.title === title && b.kind === 'kv')?.rows || [];
 
@@ -5564,14 +5678,33 @@ function fortuneOf(rec) {
 
 function plainSummary(rec) {
   const rows = [];
-  let lead = '';
+  let verdict = '';   // 一句话结论：这段到底说什么
+  let why = '';       // 有出处的白话解释：凭什么这么说（保留专业名词作锚点）
+  let action = '';    // 行动指引：现在最该做的一件事
   let note = '';
 
   if (rec.type === 'ming') {
     const f = fortuneOf(rec);
-    lead = /身旺/.test(rec.summary || '')
-      ? '你的底子偏“自己扛”那一类：精力足、主意正，眼下容易用力太猛，什么都想自己兜着。'
-      : '你更吃“有人搭把手、按节奏来”的做事方式：硬撑容易累，借力反而走得远。';
+    const judge = Object.fromEntries(kvRows(rec, '判读'));
+    const patt = Object.fromEntries(kvRows(rec, '格局'));
+    const lyn = Object.fromEntries(kvRows(rec, '流年'));
+    const elems = (rec.blocks || []).find((b) => b.title === '五行' && b.kind === 'elems')?.items || [];
+    const strong = /身旺/.test(judge['身强弱'] || rec.summary || '');
+    const useRaw = f?.use?.length ? f.use : (rec.meta?.yong || String(judge['喜用'] || '').split('、').filter(Boolean));
+    const use = (useRaw || []).filter(Boolean);
+    const patName = patt['格局'] && patt['格局'] !== '未取' ? patt['格局'] : '';
+    const sorted = [...elems].sort((a, b) => b.v - a.v);
+    const top = sorted[0]?.e || '某一行';
+    const low = sorted[sorted.length - 1]?.e || '另一行';
+
+    verdict = strong
+      ? '你的底子偏“自己扛”那一类：精力足、主意正，眼下真正的功课不是不够拼，而是别用力太猛。'
+      : '你更吃“有人搭把手、按节奏来”那一套：硬撑容易累，借力反而走得远。';
+    why = `排盘判你“${judge['身强弱'] || (strong ? '身旺' : '身弱')}”${patName ? `、格局是“${patName}”` : ''}——说人话就是，${patName && PATTERN_PLAIN[patName] ? PATTERN_PLAIN[patName] : '按自己的节奏做事，不必套死路子'}。五行里${top}偏多、${low}偏少，${use.length ? `传统上建议往${use.join('、')}这边调，补的是状态，不是改命。` : '顺着自己的节奏挑事做就好。'}`;
+    const tg = lyn['十神'] || '';
+    const yearTag = (lyn['流年'] || '').replace(/\s+/g, '');
+    action = `${yearTag ? yearTag + '年' : '眼下'}${tg ? `走“${tg}”运` : ''}：${TEN_GOD_DO[tg] || '稳住节奏，把该做的事一件件做扎实。'}`;
+
     if (f?.colors) {
       const [main, alt] = String(f.colors).split('；');
       rows.push({ k: '穿什么', v: `${main}为主${alt ? `，${alt.replace(/^次选\s*/, '')}换着穿` : ''}。贴身的围巾、包、内搭用上一点就够，不用整套换。` });
@@ -5579,10 +5712,6 @@ function plainSummary(rec) {
     if (f?.direction || f?.cities) {
       rows.push({ k: '住哪儿', v: `${f?.direction || '东西向都行'}更顺手；长期生活可留意${f?.cities || '自己熟悉的城市'}。换个房间朝向也算。` });
     }
-    const judge = Object.fromEntries(kvRows(rec, '判读'));
-    const use = f?.use?.length
-      ? f.use
-      : (rec.meta?.yong || String(judge['喜用'] || '').split('、').filter(Boolean));
     const careerTags = use.flatMap((e) => ELEM_CAREER_SHORT[e] || []);
     rows.push({ k: '做什么', v: use.length
       ? '传统说法里偏下面这些方向——当个参考，别当成“现在就得换工作”。'
@@ -5592,51 +5721,97 @@ function plainSummary(rec) {
     if (f?.sports) rows.push({ k: '动一动', v: `${f.sports}。一周两三次就够，量力而行。` });
     note = '以上按传统五行喜用推演，属娱乐参考；不是医嘱，也不是职业建议。';
   } else if (rec.type === 'face' || rec.type === 'palm' || rec.type === 'combo') {
-    lead = rec.type === 'combo'
-      ? '把面相、手相、生日三样放一起看，比只看一样更稳。'
-      : `你给人的第一印象偏“${rec.traits?.[0] || '稳'}”这一类。`;
+    const t0 = rec.traits?.[0] || '稳';
+    verdict = rec.type === 'combo'
+      ? `面相、手相、生日三样合起来看，比只看一样更稳——你给人的第一印象偏“${t0}”。`
+      : `你给人的第一印象偏“${t0}”这一类。`;
+    const dims = rec.dims || [];
+    if (dims.length) {
+      const s = [...dims].sort((a, b) => b.v - a.v);
+      why = `六个维度里，${s[0].label}最出挑（${s[0].v}分），${s[s.length - 1].label}相对弱一点（${s[s.length - 1].v}分）。这些维度是本项目的自定权重，看个趋势就好，别把它当成打分评判。`;
+    } else {
+      why = `${rec.strengths?.[0] ? stripPrefix(rec.strengths[0]) : '整体气质是长期养成的，不是一两个特征能定死。'}${rec.cautions?.[0] ? ` 也要留意：${stripPrefix(rec.cautions[0])}。` : ''}`;
+    }
+    action = rec.advice?.[0] || '当个参考，别把自己看窄，长处接着用、短板慢慢补。';
     if (rec.strengths?.[0]) rows.push({ k: '你的长处', v: stripPrefix(rec.strengths[0]) });
     if (rec.cautions?.[0]) rows.push({ k: '留意的', v: stripPrefix(rec.cautions[0]) });
-    if (rec.advice?.[0]) rows.push({ k: '可以这么调', v: rec.advice[0] });
+    if (rec.advice?.[1]) rows.push({ k: '可以这么调', v: rec.advice[1] });
     if (rec.type === 'combo') rows.push({ k: '别搞混', v: '这是三样合起来看你自己，不是看两个人合不合，两者不是一回事。' });
-    note = '六维权重与分数为本项目自定，不是古籍原文；照片只作辅助。当个参考，别把自己看窄。';
+    note = '六维权重与照片识别为本项目自定，不是古籍原文；照片只作辅助。当个参考，别把自己看窄。';
   } else if (rec.type === 'compass' || rec.type === 'kan') {
-    lead = rec.meta?.match
-      ? '按你说的朝向，这房子跟你挺合拍，不用大改。'
-      : '按你说的朝向，房子跟你不太同组，但不用改门，微调就够。';
+    const m = rec.meta || {};
+    verdict = m.match
+      ? '按你说的朝向，这房子跟你挺合拍，不用大改，住得舒服最要紧。'
+      : '按你说的朝向，房子跟你不算同组，但不用改门，微调几处就够。';
+    why = `八宅把宅和命各分八卦：这套是“${m.houseGua || '—'}宅”、你是“${m.mGua || '—'}命”，${m.sitting?.n && m.facing?.n ? `坐${m.sitting.n}向${m.facing.n}。` : ''}宅命相配看的是住着顺不顺，不是摆件灵不灵。`;
     const labels = ['床头朝哪', '身体弱时', '哪里放东西', '记住这句'];
-    (rec.advice || []).slice(0, 4).forEach((a, i) => rows.push({ k: labels[i] || '建议', v: a }));
+    (rec.advice || []).forEach((a, i) => rows.push({ k: labels[i] || '建议', v: a }));
+    action = rec.advice?.[0] || '先顾好采光、通风和动线，比摆什么更实在。';
     note = '方位是传统参考；采光、通风、动线比摆件更实在。不构成装修或购房建议。';
   } else if (rec.type === 'bu') {
     const m = String(rec.summary || '').match(/落([^（(]+)[（(]([^）)]+)[）)]。(.*)/);
-    lead = m
-      ? `这件事眼下落在“${m[1].trim()}”——说白了：${m[3].split('。')[0]}。`
+    const gua = m?.[1]?.trim() || '这一课';
+    const rest = m?.[3] || '';
+    const wang = (() => {
+      const rows2 = kvRows(rec, '类象');
+      const r = Object.fromEntries(rows2);
+      return { text: r['旺衰'] || '', timing: r['应期'] || '' };
+    })();
+    verdict = m
+      ? `你问的这件事，眼下落在“${gua}”：${GUA_LEAD[gua] || rest.split('。')[0]}。`
       : '这件事眼下先看清节奏，再决定动不动。';
-    if (m?.[3]) rows.push({ k: '眼下怎么走', v: m[3] });
+    why = `${wang.text ? wang.text : '按落宫看，气势有强有弱'}${wang.timing ? ` 应期上，${wang.timing}。` : '。'}小六壬是把起课的那一刻切下来看，说的是当时的势头，不是给你下判决。`;
+    // 行动指引取落宫本义里的“怎么做”，避免和依据里的旺衰判断重复
+    const guaBody = (rec.blocks || []).find((b) => b.title === '宫位本义')?.text || '';
+    const how = String(guaBody).split('。').filter(Boolean).find((s) => /宜|可|先|宜与|配合/.test(s));
+    action = how ? how + '。' : '先把节奏放慢，把话说清楚再动。';
+    if (rest) rows.push({ k: '眼下怎么走', v: rest });
     if (rec.advice?.[0]) rows.push({ k: '提醒', v: rec.advice[0] });
     note = '小六壬取的是当下切片，一件事问一次就够；不构成决定依据。';
   } else if (rec.type === 'ze') {
     const picks = (rec.blocks || []).find((b) => b.title === '可选的日子');
     const list = picks?.rows || [];
-    lead = list.length
-      ? `这段时间比较合适的是 ${list.slice(0, 3).map((r) => r[0]).join('、')} 这几天。`
+    const basisRows = Object.fromEntries(kvRows(rec, '首选日的依据'));
+    verdict = list.length
+      ? `办这件事，最合适的是 ${list.slice(0, 3).map((r) => r[0]).join('、')} 这几天，越靠前越顺。`
       : '这段时间没有特别合适的日子，先按自己的节奏推进。';
+    why = basisRows['为什么合适']
+      ? `首选那天之所以合适：${basisRows['为什么合适']}。这是把建除吉凶、黄道黑道和你本命生肖合起来看的结果，日子只是一部分，事还得人来办。`
+      : '这是把建除吉凶、黄道黑道和本命生肖合起来看的结果，日子只是一部分，事还得人来办。';
+    action = basisRows['当天吉时']
+      ? `当天挑 ${String(basisRows['当天吉时']).split('、').slice(0, 2).join('、')} 办正事更顺；其余时段也不是不能用。`
+      : '日子定了就别反复改，把精力放在把事办扎实上。';
     if (list.length) rows.push({ k: '怎么挑', v: `一共挑出 ${list.length} 个可选日子，越靠前越合适；具体安排还得看你自己。` });
     if (rec.advice?.[0]) rows.push({ k: '挑日子的分寸', v: rec.advice[0] });
     note = '建除只论日辰，不代替对具体事项的判断；婚丧嫁娶请结合实际情况。';
   } else if (rec.type === 'hepan') {
-    lead = (rec.overall || 0) >= 70
-      ? '两个人的节奏比较合得来，遇事商量着来，默契会越来越足。'
-      : '两个人的节奏有差异，但差异本身不是问题，先说清楚再动。';
-    kvRows(rec, '关系').slice(0, 2).forEach(([k, v]) => rows.push({ k, v }));
-    if (rec.advice?.[0]) rows.push({ k: '相处提醒', v: rec.advice[0] });
-    note = '只看日柱与五行，不涉及双方家庭、价值观与现实条件；合得来还得靠相处。';
+    const dims = rec.scores || rec.dims || [];
+    const hi = (rec.overall || 0) >= 70;
+    const s = [...dims].sort((a, b) => b.v - a.v);
+    verdict = hi
+      ? '两个人整体挺合拍：节奏对得上，遇事商量着来，默契会越磨越好。'
+      : '两个人的节奏有差异，但差异本身不是问题——先把话说清楚，再一起动。';
+    why = s.length
+      ? `从四柱、纳音、生肖、十神几个角度合起来看，${s[0].label}这一项最投缘（${s[0].v}分），${s[s.length - 1].label}稍微需要磨合（${s[s.length - 1].v}分）。分数是把各家说法凑到一起的参考，不是相处及格线。`
+      : '从四柱、纳音、生肖、十神几个传统角度合起来看，分数是把各家说法凑到一起的参考，不是相处及格线。';
+    action = rec.advice?.[0] || '合得来还得靠相处，多留一点耐心给差异。';
+    kvRows(rec, '关系明细').slice(0, 2).forEach(([k, v]) => rows.push({ k, v }));
+    if (rec.advice?.[1]) rows.push({ k: '相处提醒', v: rec.advice[1] });
+    note = '从四柱、纳音、生肖、五行、十神几个传统角度看相处倾向，不涉及双方家庭、价值观与现实条件；合得来还得靠相处。';
   } else {
     return null; // 没把握的类型保留原文，不瞎编
   }
 
-  return { lead, rows, note };
+  return { verdict, why, action, rows, note };
 }
+
+/* 批语：按分句拆成独立的行，每句独占一行。
+   典籍金句前后半字数相等，断行天然整齐，绝不会出现虚词孤悬行尾。 */
+const verdictLines = (s) => String(s || '')
+  .replace(/^[「"“]|」|["”]$/g, '')
+  .split(/[，,、；;]/)
+  .map((x) => x.trim().replace(/[。.]$/, '').trim())
+  .filter(Boolean);
 
 function summaryBlock(rec) {
   const p = plainSummary(rec);
@@ -5646,11 +5821,15 @@ function summaryBlock(rec) {
   return `
   <section class="rep-sec plain-summary">
     <h3>总评</h3>
-    <p class="plain-lead">${esc(p.lead)}</p>
-    ${rec.traits?.length ? `<div class="tags">${rec.traits.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-    <div class="plain-rows">
-      ${p.rows.map((r) => `<div class="plain-row"><b>${esc(r.k)}</b><div class="plain-cell"><span>${esc(r.v)}</span>${r.tags?.length ? `<div class="plain-tags">${r.tags.map((t) => `<em>${esc(t)}</em>`).join('')}</div>` : ''}</div></div>`).join('')}
+    <div class="sum-core">
+      <p class="sum-verdict">${esc(p.verdict)}</p>
+      <p class="sum-why"><span class="sum-kicker">凭什么这么说</span>${esc(p.why)}</p>
+      <p class="sum-action"><span class="sum-arrow">→</span><span>${esc(p.action)}</span></p>
     </div>
+    ${rec.traits?.length ? `<div class="tags">${rec.traits.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+    ${p.rows.length ? `<div class="plain-rows">
+      ${p.rows.map((r) => `<div class="plain-row"><b>${esc(r.k)}</b><div class="plain-cell"><span>${esc(r.v)}</span>${r.tags?.length ? `<div class="plain-tags">${r.tags.map((t) => `<em>${esc(t)}</em>`).join('')}</div>` : ''}</div></div>`).join('')}
+    </div>` : ''}
     <p class="plain-note">${esc(p.note)}</p>
   </section>`;
 }
@@ -5714,6 +5893,23 @@ function radarBlock(rec) {
           <span class="v">${d.v}</span>
         </div>`).join('')}
     </div>
+  </section>`;
+}
+
+function scoresBlock(rec) {
+  if (!rec.scores?.length) return '';
+  return `
+  <section class="rep-sec">
+    <h3>几个方面</h3>
+    <div class="dim-list">
+      ${rec.scores.map((s) => `
+        <div class="dim">
+          <span class="dim-name">${esc(s.label)}</span>
+          <span class="bar"><i style="width:${Number(s.v) || 0}%"></i></span>
+          <span class="v">${esc(s.v)}</span>
+        </div>`).join('')}
+    </div>
+    <p class="muted" style="margin-top:10px">${esc(rec.scores.map((s) => `${s.label}：${s.note}`).join('　'))}</p>
   </section>`;
 }
 
@@ -5810,9 +6006,18 @@ function blocksBlock(rec) {
     if (rec.type === 'ming' && MING_DETAIL_TITLES.has(b.title)) detailed.push(sec);
     else normal.push(sec);
   });
-  return normal.join('') + (detailed.length
-    ? `<details class="detail-blocks"><summary>详细排盘 · 想看干支术语再展开</summary>${detailed.join('')}</details>`
-    : '');
+  if (!detailed.length) return normal.join('');
+
+  // 命理：术语建议与排盘明细同属"想深究"层，合并进同一个入口，
+  // 不让用户在两个看不懂的标题之间做选择题。
+  let extra = '';
+  if (rec.type === 'ming') {
+    const mingAdvice = (rec.advice || []).filter((a) => !a.includes('颜色、饮食、运动、城市'));
+    if (mingAdvice.length) {
+      extra = `<section class="rep-sec"><h3>更多建议</h3><ul class="rep-list">${mingAdvice.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></section>`;
+    }
+  }
+  return normal.join('') + `<details class="detail-blocks"><summary>展开看完整分析</summary>${detailed.join('')}${extra}</details>`;
 }
 
 /* 分数旁的等级注解也翻成人话 */
@@ -5826,19 +6031,9 @@ const LEVEL_PLAIN = {
 };
 
 function adviceBlock(rec) {
-  let advice = rec.advice || [];
-  if (rec.type === 'ming') {
-    advice = advice.filter((a) => !a.includes('颜色、饮食、运动、城市'));
-    if (!advice.length) return '';
-    // 命理的调候建议带干支术语，属于专业层：收进折叠，想看再展开，不抢总评的人话结论
-    return `
-    <details class="adv-notes">
-      <summary>排盘调候建议 · 想看术语再展开</summary>
-      <ul class="rep-list">
-        ${advice.map((a) => `<li>${esc(a)}</li>`).join('')}
-      </ul>
-    </details>`;
-  }
+  const advice = rec.advice || [];
+  // 命理建议已并进 blocksBlock 的「展开看完整分析」，这里不再单独出一个入口
+  if (rec.type === 'ming') return '';
   return listBlock('可做之事', advice);
 }
 
@@ -5916,6 +6111,16 @@ const BASIS = {
     ],
     custom: '综合看相的权重与分数为本项目自定。',
   },
+  hepan: {
+    school: '四柱合参 · 纳音五行',
+    rules: [
+      '年、月、日、时四柱逐柱对照，看双方干支的生克与合化。',
+      '纳音按六十甲子取五行，参双方纳音的生克关系。',
+      '生肖按地支六合、三合、相冲取象；五行按八字本气计数看互补。',
+      '十神按日主与对方各柱的关系取象，只作相处的参考。',
+    ],
+    custom: '合盘的总分、维度权重与等级为本项目自定，不对应古籍条文；仅作娱乐参考。',
+  },
 };
 
 function basisBlock(rec) {
@@ -5923,7 +6128,7 @@ function basisBlock(rec) {
   if (!b) return '';
   return `
   <details class="basis">
-    <summary>推演依据 · ${esc(b.school)}</summary>
+    <summary>这些判断的依据 · ${esc(b.school)}</summary>
     <ul>${b.rules.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
     <p class="basis-assume">统一假设：按北京时间，未校正真太阳时；立春换年；结果不构成任何决策依据。</p>
     <p class="basis-custom">${esc(b.custom)}</p>
@@ -6041,6 +6246,7 @@ function reportView(id) {
 
           ${rec.blocks ? blocksBlock(rec) : ''}
 
+          ${scoresBlock(rec)}
           ${rec.type === 'compass' ? compassBlock(rec) : ''}
 
           ${rec.dims ? radarBlock(rec) : ''}
@@ -6054,9 +6260,11 @@ function reportView(id) {
           ${adviceBlock(rec)}
           ${rec.llm ? llmBlock(rec.llm) : ''}
 
+          ${visionBlock(rec)}
+          ${basisBlock(rec)}
+
           <div class="verdict">
-            <small>批 语</small>
-            「${esc(rec.verdict)}」
+            ${verdictLines(rec.verdict).map((line) => `<span class="vline">${esc(line)}</span>`).join('')}
           </div>
 
           <footer class="rep-foot">
@@ -6080,9 +6288,11 @@ function reportView(id) {
     `,
     mount: () => {
       const root = $('#app .view');
-      $('[data-copy]', root)?.addEventListener('click', () => copyText(recordToText(rec)));
+      // 复制与存图都跟报告页同源：用说人话的三段式，不再导出引擎原始摘要
+      const plain = plainSummary(rec);
+      $('[data-copy]', root)?.addEventListener('click', () => copyText(recordToText(rec, plain)));
       $('[data-card]', root)?.addEventListener('click', () => {
-        try { saveCard(rec); } catch { toast('生成失败，请重试'); }
+        try { saveCard(rec, plain); } catch { toast('生成失败，请重试'); }
       });
 
       const btn = $('[data-llm]', root);
@@ -6425,11 +6635,13 @@ const today = () => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
 
+/* 批语取典籍对仗句：上下句字数相等，渲染时按分句各占一行，断行天然整齐。 */
 const VERDICT = {
-  ming: ['命是底牌，运是出牌的顺序。', '知命不是认命，是知道力气该往哪使。', '四柱只说明起点，不说明终点。'],
-  bu: ['卜以决疑，不疑何卜。', '一事一占，占过不再占。', '课是当下的切片，不是一生的判词。'],
-  ze: ['择日不如择事，择事不如择人。', '吉日不等于必成，凶日不等于必败。', '先看用事，再看日辰。'],
-  kan: ['山管人丁水管财。', '形势在前，理气在后。', '地有吉气，土随而起。'],
+  ming: ['命由我作，福自己求。', '穷理尽性，以至于命。', '乐天知命，君子不忧。'],
+  bu: ['卜以决疑，不疑何卜。', '吉凶悔吝，生乎动者。', '凡事预立，不预则废。'],
+  ze: ['天时地利，人和为本。', '顺天者存，逆天者亡。', '择善而从，择时而行。'],
+  kan: ['藏风聚气，得水为上。', '山管人丁，水管财禄。', '前有明堂，后有靠山。'],
+  hepan: ['二人同心，其利断金。', '同声相应，同气相求。', '与人为善，择善而从。'],
 };
 const pickLine = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -6459,6 +6671,8 @@ function finish(result, extra) {
     summary: result.summary,
     subtitle: extra.subtitle,
     blocks: extra.blocks,
+    scores: extra.scores || null,
+    dims: extra.dims || null,
     citations: result.citations || [],
     advice: extra.advice || [],
     meta: (extra.meta || result.fortune || result.yong)
@@ -6858,7 +7072,7 @@ function buView() {
       </section>
 
       <details class="detail-blocks">
-        <summary>起课须知 · 点开看</summary>
+        <summary>起课须知</summary>
         <ul class="rule-list">
           <li>一次只问一件事，问得越具体越好；同一件事别反复起课。</li>
           <li>只看此刻吉凶。想问「哪天合适」，请用 <a href="#/ze">择日</a>。</li>
@@ -6915,7 +7129,7 @@ function buView() {
         btn.disabled = true;
         btn.textContent = '起 课 中';
         try {
-          const r = await api.tool('xiaoliuren', { month, day, hourIndex: hi });
+          const r = await api.tool('xiaoliuren', { month, day, hourIndex: hi, question });
           finish(r, {
             title: '起课批注',
             heading: '卜',
@@ -6924,19 +7138,28 @@ function buView() {
             overall: r.overall,
             level: levelOf(r.overall),
             meta: { question },
+            scores: r.scores,
             blocks: [
               { kind: 'kv', title: '所问', rows: [
                 ['问题', question],
                 ['起课', `${r.month}月${r.day}日 ${HOURS[hi - 1]?.label || ''}`],
               ] },
-              { kind: 'kv', title: '落宫', rows: [['宫位', r.gua.name], ['吉凶', r.gua.luck]] },
-              { kind: 'list', title: '起课', items: r.steps.map((s) => `${s.label}：${s.text}`) },
-              { kind: 'text', title: '断语', text: r.gua.body },
+              { kind: 'kv', title: '落宫', rows: [
+                ['宫位', `${r.gua.name}（${r.gua.luck}）`],
+                ['对这件事', r.topicLine],
+              ] },
+              { kind: 'text', title: '宫位本义', text: r.gua.body },
+              { kind: 'kv', title: '类象', rows: [
+                ['五行', r.gua.elem], ['方位', r.gua.dir], ['应期', r.gua.timing],
+                ['人 / 色 / 数', `${r.gua.person} · ${r.gua.color} · ${r.gua.num}`],
+                ['旺衰', r.wang.text],
+              ] },
+              { kind: 'list', title: '起课过程', items: r.steps.map((s) => `${s.label}：${s.text}`) },
             ],
             advice: [
               r.gua.luck === '吉' ? '吉课不等于必成，该做的准备一样不能少。' : '凶课不是判决，是提醒你把节奏放慢、把话说清。',
-              '所问之事若已过时，就不要再占。',
-              '若问的是「具体哪天」，小六壬给不了日期，请到「择日」按事由挑日子。',
+              `时序上：${r.gua.timing}。急不得的事，就先把它放在这几天之外。`,
+              '所问之事若已过时，就不要再占。若问的是「具体哪天」，请到「择日」按事由挑日子。',
             ],
           });
         } catch (err) {
@@ -7046,14 +7269,28 @@ function zeView() {
             glyph: '择',
             subtitle: `${evName} · ${r.from} 起 ${r.days} 天`,
             blocks: [
-              { kind: 'table', title: '可选的日子', head: ['日期', '干支', '吉凶'],
-                rows: r.picks.map((x) => [`${x.date.slice(5)} 周${x.weekday}`, x.ganzhi, `${x.jianchu}${x.luck}`]) },
+              { kind: 'table', title: '可选的日子', head: ['日期', '干支', '建除', '黄道', '吉时'],
+                rows: r.picks.map((x) => [
+                  `${x.date.slice(5)} 周${x.weekday}`,
+                  x.ganzhi,
+                  x.jianchu,
+                  `${x.huangdao}${x.hdKind === '黄道' ? '·吉' : ''}`,
+                  x.goodHours.slice(0, 3).join('、') || '—',
+                ]) },
               ...(r.avoid.length ? [{ kind: 'table', title: '避开的日子', head: ['日期', '干支', '原因'],
-                rows: r.avoid.map((x) => [`${x.date.slice(5)}`, x.ganzhi, `${x.reasons[0] || '日辰不利'}`]) }] : []),
+                rows: r.avoid.map((x) => [`${x.date.slice(5)}`, x.ganzhi, x.reasons.slice(0, 2).join('；') || '日辰不利']) }] : []),
+              { kind: 'kv', title: '首选日的依据', rows: r.picks.length
+                ? [['日子', `${r.picks[0].date.slice(5)} ${r.picks[0].ganzhi}`],
+                   ['为什么合适', r.picks[0].reasons.join('；')],
+                   ['当天吉时', r.picks[0].goodHours.join('、') || '时辰上无明显偏向']]
+                : [['说明', '这段时间没有明显合适的日子']] },
+              { kind: 'text', title: '怎么挑的',
+                text: `综合看了建除十二神（办这事偏向定、成、开这类日子）、黄道黑道（青龙、明堂、金匮、天德、玉堂、司命为吉）、月德天德，${r.birthZhi ? `再避开冲、害本命生肖${r.birthZhi}的日子` : '未填出生年，暂未排本命生肖'}；最后按当天日支与时辰的合冲，给出吉时。分数只是把这些因素加在一起，不是绝对的吉凶。` },
             ],
             advice: r.advice,
             overall: r.overall,
             level: levelOf(r.overall),
+            scores: r.dims.map((d) => ({ ...d, note: ({ 日辰: '当天日辰本身', 事由: '和你要办的事是否对路', 本命: '和主事人生肖是否相合' })[d.label] || '' })),
             meta: { event: r.event, days: r.days, birthYear: birthYear || null },
           });
         } catch (err) {
@@ -7085,7 +7322,7 @@ function hepanView() {
         <a class="seg-item" href="#/ming">看我自己</a>
         <a class="seg-item is-on" href="#/hepan">看两人合不合</a>
       </div>
-      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。可以给两人填个称呼，报告里就好认。时辰不清楚就选「不清楚」，按正午算。</p>
+      <p class="lead">填两个人的生日与时辰，从四柱、纳音、生肖、五行、十神几个角度合起来看。可以给两人填个称呼，报告里就好认。时辰不清楚就选「不清楚」，按正午算。</p>
       <h2 class="step"><b>一</b><span data-role-title="a">你</span></h2>
       <div class="field"><label>称呼（选填）</label>
         <input class="input" type="text" data-a-name maxlength="10" placeholder="你" autocomplete="off"></div>
@@ -7094,7 +7331,7 @@ function hepanView() {
       <div class="field"><label>称呼（选填）</label>
         <input class="input" type="text" data-b-name maxlength="10" placeholder="对方" autocomplete="off"></div>
       ${person('b')}
-      <p class="foot">合盘只看日柱与五行互补，不替代相处与沟通。</p>
+      <p class="foot">合盘从命理角度看相处倾向，不替代真实相处与沟通。</p>
     `, '<button class="btn btn-primary" type="button" data-go>看 合 盘</button>'),
     mount: () => {
       const root = $('#app .view');
@@ -7129,19 +7366,27 @@ function hepanView() {
             subtitle: `${nameA}（${pa}）　×　${nameB}（${pb}）`,
             overall: r.overall,
             level: levelOf(r.overall),
+            scores: r.scores,
             blocks: [
               { kind: 'table', title: '双方四柱', head: ['', nameA, nameB], rows: [
                 ['四柱', pa, pb],
                 ['日主', r.a.dayMaster, r.b.dayMaster],
                 ['喜用', r.a.yong.filter(Boolean).join('、'), r.b.yong.filter(Boolean).join('、')],
+                ['纳音', r.a.nayin, r.b.nayin],
+                ['格局', r.a.pattern, r.b.pattern],
               ] },
-              { kind: 'kv', title: '关系', rows: r.relations.length ? r.relations.map((x) => [x.type, x.text]) : [['日柱', '无直接冲合']] },
+              { kind: 'table', title: '四柱逐柱对照', head: ['', nameA, nameB, '关系'],
+                rows: r.pillarTable.map((p) => [p.meaning, p.a, p.b, p.rel]) },
+              { kind: 'kv', title: '关系明细', rows: r.relations.length
+                ? r.relations.map((x) => [`${x.dim} · ${x.type}`, x.text])
+                : [['整体', '四柱之间没有明显的冲合，属平和之象']] },
+              { kind: 'kv', title: '十神与纳音', rows: [
+                ['相处默契', r.tenGods.aToB],
+                ['对方看你', r.tenGods.bToA],
+                ['纳音', r.nayin.text],
+              ] },
             ],
-            advice: [
-              r.overall >= 70 ? '两人五行互补较多，遇事商量着来，别把默契当理所当然。' : '互补不算多，反而要留出各自的空间，少替对方做决定。',
-              '日柱相冲不代表不能处，代表节奏不同：一个快一个慢，先说清楚再动。',
-              '合盘只论日柱与五行，不涉及双方家庭、价值观与现实条件。',
-            ],
+            advice: r.advice,
           });
         } catch (err) {
           btn.disabled = false;
@@ -17020,35 +17265,147 @@ function paipan({ date, hour = '午', gender = 'male', clock, city, province, lo
 }
 
 /* ---------------- 小六壬 ---------------- */
+/* 六宫：吉凶 + 五行方位类象（传统口诀，属文化娱乐参考）+ 应期节奏 */
 const LIUREN = [
-  { name: '大安', luck: '吉', body: '身不动，事在近处。所问之事宜守成，不宜远求；等人则至，失物未远。' },
-  { name: '留连', luck: '小凶', body: '事多拖延，音信迟。宜缓不宜急，反复确认再落笔；所托之人未必尽力。' },
-  { name: '速喜', luck: '吉', body: '喜信将至，事在须臾。宜速行、速决；求财得，问病轻，远行有信。' },
-  { name: '赤口', luck: '凶', body: '口舌是非，争讼之象。宜少言、避争；文书合同细看，勿代人担保。' },
-  { name: '小吉', luck: '吉', body: '事有小成，人和为贵。宜与人合作、托人办事；所谋多顺，但利不大。' },
-  { name: '空亡', luck: '大凶', body: '事多落空，阴人作梗。宜止不宜进，所问之事多半无果；静待时机。' },
+  { name: '大安', luck: '吉', elem: '木', dir: '东', color: '青绿', num: '3、8',
+    person: '长辈、稳重之人', timing: '事缓则圆，多在近日或春季见分晓',
+    body: '身不动，事在近处。所问之事宜守成，不宜远求；等人则至，失物未远。' },
+  { name: '留连', luck: '小凶', elem: '水', dir: '北', color: '黑蓝', num: '1、6',
+    person: '反复之人、旧相识', timing: '事多拖延，往往一再展期',
+    body: '事多拖延，音信迟。宜缓不宜急，反复确认再落笔；所托之人未必尽力。' },
+  { name: '速喜', luck: '吉', elem: '火', dir: '南', color: '红橙', num: '2、7',
+    person: '热心人、消息灵通者', timing: '事在须臾，近日即有消息',
+    body: '喜信将至，事在须臾。宜速行、速决；求财得，问病轻，远行有信。' },
+  { name: '赤口', luck: '凶', elem: '金', dir: '西', color: '白黄', num: '4、9',
+    person: '口舌之人、执法者', timing: '防一时口角，过后渐平',
+    body: '口舌是非，争讼之象。宜少言、避争；文书合同细看，勿代人担保。' },
+  { name: '小吉', luck: '吉', elem: '木', dir: '东南', color: '青绿', num: '3、8',
+    person: '和气之人、中间人', timing: '小有所成，需借人力',
+    body: '事有小成，人和为贵。宜与人合作、托人办事；所谋多顺，但利不大。' },
+  { name: '空亡', luck: '大凶', elem: '土', dir: '中 / 西南', color: '土黄', num: '5、10',
+    person: '虚浮之人、久无音信者', timing: '所问多半无期，宜另寻他途',
+    body: '事多落空，阴人作梗。宜止不宜进，所问之事多半无果；静待时机。' },
 ];
 
-function xiaoliuren({ month, day, hourIndex }) {
+/* 事项分类：从所问的话里识别，给同一落宫一句对题的断语 */
+const LIUREN_TOPICS = [
+  { id: 'wealth', name: '求财', keys: ['钱', '财', '生意', '买卖', '投资', '收入', '工资', '报价', '回款', '赚钱', '成本', '价格'],
+    lines: {
+      '大安': '钱在近处，别往远处追：先把手头的账理清，老客户比新门路靠谱。',
+      '留连': '钱要账期慢，催得急反而拖；先把单据和约定写清楚。',
+      '速喜': '进账的消息来得快，可趁热打铁，但别当场拍板大额。',
+      '赤口': '容易在报价、合同上起争执，数字白纸黑字再签字。',
+      '小吉': '有小的进账或人情回报，积少成多，别贪大。',
+      '空亡': '这笔钱多半落空或回收无期，先保住本金，别追加。',
+    } },
+  { id: 'work', name: '工作与考试', keys: ['工作', '面试', '升职', '跳槽', '考试', '事业', 'offer', '录', '竞聘', '调动', '官司', '诉讼'],
+    lines: {
+      '大安': '位置稳得住，别急着动；把手上的成果整理出来，比到处打听更有用。',
+      '留连': '流程会拖，名单或结果反复；多问一句进度，材料备齐别缺漏。',
+      '速喜': '消息来得快，接到通知就果断回应，机会不等人。',
+      '赤口': '容易有口碑或口舌之争，少表态、多留痕，别在人前评人。',
+      '小吉': '有贵人从中说项，配合别人一起推进，比单打独斗顺。',
+      '空亡': '这轮多半没有下文，别把希望押在一处，同时准备别的路。',
+    } },
+  { id: 'love', name: '感情', keys: ['感情', '恋爱', '婚姻', '结婚', '对象', '分手', '复合', '喜欢', '相亲', '异地'],
+    lines: {
+      '大安': '关系稳在近处，别急着推进或试探；把日常过好，比表态更管用。',
+      '留连': '心里反复、对方也含糊；先把话说明白，别靠猜。',
+      '速喜': '有好消息或主动的回应，趁热把约见面、把话说到明处。',
+      '赤口': '容易因一句话起争执，先停一停再回，别翻旧账。',
+      '小吉': '有中间人帮忙撮合，顺着人情走，别硬碰。',
+      '空亡': '这层关系暂时没有着落，先把自己的日子过好，别追着问。',
+    } },
+  { id: 'move', name: '出行与搬迁', keys: ['出行', '搬家', '旅行', '出差', '迁', '搬', '走', '出远门'],
+    lines: {
+      '大安': '近处可行、远行宜缓；行李和证件先备齐，稳着走。',
+      '留连': '路上多半耽搁，预留缓冲时间，别把行程排太满。',
+      '速喜': '说走就走，路上顺，但提前订好落脚处。',
+      '赤口': '路上易有口角或剐蹭，慢一点、让一步，别抢时间。',
+      '小吉': '有人结伴或接应更顺，把行程告诉可信的人。',
+      '空亡': '这趟多半成行不了或白跑，先确认消息真假再动身。',
+    } },
+  { id: 'lost', name: '找东西', keys: ['丢', '找', '失物', '丢了', '不见', '钥匙', '手机', '钱包'],
+    lines: {
+      '大安': '东西没走远，就在常待的地方；先翻手边和原处。',
+      '留连': '被压在别处或一时记错，过一阵再找，越急越乱。',
+      '速喜': '很快有线索，问一问身边的人就有消息。',
+      '赤口': '可能被别人动过或借走，好好问，别先指责。',
+      '小吉': '有人替你收着，找人问一声就有。',
+      '空亡': '一时找不回，先止损、补办，别耗在原地。',
+    } },
+  { id: 'health', name: '身体', keys: ['病', '身体', '手术', '健康', '检查', '疼', '不舒服'],
+    lines: {
+      '大安': '情况平稳，按原来的节奏养着；别自己加药或停药。',
+      '留连': '好得慢，反复拉扯；该复查就复查，别拖。',
+      '速喜': '有好转的迹象，趁势把作息调好。',
+      '赤口': '容易为治疗方案起争执，多听医生的专业意见。',
+      '小吉': '有人照应、有办法，配合着来恢复得快。',
+      '空亡': '心里没底的时候，先去正规医院查清楚，别靠猜。',
+    } },
+];
+
+const PACE = { 大安: 45, 留连: 25, 速喜: 90, 赤口: 70, 小吉: 60, 空亡: 12 };
+const HARMONY = { 大安: 70, 留连: 45, 速喜: 72, 赤口: 25, 小吉: 80, 空亡: 30 };
+const LUCK_BASE = { 吉: 78, 小凶: 58, 凶: 52, 大凶: 45 };
+
+function detectTopic(question) {
+  const q = String(question || '');
+  for (const t of LIUREN_TOPICS) if (t.keys.some((k) => q.includes(k))) return t;
+  return { id: 'general', name: 'general', lines: {} };
+}
+
+function wangOf(elem, lunarMonth) {
+  const season = lunarMonth <= 3 ? '春' : lunarMonth <= 6 ? '夏' : lunarMonth <= 9 ? '秋' : '冬';
+  const seasonElem = { 春: '木', 夏: '火', 秋: '金', 冬: '水' }[season];
+  const SHENG = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
+  const KE = { 木: '土', 火: '金', 土: '水', 金: '木', 水: '火' };
+  /* 以当令五行为「我」：同我旺、我生相、生我休、克我囚、我克死 */
+  let state = '平';
+  if (elem === seasonElem) state = '旺';
+  else if (SHENG[seasonElem] === elem) state = '相';
+  else if (SHENG[elem] === seasonElem) state = '休';
+  else if (KE[elem] === seasonElem) state = '囚';
+  else if (KE[seasonElem] === elem) state = '死';
+  const delta = { 旺: 6, 相: 3, 平: 0, 休: 0, 囚: -3, 死: -6 }[state] || 0;
+  const desc = { 旺: '得令而旺，事有根基', 相: '得生而相，后劲尚足', 休: '当令者休，气势平和',
+    囚: '受克制而囚，进展有压', 死: '失令而弱，宜守不宜进', 平: '气势平和' }[state];
+  return { season, seasonElem, state, delta, text: `${season}季${seasonElem}当令，落宫属${elem}，${desc}。` };
+}
+
+function xiaoliuren({ month, day, hourIndex, question = '' }) {
   const m = Number(month), d = Number(day), h = Number(hourIndex);
   if (!(m >= 1 && m <= 12) || !(d >= 1 && d <= 30) || !(h >= 1 && h <= 12)) {
     throw new Error('month 1-12 / day 1-30 / hourIndex 1-12');
   }
   const pos = ((m - 1) + (d - 1) + (h - 1)) % 6;
-  const luckScore = { 吉: 78, 小凶: 58, 凶: 52, 大凶: 45 }[LIUREN[pos].luck] || 60;
   const gua = LIUREN[pos];
+  const topic = detectTopic(question);
+  const wang = wangOf(gua.elem, m);
+  const overall = Math.round(clamp((LUCK_BASE[gua.luck] || 60) + wang.delta, 35, 92));
+  const topicLine = topic.lines[gua.name]
+    || `落在${gua.name}：${gua.body}`;
+
   return {
     type: 'bu',
     month: m, day: d, hourIndex: h,
     pos,
-    overall: luckScore,
+    overall,
     gua,
+    topic: { id: topic.id, name: topic.name === 'general' ? '所占之事' : topic.name },
+    topicLine,
+    wang,
+    scores: [
+      { label: '事体', v: overall, note: '这一课的总体倾向' },
+      { label: '节奏', v: PACE[gua.name] ?? 60, note: '事情来得快还是慢' },
+      { label: '人事', v: HARMONY[gua.name] ?? 60, note: '与人相处、配合的顺逆' },
+    ],
     steps: [
       { label: '起月', text: `自大安起，顺数至${m}月，落${LIUREN[(m - 1) % 6].name}` },
       { label: '起日', text: `自${LIUREN[(m - 1) % 6].name}起，顺数至${d}日，落${LIUREN[(m - 1 + d - 1) % 6].name}` },
       { label: '起时', text: `自${LIUREN[(m - 1 + d - 1) % 6].name}起，顺数至第${h}时，落${gua.name}` },
     ],
-    summary: `农历${m}月${d}日第${h}时，落${gua.name}（${gua.luck}）。${gua.body}`,
+    summary: `农历${m}月${d}日第${h}时，落${gua.name}（${gua.luck}）。${wang.text}${topicLine}`,
   };
 }
 
@@ -17075,18 +17432,52 @@ const SHA = [
   { zhi: ['亥', '卯', '未'], dir: '西' },
 ];
 
+/* 黄道黑道十二神：按月建起青龙顺行，与建除共用同一地支序号。
+   六黄道（青龙/明堂/金匮/天德/玉堂/司命）为吉，六黑道为凶。
+   注：黄黑道起例各派略有差异，本项目采用月建起青龙顺行的常见排法。 */
+const HUANGDAO = [
+  { name: '青龙', kind: '黄道' }, { name: '明堂', kind: '黄道' },
+  { name: '天刑', kind: '黑道' }, { name: '朱雀', kind: '黑道' },
+  { name: '金匮', kind: '黄道' }, { name: '天德', kind: '黄道' },
+  { name: '白虎', kind: '黑道' }, { name: '玉堂', kind: '黄道' },
+  { name: '天牢', kind: '黑道' }, { name: '玄武', kind: '黑道' },
+  { name: '司命', kind: '黄道' }, { name: '勾陈', kind: '黑道' },
+];
+
+/* 月德：寅午戌月在丙，申子辰月在壬，亥卯未月在甲，巳酉丑月在庚 */
+const YUEDE = { 寅: '丙', 午: '丙', 戌: '丙', 申: '壬', 子: '壬', 辰: '壬',
+  亥: '甲', 卯: '甲', 未: '甲', 巳: '庚', 酉: '庚', 丑: '庚' };
+/* 天德（月建方）：正丁二申三壬四辛五亥六甲七癸八寅九丙十乙十一巳十二庚 */
+const TIANDE = ['丁', '申', '壬', '辛', '亥', '甲', '癸', '寅', '丙', '乙', '巳', '庚'];
+
+/* 地支关系：六合、三合、相害、相刑、比和 */
+const BRANCH_SANHE = [['申', '子', '辰'], ['寅', '午', '戌'], ['巳', '酉', '丑'], ['亥', '卯', '未']];
+const BRANCH_HAI = [['子', '未'], ['丑', '午'], ['寅', '巳'], ['卯', '辰'], ['申', '亥'], ['酉', '戌']];
+const BRANCH_XING = [['子', '卯'], ['丑', '戌'], ['寅', '巳'], ['辰', '辰'], ['午', '午'], ['未', '丑'], ['申', '寅'], ['酉', '酉'], ['戌', '未'], ['巳', '申'], ['亥', '亥'], ['卯', '子']];
+function branchRel(a, b) {
+  if (!a || !b) return [];
+  const out = [];
+  if (a === b) out.push({ type: '比和', v: 1, text: '同支' });
+  if (BRANCH_CLASH.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '冲', v: -5, text: `${a}${b}相冲` });
+  if (BRANCH_HE.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '合', v: 3, text: `${a}${b}六合` });
+  if (BRANCH_SANHE.some((g) => g.includes(a) && g.includes(b))) out.push({ type: '三合', v: 3, text: `${a}${b}同属三合` });
+  if (BRANCH_HAI.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '害', v: -3, text: `${a}${b}相害` });
+  if (BRANCH_XING.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '刑', v: -3, text: `${a}${b}相刑` });
+  return out;
+}
+
 const EVENTS = [
-  { id: 'marry', name: '嫁娶订婚', keys: ['嫁娶', '结亲', '订婚', '纳采'] },
-  { id: 'propose', name: '求婚', keys: ['嫁娶', '结亲', '订婚', '纳采'] },
-  { id: 'move', name: '入宅搬家', keys: ['入宅', '移徙', '搬家', '安床'] },
-  { id: 'open', name: '开业开市', keys: ['开市', '开业', '交易', '立券'] },
-  { id: 'travel', name: '出行赴任', keys: ['出行', '赴任', '移徙'] },
-  { id: 'build', name: '动土装修', keys: ['动土', '修造', '上梁', '起基'] },
-  { id: 'sign', name: '签约立约', keys: ['立约', '交易', '纳财', '立券'] },
-  { id: 'medical', name: '求医问诊', keys: ['求医', '疗病', '除服', '解除'] },
-  { id: 'bury', name: '安葬破土', keys: ['安葬', '破土', '埋藏'] },
-  { id: 'worship', name: '祭祀祈福', keys: ['祭祀', '祈福', '求嗣'] },
-  { id: 'study', name: '入学考试', keys: ['入学', '赴考', '求财'] },
+  { id: 'marry', name: '嫁娶订婚', keys: ['嫁娶', '结亲', '订婚', '纳采'], prefer: ['成', '定', '危', '开'], avoid: ['破', '闭', '收'] },
+  { id: 'propose', name: '求婚', keys: ['嫁娶', '结亲', '订婚', '纳采'], prefer: ['成', '定', '开'], avoid: ['破', '闭'] },
+  { id: 'move', name: '入宅搬家', keys: ['入宅', '移徙', '搬家', '安床'], prefer: ['成', '开', '除', '危'], avoid: ['破', '闭'] },
+  { id: 'open', name: '开业开市', keys: ['开市', '开业', '交易', '立券'], prefer: ['开', '成', '满', '定'], avoid: ['破', '闭', '收'] },
+  { id: 'travel', name: '出行赴任', keys: ['出行', '赴任', '移徙'], prefer: ['成', '开', '除', '执'], avoid: ['破', '闭', '危'] },
+  { id: 'build', name: '动土装修', keys: ['动土', '修造', '上梁', '起基'], prefer: ['成', '开', '定', '执'], avoid: ['破', '闭', '月破'] },
+  { id: 'sign', name: '签约立约', keys: ['立约', '交易', '纳财', '立券'], prefer: ['定', '成', '开', '执'], avoid: ['破', '闭'] },
+  { id: 'medical', name: '求医问诊', keys: ['求医', '疗病', '除服', '解除'], prefer: ['除', '危', '定', '成'], avoid: ['破', '闭'] },
+  { id: 'bury', name: '安葬破土', keys: ['安葬', '破土', '埋藏'], prefer: ['破', '危', '定', '执'], avoid: ['开', '成', '满'] },
+  { id: 'worship', name: '祭祀祈福', keys: ['祭祀', '祈福', '求嗣'], prefer: ['除', '定', '执', '成'], avoid: ['破', '闭'] },
+  { id: 'study', name: '入学考试', keys: ['入学', '赴考', '求财'], prefer: ['开', '成', '定', '满'], avoid: ['破', '闭'] },
 ];
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -17097,27 +17488,58 @@ function dayInfo(y, m, d) {
   const mZhi = monthZhiOf(y, m, d);
   const idx = ((ZHI.indexOf(day.zhi) - mZhi) % 12 + 12) % 12;
   const jc = JIANCHU[idx];
+  const hd = HUANGDAO[idx];
   const chong = ZHI[(ZHI.indexOf(day.zhi) + 6) % 12];
   const sha = SHA.find((s) => s.zhi.includes(day.zhi))?.dir || '—';
-  return { day, mZhi, jc, chong, sha };
+  const monthZhiName = ZHI[mZhi];
+  const yueDe = YUEDE[monthZhiName] || null;
+  const tianDe = TIANDE[(m - 1 + 12) % 12];
+  const deShen = [];
+  if (day.gan === yueDe) deShen.push('月德');
+  if (day.gan === tianDe || day.zhi === tianDe) deShen.push('天德');
+  return { day, mZhi, idx, jc, hd, chong, sha, monthZhiName, yueDe, tianDe, deShen };
+}
+
+/* 某日的十二时辰吉时：时支与日支的合/冲/三合/害 + 时干与日干的合 + 黄黑道 */
+function hoursOf(info) {
+  const dayZhi = info.day.zhi;
+  const dayGan = info.day.gan;
+  const HOUR_ZHI = ZHI;
+  const out = [];
+  for (let i = 0; i < 12; i++) {
+    const hz = HOUR_ZHI[i];
+    const hg = GAN[((GAN.indexOf(dayGan) % 5) * 2 + i) % 10];
+    let s = 0;
+    const notes = [];
+    const rels = branchRel(dayZhi, hz);
+    for (const r of rels) { s += r.v; notes.push(r.text); }
+    if (isStemHe(dayGan, hg)) { s += 3; notes.push(`${dayGan}${hg}干合`); }
+    if (isClash(dayZhi, hz)) notes.push('时冲日');
+    out.push({ zhi: hz, gan: hg, s, notes, level: s >= 3 ? '宜' : s <= -3 ? '避' : '平' });
+  }
+  return out;
 }
 
 function zeri({ date, event, days = 30, birthYear, from }) {
   const ev = EVENTS.find((e) => e.id === event) || EVENTS.find((e) => e.name === event);
 
-  /* 单日查询 */
+  /* 单日查询：给出这一天的完整信息 + 吉时 */
   if (!ev) {
     const [y, m, d] = String(date).split('-').map(Number);
     const info = dayInfo(y, m, d);
+    const hours = hoursOf(info);
     return {
       type: 'ze',
       date,
       ganzhi: info.day.gan + info.day.zhi,
-      monthZhi: ZHI[info.mZhi],
+      monthZhi: info.monthZhiName,
       jianchu: info.jc,
+      huangdao: info.hd,
+      deShen: info.deShen,
       chong: info.chong,
       sha: info.sha,
-      summary: `${y}年${m}月${d}日，${info.day.gan}${info.day.zhi}日，${ZHI[info.mZhi]}月${info.jc.name}日（${info.jc.luck}）。冲${info.chong}，煞${info.sha}。`,
+      goodHours: hours.filter((h) => h.level === '宜').map((h) => `${h.zhi}时`),
+      summary: `${y}年${m}月${d}日，${info.day.gan}${info.day.zhi}日，${info.monthZhiName}月${info.jc.name}日（${info.jc.luck}），${info.hd.name}${info.hd.kind}。冲${info.chong}，煞${info.sha}。${info.deShen.length ? `得${info.deShen.join('、')}。` : ''}`,
     };
   }
 
@@ -17131,23 +17553,37 @@ function zeri({ date, event, days = 30, birthYear, from }) {
     const dt = new Date(base.getTime() + i * 86400000);
     const [y, m, d] = ymd(dt).split('-').map(Number);
     const info = dayInfo(y, m, d);
-    const { jc } = info;
+    const { jc, hd } = info;
 
+    /* 打分：建除吉凶 + 事由关键词 + 事由偏好 + 黄黑道 + 德神 + 本命生肖关系 */
     let score = jc.luck === '吉' ? 3 : jc.luck === '凶' ? -4 : 0;
+    const reasons = [];
+    if (jc.luck === '吉') reasons.push(`${jc.name}日属吉`);
+    if (jc.luck === '凶') reasons.push(`${jc.name}日不宜`);
+
     const hitYi = ev.keys.filter((k) => jc.yi.includes(k));
     const hitJi = ev.keys.filter((k) => jc.ji.includes(k));
     score += hitYi.length * 4;
     score -= hitJi.length * 5;
-
-    const chongMe = birthZhi && info.chong === birthZhi;
-    if (chongMe) score -= 6;
-
-    const reasons = [];
-    if (jc.luck === '吉') reasons.push(`${jc.name}日，属吉`);
-    if (jc.luck === '凶') reasons.push(`${jc.name}日，不宜`);
     if (hitYi.length) reasons.push(`宜${hitYi.join('、')}`);
     if (hitJi.length) reasons.push(`忌${hitJi.join('、')}`);
-    if (chongMe) reasons.push(`冲本命${birthZhi}`);
+
+    if (ev.prefer?.includes(jc.name)) { score += 3; reasons.push(`利${ev.name}`); }
+    if (ev.avoid?.includes(jc.name)) { score -= 3; reasons.push(`不宜${ev.name}`); }
+
+    if (hd.kind === '黄道') { score += 2; reasons.push(`${hd.name}黄道`); }
+    else { score -= 2; reasons.push(`${hd.name}黑道`); }
+
+    if (info.deShen.length) { score += 2; reasons.push(`得${info.deShen.join('、')}`); }
+
+    let birthRel = [];
+    if (birthZhi) {
+      birthRel = branchRel(birthZhi, info.day.zhi);
+      birthRel.forEach((r) => { score += r.v; reasons.push(`${r.text}本命`); });
+    }
+
+    const hours = hoursOf(info);
+    const goodHours = hours.filter((h) => h.level === '宜').map((h) => `${h.zhi}时`);
 
     all.push({
       date: ymd(dt),
@@ -17155,18 +17591,29 @@ function zeri({ date, event, days = 30, birthYear, from }) {
       ganzhi: info.day.gan + info.day.zhi,
       jianchu: jc.name,
       luck: jc.luck,
+      huangdao: hd.name,
+      hdKind: hd.kind,
+      deShen: info.deShen,
       chong: info.chong,
       sha: info.sha,
       yi: jc.yi,
       ji: jc.ji,
+      birthRel: birthRel.map((r) => r.text),
+      goodHours,
       score,
       reasons,
     });
   }
 
   const picks = all.filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 6);
-  const zeriScore = Math.round(clamp(58 + Math.max(0, picks[0]?.score || 0) * 3, 50, 90));
+  const zeriScore = Math.round(clamp(58 + Math.max(0, picks[0]?.score || 0) * 2.2, 50, 92));
   const avoid = all.filter((x) => x.score <= -4).sort((a, b) => a.score - b.score).slice(0, 5);
+  /* 三维评分：日辰（建除黄道德神）、事由适配、本命相合 */
+  const dims = [
+    { label: '日辰', v: clamp(58 + Math.max(0, picks[0]?.score || 0) * 2, 45, 92) },
+    { label: '事由', v: clamp(56 + Math.max(0, ...all.map((x) => (ev.prefer?.includes(x.jianchu) ? 18 : 0))) , 45, 92) },
+    { label: '本命', v: birthZhi ? clamp(60 + Math.max(0, ...all.map((x) => x.birthRel.reduce((s, r) => s + (r.includes('合') ? 1 : 0), 0) * 8)), 40, 92) : 62 },
+  ];
 
   return {
     type: 'ze',
@@ -17176,13 +17623,15 @@ function zeri({ date, event, days = 30, birthYear, from }) {
     days: span,
     overall: zeriScore,
     birthYear: birthYear || null,
+    birthZhi,
     picks,
     avoid,
-    summary: `按「${ev.name}」看未来 ${span} 天：${picks.length ? `建议 ${picks.slice(0, 3).map((x) => `${x.date.slice(5)}（${x.jianchu}）`).join('、')} 等 ${picks.length} 个日子` : '没有明显合适的日子'}；避开 ${avoid.length ? avoid.map((x) => x.date.slice(5)).join('、') : '无特别忌日'}。`,
+    dims,
+    summary: `按「${ev.name}」看未来 ${span} 天：${picks.length ? `建议 ${picks.slice(0, 3).map((x) => `${x.date.slice(5)}（${x.jianchu}·${x.huangdao}）`).join('、')} 等 ${picks.length} 个日子` : '没有明显合适的日子'}；避开 ${avoid.length ? avoid.map((x) => x.date.slice(5)).join('、') : '无特别忌日'}。`,
     advice: [
-      picks.length ? '优先看排在前面的日子，再看当天是否有冲本命、冲主事人。' : '这个区间没有高分日，建议放宽到 60 天，或改看时辰。',
-      '建除只论日辰，不代替对具体事项的判断；婚丧嫁娶等大事请结合双方家庭与实际情况。',
-      '若已知主事人生肖，填出生年可自动避开冲本命的日子。',
+      picks.length ? `首选 ${picks[0].date.slice(5)}：${picks[0].huangdao}${picks[0].hdKind}，${picks[0].jianchu}日${picks[0].goodHours.length ? `，当天${picks[0].goodHours.slice(0, 3).join('、')}较佳` : ''}。` : '这个区间没有高分日，建议放宽到 60 天再挑。',
+      '建除、黄黑道、德神只是选日的几个角度，彼此也会打架；取分数高的日子，再看当天是否冲主事人。',
+      birthZhi ? `已按本命生肖${birthZhi}避开冲害；填出生年只能看生肖，精细到日柱需另排八字。` : '填了出生年，就能自动避开冲、害本命生肖的日子。',
     ],
   };
 }
@@ -17370,31 +17819,112 @@ function daily({ birth = {}, days = 7, from } = {}) {
 }
 
 /* ---------------- 合盘 ---------------- */
+const NAYIN_ELEM = (name) => (name || '').slice(-1);
+const ELEM_SHENG = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
+
 function hepan({ a = {}, b = {} }) {
   const A = paipan(a);
   const B = paipan(b);
-  const rel = [];
-  let score = 60;
+  const relations = [];
+  let core = 60;
+  let shengxiao = 60;
+  let wuxing = 60;
+  let shishenScore = 60;
 
-  if (isStemHe(A.dayMaster, B.dayMaster)) { score += 12; rel.push({ type: '干合', text: `${A.dayMaster} 与 ${B.dayMaster} 相合` }); }
-  if (isHe(A.pillars[2].zhi, B.pillars[2].zhi)) { score += 12; rel.push({ type: '支合', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相合` }); }
-  if (isClash(A.pillars[2].zhi, B.pillars[2].zhi)) { score -= 15; rel.push({ type: '支冲', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相冲` }); }
+  /* 1) 日柱核心：日干合冲、夫妻宫（日支）合冲害刑 */
+  if (isStemHe(A.dayMaster, B.dayMaster)) { core += 12; relations.push({ dim: '性情', type: '日干合', text: `${A.dayMaster} 与 ${B.dayMaster} 相合，性情上容易互相欣赏` }); }
+  if (isHe(A.pillars[2].zhi, B.pillars[2].zhi)) { core += 12; relations.push({ dim: '相处', type: '夫妻宫合', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相合，节奏合拍` }); }
+  if (isClash(A.pillars[2].zhi, B.pillars[2].zhi)) { core -= 15; relations.push({ dim: '相处', type: '夫妻宫冲', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相冲，节奏一快一慢` }); }
 
+  /* 2) 四柱逐柱对照 */
+  const pillarNames = ['年柱', '月柱', '日柱', '时柱'];
+  const pillarMeanings = ['根基与家庭', '成长环境', '自身与伴侣宫', '晚年与子女'];
+  const pillarTable = pillarNames.map((label, i) => {
+    const za = A.pillars[i].zhi, zb = B.pillars[i].zhi;
+    const rels = branchRel(za, zb);
+    rels.forEach((r) => {
+      if (i !== 2 || r.type !== '比和') relations.push({ dim: '四柱', type: `${label}${r.type}`, text: `${label} ${za} 与 ${zb} ${r.text}` });
+    });
+    return { label, meaning: pillarMeanings[i], a: A.pillars[i].gan + A.pillars[i].zhi, b: B.pillars[i].gan + B.pillars[i].zhi,
+      rel: rels.map((r) => r.text).join('、') || '无直接冲合' };
+  });
+
+  /* 3) 生肖（年支）关系 */
+  const yearRels = branchRel(A.pillars[0].zhi, B.pillars[0].zhi);
+  yearRels.forEach((r) => {
+    shengxiao += r.v * 2;
+    relations.push({ dim: '生肖', type: r.type, text: `生肖 ${A.pillars[0].zhi} 与 ${B.pillars[0].zhi} ${r.text}` });
+  });
+
+  /* 4) 日柱纳音五行 */
+  const nayinA = A.deep?.nayin?.find((x) => x.label === '日柱')?.name || '';
+  const nayinB = B.deep?.nayin?.find((x) => x.label === '日柱')?.name || '';
+  const neA = NAYIN_ELEM(nayinA), neB = NAYIN_ELEM(nayinB);
+  let nayinText = '纳音无直接生克';
+  if (neA && neB) {
+    if (ELEM_SHENG[neA] === neB) { wuxing += 6; nayinText = `你的纳音${nayinA}生对方的${nayinB}，你更愿意付出`; }
+    else if (ELEM_SHENG[neB] === neA) { wuxing += 6; nayinText = `对方纳音${nayinB}生你的${nayinA}，对方更顾着你`; }
+    else if (neA === neB) { wuxing += 3; nayinText = `两人纳音同属${neA}，气质相近`; }
+  }
+
+  /* 5) 五行互补：一方喜用恰好是对方旺项 */
   const topA = [...A.elems].sort((x, y) => y.v - x.v)[0].e;
   const topB = [...B.elems].sort((x, y) => y.v - x.v)[0].e;
-  if (A.yong.includes(topB)) { score += 8; rel.push({ type: '五行', text: `对方以 ${topB} 为主，正是你的喜用` }); }
-  if (B.yong.includes(topA)) { score += 8; rel.push({ type: '五行', text: `你以 ${topA} 为主，正是对方的喜用` }); }
-  score = clamp(score, 20, 96);
+  const weakA = A.weak, weakB = B.weak;
+  if (A.yong.includes(topB)) { wuxing += 8; relations.push({ dim: '五行', type: '互为喜用', text: `对方以 ${topB} 为主，正是你的喜用` }); }
+  if (B.yong.includes(topA)) { wuxing += 8; relations.push({ dim: '五行', type: '互为喜用', text: `你以 ${topA} 为主，正是对方的喜用` }); }
+  if (topA === weakB || topB === weakA) { wuxing += 4; relations.push({ dim: '五行', type: '补缺', text: `一方偏旺的五行，恰好补上另一方的短板` }); }
+
+  /* 6) 十神互补：对方日主对我是什么十神 */
+  const godOfA = shishen(A.dayMaster, B.dayMaster);
+  const godOfB = shishen(B.dayMaster, A.dayMaster);
+  const HARM_GODS = ['正财', '正官', '正印', '食神'];
+  if (HARM_GODS.includes(godOfA)) shishenScore += 5;
+  if (HARM_GODS.includes(godOfB)) shishenScore += 5;
+  if (['七杀', '伤官', '劫财'].includes(godOfA)) shishenScore -= 4;
+  if (['七杀', '伤官', '劫财'].includes(godOfB)) shishenScore -= 4;
+
+  core = clamp(core, 25, 96);
+  shengxiao = clamp(shengxiao, 25, 96);
+  wuxing = clamp(wuxing, 25, 96);
+  shishenScore = clamp(shishenScore, 25, 96);
+  const overall = Math.round(core * 0.4 + wuxing * 0.25 + shengxiao * 0.2 + shishenScore * 0.15);
+
+  const dims = [
+    { label: '性情相处', v: core, note: '日干与夫妻宫的合冲' },
+    { label: '五行互补', v: wuxing, note: '喜用、纳音、强弱是否互补' },
+    { label: '生肖根基', v: shengxiao, note: '年支（生肖）的生克' },
+    { label: '十神相处', v: shishenScore, note: '两人日主的十神关系' },
+  ];
+
+  const good = relations.filter((r) => /合|相生|喜用|补缺|相合/.test(r.text));
+  const bad = relations.filter((r) => /冲|相刑|相害/.test(r.text));
 
   return {
     type: 'hepan',
-    a: { pillars: A.pillars, dayMaster: A.dayMaster, yong: A.yong, elems: A.elems },
-    b: { pillars: B.pillars, dayMaster: B.dayMaster, yong: B.yong, elems: B.elems },
-    relations: rel,
-    overall: score,
-    summary: rel.length
-      ? `${rel.map((r) => r.text).join('；')}。`
-      : '两人日柱无直接冲合，按五行互补来看。',
+    a: { pillars: A.pillars, dayMaster: A.dayMaster, dayMasterElem: A.dayMasterElem, yong: A.yong, elems: A.elems,
+      weak: A.weak, nayin: nayinA, tenGodToB: godOfB, pattern: A.deep?.pattern?.name || '' },
+    b: { pillars: B.pillars, dayMaster: B.dayMaster, dayMasterElem: B.dayMasterElem, yong: B.yong, elems: B.elems,
+      weak: B.weak, nayin: nayinB, tenGodToA: godOfA, pattern: B.deep?.pattern?.name || '' },
+    relations,
+    pillarTable,
+    nayin: { a: nayinA, b: nayinB, text: nayinText },
+    tenGods: { aToB: godOfB, bToA: godOfA },
+    goodCount: good.length,
+    badCount: bad.length,
+    dims,
+    overall,
+    scores: dims,
+    summary: [
+      core >= 70 ? '日柱与相处上合多冲少，节奏比较对得上。' : core <= 50 ? '日柱有冲，节奏不同，需要多磨合。' : '日柱合冲参半，有合有磕绊，看具体维度。',
+      nayinText + '。',
+      bad.length ? `要留意：${bad.slice(0, 2).map((r) => r.text).join('；')}。` : '四柱与生肖上没有明显的冲刑。',
+    ].join(''),
+    advice: [
+      overall >= 72 ? '底子相合，别把默契当理所当然；把日子过好，比盘上的合更实在。' : overall <= 52 ? '合盘不算顺，不代表不能处；节奏不同就先说清楚，互相留空间。' : '有合有冲，遇到分歧先讲事实、再讲感受，别翻旧账。',
+      `十神上，一方对另一方偏「${godOfB}」「${godOfA}」，相处里容易形成付出与承接的默契，也可能一边倒，留意平衡。`,
+      '合盘只看传统命理的几组关系，不涉及家庭、价值观与现实相处；当个参考，别当成结论。',
+    ],
   };
 }
 
@@ -17453,7 +17983,7 @@ const TOOL_MANIFEST = [
   },
 ];
 
-return { GAN, ZHI, termsOf, paipan, LIUREN, xiaoliuren, zeri, bazhai, yangzhai, yinzha, daily, hepan, TOOLS, TOOL_MANIFEST };
+return { GAN, ZHI, termsOf, paipan, LIUREN, LIUREN_TOPICS, xiaoliuren, zeri, bazhai, yangzhai, yinzha, daily, hepan, TOOLS, TOOL_MANIFEST };
 })();
 return __m_tools;
 })();

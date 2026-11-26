@@ -13,11 +13,13 @@ const today = () => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
 
+/* 批语取典籍对仗句：上下句字数相等，渲染时按分句各占一行，断行天然整齐。 */
 const VERDICT = {
-  ming: ['命是底牌，运是出牌的顺序。', '知命不是认命，是知道力气该往哪使。', '四柱只说明起点，不说明终点。'],
-  bu: ['卜以决疑，不疑何卜。', '一事一占，占过不再占。', '课是当下的切片，不是一生的判词。'],
-  ze: ['择日不如择事，择事不如择人。', '吉日不等于必成，凶日不等于必败。', '先看用事，再看日辰。'],
-  kan: ['山管人丁水管财。', '形势在前，理气在后。', '地有吉气，土随而起。'],
+  ming: ['命由我作，福自己求。', '穷理尽性，以至于命。', '乐天知命，君子不忧。'],
+  bu: ['卜以决疑，不疑何卜。', '吉凶悔吝，生乎动者。', '凡事预立，不预则废。'],
+  ze: ['天时地利，人和为本。', '顺天者存，逆天者亡。', '择善而从，择时而行。'],
+  kan: ['藏风聚气，得水为上。', '山管人丁，水管财禄。', '前有明堂，后有靠山。'],
+  hepan: ['二人同心，其利断金。', '同声相应，同气相求。', '与人为善，择善而从。'],
 };
 const pickLine = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -47,6 +49,8 @@ export function finish(result, extra) {
     summary: result.summary,
     subtitle: extra.subtitle,
     blocks: extra.blocks,
+    scores: extra.scores || null,
+    dims: extra.dims || null,
     citations: result.citations || [],
     advice: extra.advice || [],
     meta: (extra.meta || result.fortune || result.yong)
@@ -446,7 +450,7 @@ export function buView() {
       </section>
 
       <details class="detail-blocks">
-        <summary>起课须知 · 点开看</summary>
+        <summary>起课须知</summary>
         <ul class="rule-list">
           <li>一次只问一件事，问得越具体越好；同一件事别反复起课。</li>
           <li>只看此刻吉凶。想问「哪天合适」，请用 <a href="#/ze">择日</a>。</li>
@@ -503,7 +507,7 @@ export function buView() {
         btn.disabled = true;
         btn.textContent = '起 课 中';
         try {
-          const r = await api.tool('xiaoliuren', { month, day, hourIndex: hi });
+          const r = await api.tool('xiaoliuren', { month, day, hourIndex: hi, question });
           finish(r, {
             title: '起课批注',
             heading: '卜',
@@ -512,19 +516,28 @@ export function buView() {
             overall: r.overall,
             level: levelOf(r.overall),
             meta: { question },
+            scores: r.scores,
             blocks: [
               { kind: 'kv', title: '所问', rows: [
                 ['问题', question],
                 ['起课', `${r.month}月${r.day}日 ${HOURS[hi - 1]?.label || ''}`],
               ] },
-              { kind: 'kv', title: '落宫', rows: [['宫位', r.gua.name], ['吉凶', r.gua.luck]] },
-              { kind: 'list', title: '起课', items: r.steps.map((s) => `${s.label}：${s.text}`) },
-              { kind: 'text', title: '断语', text: r.gua.body },
+              { kind: 'kv', title: '落宫', rows: [
+                ['宫位', `${r.gua.name}（${r.gua.luck}）`],
+                ['对这件事', r.topicLine],
+              ] },
+              { kind: 'text', title: '宫位本义', text: r.gua.body },
+              { kind: 'kv', title: '类象', rows: [
+                ['五行', r.gua.elem], ['方位', r.gua.dir], ['应期', r.gua.timing],
+                ['人 / 色 / 数', `${r.gua.person} · ${r.gua.color} · ${r.gua.num}`],
+                ['旺衰', r.wang.text],
+              ] },
+              { kind: 'list', title: '起课过程', items: r.steps.map((s) => `${s.label}：${s.text}`) },
             ],
             advice: [
               r.gua.luck === '吉' ? '吉课不等于必成，该做的准备一样不能少。' : '凶课不是判决，是提醒你把节奏放慢、把话说清。',
-              '所问之事若已过时，就不要再占。',
-              '若问的是「具体哪天」，小六壬给不了日期，请到「择日」按事由挑日子。',
+              `时序上：${r.gua.timing}。急不得的事，就先把它放在这几天之外。`,
+              '所问之事若已过时，就不要再占。若问的是「具体哪天」，请到「择日」按事由挑日子。',
             ],
           });
         } catch (err) {
@@ -634,14 +647,28 @@ export function zeView() {
             glyph: '择',
             subtitle: `${evName} · ${r.from} 起 ${r.days} 天`,
             blocks: [
-              { kind: 'table', title: '可选的日子', head: ['日期', '干支', '吉凶'],
-                rows: r.picks.map((x) => [`${x.date.slice(5)} 周${x.weekday}`, x.ganzhi, `${x.jianchu}${x.luck}`]) },
+              { kind: 'table', title: '可选的日子', head: ['日期', '干支', '建除', '黄道', '吉时'],
+                rows: r.picks.map((x) => [
+                  `${x.date.slice(5)} 周${x.weekday}`,
+                  x.ganzhi,
+                  x.jianchu,
+                  `${x.huangdao}${x.hdKind === '黄道' ? '·吉' : ''}`,
+                  x.goodHours.slice(0, 3).join('、') || '—',
+                ]) },
               ...(r.avoid.length ? [{ kind: 'table', title: '避开的日子', head: ['日期', '干支', '原因'],
-                rows: r.avoid.map((x) => [`${x.date.slice(5)}`, x.ganzhi, `${x.reasons[0] || '日辰不利'}`]) }] : []),
+                rows: r.avoid.map((x) => [`${x.date.slice(5)}`, x.ganzhi, x.reasons.slice(0, 2).join('；') || '日辰不利']) }] : []),
+              { kind: 'kv', title: '首选日的依据', rows: r.picks.length
+                ? [['日子', `${r.picks[0].date.slice(5)} ${r.picks[0].ganzhi}`],
+                   ['为什么合适', r.picks[0].reasons.join('；')],
+                   ['当天吉时', r.picks[0].goodHours.join('、') || '时辰上无明显偏向']]
+                : [['说明', '这段时间没有明显合适的日子']] },
+              { kind: 'text', title: '怎么挑的',
+                text: `综合看了建除十二神（办这事偏向定、成、开这类日子）、黄道黑道（青龙、明堂、金匮、天德、玉堂、司命为吉）、月德天德，${r.birthZhi ? `再避开冲、害本命生肖${r.birthZhi}的日子` : '未填出生年，暂未排本命生肖'}；最后按当天日支与时辰的合冲，给出吉时。分数只是把这些因素加在一起，不是绝对的吉凶。` },
             ],
             advice: r.advice,
             overall: r.overall,
             level: levelOf(r.overall),
+            scores: r.dims.map((d) => ({ ...d, note: ({ 日辰: '当天日辰本身', 事由: '和你要办的事是否对路', 本命: '和主事人生肖是否相合' })[d.label] || '' })),
             meta: { event: r.event, days: r.days, birthYear: birthYear || null },
           });
         } catch (err) {
@@ -673,7 +700,7 @@ export function hepanView() {
         <a class="seg-item" href="#/ming">看我自己</a>
         <a class="seg-item is-on" href="#/hepan">看两人合不合</a>
       </div>
-      <p class="lead">填两个人的生日与时辰，看日柱冲合、五行互补。可以给两人填个称呼，报告里就好认。时辰不清楚就选「不清楚」，按正午算。</p>
+      <p class="lead">填两个人的生日与时辰，从四柱、纳音、生肖、五行、十神几个角度合起来看。可以给两人填个称呼，报告里就好认。时辰不清楚就选「不清楚」，按正午算。</p>
       <h2 class="step"><b>一</b><span data-role-title="a">你</span></h2>
       <div class="field"><label>称呼（选填）</label>
         <input class="input" type="text" data-a-name maxlength="10" placeholder="你" autocomplete="off"></div>
@@ -682,7 +709,7 @@ export function hepanView() {
       <div class="field"><label>称呼（选填）</label>
         <input class="input" type="text" data-b-name maxlength="10" placeholder="对方" autocomplete="off"></div>
       ${person('b')}
-      <p class="foot">合盘只看日柱与五行互补，不替代相处与沟通。</p>
+      <p class="foot">合盘从命理角度看相处倾向，不替代真实相处与沟通。</p>
     `, '<button class="btn btn-primary" type="button" data-go>看 合 盘</button>'),
     mount: () => {
       const root = $('#app .view');
@@ -717,19 +744,27 @@ export function hepanView() {
             subtitle: `${nameA}（${pa}）　×　${nameB}（${pb}）`,
             overall: r.overall,
             level: levelOf(r.overall),
+            scores: r.scores,
             blocks: [
               { kind: 'table', title: '双方四柱', head: ['', nameA, nameB], rows: [
                 ['四柱', pa, pb],
                 ['日主', r.a.dayMaster, r.b.dayMaster],
                 ['喜用', r.a.yong.filter(Boolean).join('、'), r.b.yong.filter(Boolean).join('、')],
+                ['纳音', r.a.nayin, r.b.nayin],
+                ['格局', r.a.pattern, r.b.pattern],
               ] },
-              { kind: 'kv', title: '关系', rows: r.relations.length ? r.relations.map((x) => [x.type, x.text]) : [['日柱', '无直接冲合']] },
+              { kind: 'table', title: '四柱逐柱对照', head: ['', nameA, nameB, '关系'],
+                rows: r.pillarTable.map((p) => [p.meaning, p.a, p.b, p.rel]) },
+              { kind: 'kv', title: '关系明细', rows: r.relations.length
+                ? r.relations.map((x) => [`${x.dim} · ${x.type}`, x.text])
+                : [['整体', '四柱之间没有明显的冲合，属平和之象']] },
+              { kind: 'kv', title: '十神与纳音', rows: [
+                ['相处默契', r.tenGods.aToB],
+                ['对方看你', r.tenGods.bToA],
+                ['纳音', r.nayin.text],
+              ] },
             ],
-            advice: [
-              r.overall >= 70 ? '两人五行互补较多，遇事商量着来，别把默契当理所当然。' : '互补不算多，反而要留出各自的空间，少替对方做决定。',
-              '日柱相冲不代表不能处，代表节奏不同：一个快一个慢，先说清楚再动。',
-              '合盘只论日柱与五行，不涉及双方家庭、价值观与现实条件。',
-            ],
+            advice: r.advice,
           });
         } catch (err) {
           btn.disabled = false;

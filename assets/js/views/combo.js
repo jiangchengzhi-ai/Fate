@@ -12,12 +12,13 @@ export function comboView() {
   const isComplete = () => !!(face && palm && birth.year && birth.hour && birth.gender);
   const readyCount = () => (face ? 1 : 0) + (palm ? 1 : 0) + (birth.year && birth.hour && birth.gender ? 1 : 0);
 
-  const row = (idx, name, note, done, href) => `
-    <div class="ready-row">
-      <span class="ready-idx">${idx}</span>
-      <span class="ready-name">${name}</span>
-      <span class="ready-state ${done ? 'done' : 'todo'}">${done ? '已成' : `<a href="${href === '#birth' ? '#/combo' : href}"${href === '#birth' ? ' data-scroll-birth' : ''}>${href.includes('face') ? '去观面' : href.includes('palm') ? '去看掌' : '填写'}</a>`}</span>
-      <span class="ready-note">${esc(note)}</span>
+  const row = (name, note, done, href, todoText, doneText) => `
+    <div class="ready-row ${done ? 'is-done' : ''}">
+      <div class="ready-info">
+        <span class="ready-name">${name}</span>
+        <span class="ready-note">${esc(note)}</span>
+      </div>
+      <a class="ready-go" href="${href === '#birth' ? '#/combo' : href}"${href === '#birth' ? ' data-scroll-birth' : ''}>${done ? doneText : todoText}</a>
     </div>`;
 
   const html = `
@@ -31,9 +32,9 @@ export function comboView() {
       <p class="lead">把面相、手相、生日三样合起来看自己，比只看一样更稳。<b>这是看一个人，不是看两个人合不合。</b>缺一处，就少一个参照。</p>
 
       <div class="ready">
-        ${row('一', '面相', face ? `已录：${face.overall} 分 · ${face.dateLabel}` : '尚未观面', !!face, '#/face')}
-        ${row('二', '手相', palm ? `已录：${palm.overall} 分 · ${palm.dateLabel}` : '尚未看掌', !!palm, '#/palm')}
-        ${row('三', '生辰', birth.year ? `${ganzhi(birth.year)}年 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '未填'}` : '公历生日与时辰', !!(birth.year && birth.hour && birth.gender), '#birth')}
+        ${row('面相', face ? `已录 ${face.overall} 分 · ${face.dateLabel}` : '还没测', !!face, '#/face', '测面相', '重测')}
+        ${row('手相', palm ? `已录 ${palm.overall} 分 · ${palm.dateLabel}` : '还没测', !!palm, '#/palm', '测手相', '重测')}
+        ${row('生辰', birth.year ? `${ganzhi(birth.year)}年 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '未填'}` : '填公历生日与时辰', !!(birth.year && birth.hour && birth.gender), '#birth', '填生辰', '重填')}
       </div>
 
       <div class="field" id="birth">
@@ -84,20 +85,21 @@ export function comboView() {
       } else {
         preview.innerHTML = '';
       }
-      const state3 = root.querySelectorAll('.ready-state')[2];
-      if (state3) {
-        const ok = !!(birth.year && birth.hour && birth.gender);
-        state3.className = `ready-state ${ok ? 'done' : 'todo'}`;
-        state3.innerHTML = ok ? '已成' : '<a href="#/combo" data-scroll-birth>填写</a>';
+      const rows = root.querySelectorAll('.ready-row');
+      const ok3 = !!(birth.year && birth.hour && birth.gender);
+      if (rows[2]) {
+        rows[2].classList.toggle('is-done', ok3);
+        const link = rows[2].querySelector('.ready-go');
+        if (link) link.textContent = ok3 ? '重填' : '填生辰';
       }
       const notes = root.querySelectorAll('.ready-note');
       if (notes[2]) {
         notes[2].textContent = birth.year
           ? `${birth.year}年${birth.month}月${birth.day}日 · ${birth.hour}时 · ${birth.gender === 'male' ? '男' : birth.gender === 'female' ? '女' : '性别未填'}`
-          : '公历生日与时辰';
+          : '填公历生日与时辰';
       }
-      if (notes[0] && face) notes[0].textContent = `已录：${face.overall} 分 · ${face.dateLabel}`;
-      if (notes[1] && palm) notes[1].textContent = `已录：${palm.overall} 分 · ${palm.dateLabel}`;
+      if (notes[0] && face) notes[0].textContent = `已录 ${face.overall} 分 · ${face.dateLabel}`;
+      if (notes[1] && palm) notes[1].textContent = `已录 ${palm.overall} 分 · ${palm.dateLabel}`;
     };
 
     root.addEventListener('change', (e) => {

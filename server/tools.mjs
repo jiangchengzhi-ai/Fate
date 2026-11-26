@@ -11,7 +11,7 @@ import { cityByName } from './cities.mjs';
 import { lunarToSolar } from './lunar.mjs';
 import { deepen } from './bazi.mjs';
 import { inChinaDST } from './dst-cn.mjs';
-import { isClash, isHe, isStemHe, dayRelations, dayEnergy, dayAdvice } from './relations.mjs';
+import { isClash, isHe, isStemHe, dayRelations, dayEnergy, dayAdvice, BRANCH_CLASH, BRANCH_HE } from './relations.mjs';
 
 export const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 export const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
@@ -363,35 +363,147 @@ export function paipan({ date, hour = '午', gender = 'male', clock, city, provi
 }
 
 /* ---------------- 小六壬 ---------------- */
+/* 六宫：吉凶 + 五行方位类象（传统口诀，属文化娱乐参考）+ 应期节奏 */
 export const LIUREN = [
-  { name: '大安', luck: '吉', body: '身不动，事在近处。所问之事宜守成，不宜远求；等人则至，失物未远。' },
-  { name: '留连', luck: '小凶', body: '事多拖延，音信迟。宜缓不宜急，反复确认再落笔；所托之人未必尽力。' },
-  { name: '速喜', luck: '吉', body: '喜信将至，事在须臾。宜速行、速决；求财得，问病轻，远行有信。' },
-  { name: '赤口', luck: '凶', body: '口舌是非，争讼之象。宜少言、避争；文书合同细看，勿代人担保。' },
-  { name: '小吉', luck: '吉', body: '事有小成，人和为贵。宜与人合作、托人办事；所谋多顺，但利不大。' },
-  { name: '空亡', luck: '大凶', body: '事多落空，阴人作梗。宜止不宜进，所问之事多半无果；静待时机。' },
+  { name: '大安', luck: '吉', elem: '木', dir: '东', color: '青绿', num: '3、8',
+    person: '长辈、稳重之人', timing: '事缓则圆，多在近日或春季见分晓',
+    body: '身不动，事在近处。所问之事宜守成，不宜远求；等人则至，失物未远。' },
+  { name: '留连', luck: '小凶', elem: '水', dir: '北', color: '黑蓝', num: '1、6',
+    person: '反复之人、旧相识', timing: '事多拖延，往往一再展期',
+    body: '事多拖延，音信迟。宜缓不宜急，反复确认再落笔；所托之人未必尽力。' },
+  { name: '速喜', luck: '吉', elem: '火', dir: '南', color: '红橙', num: '2、7',
+    person: '热心人、消息灵通者', timing: '事在须臾，近日即有消息',
+    body: '喜信将至，事在须臾。宜速行、速决；求财得，问病轻，远行有信。' },
+  { name: '赤口', luck: '凶', elem: '金', dir: '西', color: '白黄', num: '4、9',
+    person: '口舌之人、执法者', timing: '防一时口角，过后渐平',
+    body: '口舌是非，争讼之象。宜少言、避争；文书合同细看，勿代人担保。' },
+  { name: '小吉', luck: '吉', elem: '木', dir: '东南', color: '青绿', num: '3、8',
+    person: '和气之人、中间人', timing: '小有所成，需借人力',
+    body: '事有小成，人和为贵。宜与人合作、托人办事；所谋多顺，但利不大。' },
+  { name: '空亡', luck: '大凶', elem: '土', dir: '中 / 西南', color: '土黄', num: '5、10',
+    person: '虚浮之人、久无音信者', timing: '所问多半无期，宜另寻他途',
+    body: '事多落空，阴人作梗。宜止不宜进，所问之事多半无果；静待时机。' },
 ];
 
-export function xiaoliuren({ month, day, hourIndex }) {
+/* 事项分类：从所问的话里识别，给同一落宫一句对题的断语 */
+export const LIUREN_TOPICS = [
+  { id: 'wealth', name: '求财', keys: ['钱', '财', '生意', '买卖', '投资', '收入', '工资', '报价', '回款', '赚钱', '成本', '价格'],
+    lines: {
+      '大安': '钱在近处，别往远处追：先把手头的账理清，老客户比新门路靠谱。',
+      '留连': '钱要账期慢，催得急反而拖；先把单据和约定写清楚。',
+      '速喜': '进账的消息来得快，可趁热打铁，但别当场拍板大额。',
+      '赤口': '容易在报价、合同上起争执，数字白纸黑字再签字。',
+      '小吉': '有小的进账或人情回报，积少成多，别贪大。',
+      '空亡': '这笔钱多半落空或回收无期，先保住本金，别追加。',
+    } },
+  { id: 'work', name: '工作与考试', keys: ['工作', '面试', '升职', '跳槽', '考试', '事业', 'offer', '录', '竞聘', '调动', '官司', '诉讼'],
+    lines: {
+      '大安': '位置稳得住，别急着动；把手上的成果整理出来，比到处打听更有用。',
+      '留连': '流程会拖，名单或结果反复；多问一句进度，材料备齐别缺漏。',
+      '速喜': '消息来得快，接到通知就果断回应，机会不等人。',
+      '赤口': '容易有口碑或口舌之争，少表态、多留痕，别在人前评人。',
+      '小吉': '有贵人从中说项，配合别人一起推进，比单打独斗顺。',
+      '空亡': '这轮多半没有下文，别把希望押在一处，同时准备别的路。',
+    } },
+  { id: 'love', name: '感情', keys: ['感情', '恋爱', '婚姻', '结婚', '对象', '分手', '复合', '喜欢', '相亲', '异地'],
+    lines: {
+      '大安': '关系稳在近处，别急着推进或试探；把日常过好，比表态更管用。',
+      '留连': '心里反复、对方也含糊；先把话说明白，别靠猜。',
+      '速喜': '有好消息或主动的回应，趁热把约见面、把话说到明处。',
+      '赤口': '容易因一句话起争执，先停一停再回，别翻旧账。',
+      '小吉': '有中间人帮忙撮合，顺着人情走，别硬碰。',
+      '空亡': '这层关系暂时没有着落，先把自己的日子过好，别追着问。',
+    } },
+  { id: 'move', name: '出行与搬迁', keys: ['出行', '搬家', '旅行', '出差', '迁', '搬', '走', '出远门'],
+    lines: {
+      '大安': '近处可行、远行宜缓；行李和证件先备齐，稳着走。',
+      '留连': '路上多半耽搁，预留缓冲时间，别把行程排太满。',
+      '速喜': '说走就走，路上顺，但提前订好落脚处。',
+      '赤口': '路上易有口角或剐蹭，慢一点、让一步，别抢时间。',
+      '小吉': '有人结伴或接应更顺，把行程告诉可信的人。',
+      '空亡': '这趟多半成行不了或白跑，先确认消息真假再动身。',
+    } },
+  { id: 'lost', name: '找东西', keys: ['丢', '找', '失物', '丢了', '不见', '钥匙', '手机', '钱包'],
+    lines: {
+      '大安': '东西没走远，就在常待的地方；先翻手边和原处。',
+      '留连': '被压在别处或一时记错，过一阵再找，越急越乱。',
+      '速喜': '很快有线索，问一问身边的人就有消息。',
+      '赤口': '可能被别人动过或借走，好好问，别先指责。',
+      '小吉': '有人替你收着，找人问一声就有。',
+      '空亡': '一时找不回，先止损、补办，别耗在原地。',
+    } },
+  { id: 'health', name: '身体', keys: ['病', '身体', '手术', '健康', '检查', '疼', '不舒服'],
+    lines: {
+      '大安': '情况平稳，按原来的节奏养着；别自己加药或停药。',
+      '留连': '好得慢，反复拉扯；该复查就复查，别拖。',
+      '速喜': '有好转的迹象，趁势把作息调好。',
+      '赤口': '容易为治疗方案起争执，多听医生的专业意见。',
+      '小吉': '有人照应、有办法，配合着来恢复得快。',
+      '空亡': '心里没底的时候，先去正规医院查清楚，别靠猜。',
+    } },
+];
+
+const PACE = { 大安: 45, 留连: 25, 速喜: 90, 赤口: 70, 小吉: 60, 空亡: 12 };
+const HARMONY = { 大安: 70, 留连: 45, 速喜: 72, 赤口: 25, 小吉: 80, 空亡: 30 };
+const LUCK_BASE = { 吉: 78, 小凶: 58, 凶: 52, 大凶: 45 };
+
+function detectTopic(question) {
+  const q = String(question || '');
+  for (const t of LIUREN_TOPICS) if (t.keys.some((k) => q.includes(k))) return t;
+  return { id: 'general', name: 'general', lines: {} };
+}
+
+function wangOf(elem, lunarMonth) {
+  const season = lunarMonth <= 3 ? '春' : lunarMonth <= 6 ? '夏' : lunarMonth <= 9 ? '秋' : '冬';
+  const seasonElem = { 春: '木', 夏: '火', 秋: '金', 冬: '水' }[season];
+  const SHENG = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
+  const KE = { 木: '土', 火: '金', 土: '水', 金: '木', 水: '火' };
+  /* 以当令五行为「我」：同我旺、我生相、生我休、克我囚、我克死 */
+  let state = '平';
+  if (elem === seasonElem) state = '旺';
+  else if (SHENG[seasonElem] === elem) state = '相';
+  else if (SHENG[elem] === seasonElem) state = '休';
+  else if (KE[elem] === seasonElem) state = '囚';
+  else if (KE[seasonElem] === elem) state = '死';
+  const delta = { 旺: 6, 相: 3, 平: 0, 休: 0, 囚: -3, 死: -6 }[state] || 0;
+  const desc = { 旺: '得令而旺，事有根基', 相: '得生而相，后劲尚足', 休: '当令者休，气势平和',
+    囚: '受克制而囚，进展有压', 死: '失令而弱，宜守不宜进', 平: '气势平和' }[state];
+  return { season, seasonElem, state, delta, text: `${season}季${seasonElem}当令，落宫属${elem}，${desc}。` };
+}
+
+export function xiaoliuren({ month, day, hourIndex, question = '' }) {
   const m = Number(month), d = Number(day), h = Number(hourIndex);
   if (!(m >= 1 && m <= 12) || !(d >= 1 && d <= 30) || !(h >= 1 && h <= 12)) {
     throw new Error('month 1-12 / day 1-30 / hourIndex 1-12');
   }
   const pos = ((m - 1) + (d - 1) + (h - 1)) % 6;
-  const luckScore = { 吉: 78, 小凶: 58, 凶: 52, 大凶: 45 }[LIUREN[pos].luck] || 60;
   const gua = LIUREN[pos];
+  const topic = detectTopic(question);
+  const wang = wangOf(gua.elem, m);
+  const overall = Math.round(clamp((LUCK_BASE[gua.luck] || 60) + wang.delta, 35, 92));
+  const topicLine = topic.lines[gua.name]
+    || `落在${gua.name}：${gua.body}`;
+
   return {
     type: 'bu',
     month: m, day: d, hourIndex: h,
     pos,
-    overall: luckScore,
+    overall,
     gua,
+    topic: { id: topic.id, name: topic.name === 'general' ? '所占之事' : topic.name },
+    topicLine,
+    wang,
+    scores: [
+      { label: '事体', v: overall, note: '这一课的总体倾向' },
+      { label: '节奏', v: PACE[gua.name] ?? 60, note: '事情来得快还是慢' },
+      { label: '人事', v: HARMONY[gua.name] ?? 60, note: '与人相处、配合的顺逆' },
+    ],
     steps: [
       { label: '起月', text: `自大安起，顺数至${m}月，落${LIUREN[(m - 1) % 6].name}` },
       { label: '起日', text: `自${LIUREN[(m - 1) % 6].name}起，顺数至${d}日，落${LIUREN[(m - 1 + d - 1) % 6].name}` },
       { label: '起时', text: `自${LIUREN[(m - 1 + d - 1) % 6].name}起，顺数至第${h}时，落${gua.name}` },
     ],
-    summary: `农历${m}月${d}日第${h}时，落${gua.name}（${gua.luck}）。${gua.body}`,
+    summary: `农历${m}月${d}日第${h}时，落${gua.name}（${gua.luck}）。${wang.text}${topicLine}`,
   };
 }
 
@@ -418,18 +530,52 @@ const SHA = [
   { zhi: ['亥', '卯', '未'], dir: '西' },
 ];
 
+/* 黄道黑道十二神：按月建起青龙顺行，与建除共用同一地支序号。
+   六黄道（青龙/明堂/金匮/天德/玉堂/司命）为吉，六黑道为凶。
+   注：黄黑道起例各派略有差异，本项目采用月建起青龙顺行的常见排法。 */
+const HUANGDAO = [
+  { name: '青龙', kind: '黄道' }, { name: '明堂', kind: '黄道' },
+  { name: '天刑', kind: '黑道' }, { name: '朱雀', kind: '黑道' },
+  { name: '金匮', kind: '黄道' }, { name: '天德', kind: '黄道' },
+  { name: '白虎', kind: '黑道' }, { name: '玉堂', kind: '黄道' },
+  { name: '天牢', kind: '黑道' }, { name: '玄武', kind: '黑道' },
+  { name: '司命', kind: '黄道' }, { name: '勾陈', kind: '黑道' },
+];
+
+/* 月德：寅午戌月在丙，申子辰月在壬，亥卯未月在甲，巳酉丑月在庚 */
+const YUEDE = { 寅: '丙', 午: '丙', 戌: '丙', 申: '壬', 子: '壬', 辰: '壬',
+  亥: '甲', 卯: '甲', 未: '甲', 巳: '庚', 酉: '庚', 丑: '庚' };
+/* 天德（月建方）：正丁二申三壬四辛五亥六甲七癸八寅九丙十乙十一巳十二庚 */
+const TIANDE = ['丁', '申', '壬', '辛', '亥', '甲', '癸', '寅', '丙', '乙', '巳', '庚'];
+
+/* 地支关系：六合、三合、相害、相刑、比和 */
+const BRANCH_SANHE = [['申', '子', '辰'], ['寅', '午', '戌'], ['巳', '酉', '丑'], ['亥', '卯', '未']];
+const BRANCH_HAI = [['子', '未'], ['丑', '午'], ['寅', '巳'], ['卯', '辰'], ['申', '亥'], ['酉', '戌']];
+const BRANCH_XING = [['子', '卯'], ['丑', '戌'], ['寅', '巳'], ['辰', '辰'], ['午', '午'], ['未', '丑'], ['申', '寅'], ['酉', '酉'], ['戌', '未'], ['巳', '申'], ['亥', '亥'], ['卯', '子']];
+function branchRel(a, b) {
+  if (!a || !b) return [];
+  const out = [];
+  if (a === b) out.push({ type: '比和', v: 1, text: '同支' });
+  if (BRANCH_CLASH.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '冲', v: -5, text: `${a}${b}相冲` });
+  if (BRANCH_HE.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '合', v: 3, text: `${a}${b}六合` });
+  if (BRANCH_SANHE.some((g) => g.includes(a) && g.includes(b))) out.push({ type: '三合', v: 3, text: `${a}${b}同属三合` });
+  if (BRANCH_HAI.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '害', v: -3, text: `${a}${b}相害` });
+  if (BRANCH_XING.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) out.push({ type: '刑', v: -3, text: `${a}${b}相刑` });
+  return out;
+}
+
 const EVENTS = [
-  { id: 'marry', name: '嫁娶订婚', keys: ['嫁娶', '结亲', '订婚', '纳采'] },
-  { id: 'propose', name: '求婚', keys: ['嫁娶', '结亲', '订婚', '纳采'] },
-  { id: 'move', name: '入宅搬家', keys: ['入宅', '移徙', '搬家', '安床'] },
-  { id: 'open', name: '开业开市', keys: ['开市', '开业', '交易', '立券'] },
-  { id: 'travel', name: '出行赴任', keys: ['出行', '赴任', '移徙'] },
-  { id: 'build', name: '动土装修', keys: ['动土', '修造', '上梁', '起基'] },
-  { id: 'sign', name: '签约立约', keys: ['立约', '交易', '纳财', '立券'] },
-  { id: 'medical', name: '求医问诊', keys: ['求医', '疗病', '除服', '解除'] },
-  { id: 'bury', name: '安葬破土', keys: ['安葬', '破土', '埋藏'] },
-  { id: 'worship', name: '祭祀祈福', keys: ['祭祀', '祈福', '求嗣'] },
-  { id: 'study', name: '入学考试', keys: ['入学', '赴考', '求财'] },
+  { id: 'marry', name: '嫁娶订婚', keys: ['嫁娶', '结亲', '订婚', '纳采'], prefer: ['成', '定', '危', '开'], avoid: ['破', '闭', '收'] },
+  { id: 'propose', name: '求婚', keys: ['嫁娶', '结亲', '订婚', '纳采'], prefer: ['成', '定', '开'], avoid: ['破', '闭'] },
+  { id: 'move', name: '入宅搬家', keys: ['入宅', '移徙', '搬家', '安床'], prefer: ['成', '开', '除', '危'], avoid: ['破', '闭'] },
+  { id: 'open', name: '开业开市', keys: ['开市', '开业', '交易', '立券'], prefer: ['开', '成', '满', '定'], avoid: ['破', '闭', '收'] },
+  { id: 'travel', name: '出行赴任', keys: ['出行', '赴任', '移徙'], prefer: ['成', '开', '除', '执'], avoid: ['破', '闭', '危'] },
+  { id: 'build', name: '动土装修', keys: ['动土', '修造', '上梁', '起基'], prefer: ['成', '开', '定', '执'], avoid: ['破', '闭', '月破'] },
+  { id: 'sign', name: '签约立约', keys: ['立约', '交易', '纳财', '立券'], prefer: ['定', '成', '开', '执'], avoid: ['破', '闭'] },
+  { id: 'medical', name: '求医问诊', keys: ['求医', '疗病', '除服', '解除'], prefer: ['除', '危', '定', '成'], avoid: ['破', '闭'] },
+  { id: 'bury', name: '安葬破土', keys: ['安葬', '破土', '埋藏'], prefer: ['破', '危', '定', '执'], avoid: ['开', '成', '满'] },
+  { id: 'worship', name: '祭祀祈福', keys: ['祭祀', '祈福', '求嗣'], prefer: ['除', '定', '执', '成'], avoid: ['破', '闭'] },
+  { id: 'study', name: '入学考试', keys: ['入学', '赴考', '求财'], prefer: ['开', '成', '定', '满'], avoid: ['破', '闭'] },
 ];
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -440,27 +586,58 @@ function dayInfo(y, m, d) {
   const mZhi = monthZhiOf(y, m, d);
   const idx = ((ZHI.indexOf(day.zhi) - mZhi) % 12 + 12) % 12;
   const jc = JIANCHU[idx];
+  const hd = HUANGDAO[idx];
   const chong = ZHI[(ZHI.indexOf(day.zhi) + 6) % 12];
   const sha = SHA.find((s) => s.zhi.includes(day.zhi))?.dir || '—';
-  return { day, mZhi, jc, chong, sha };
+  const monthZhiName = ZHI[mZhi];
+  const yueDe = YUEDE[monthZhiName] || null;
+  const tianDe = TIANDE[(m - 1 + 12) % 12];
+  const deShen = [];
+  if (day.gan === yueDe) deShen.push('月德');
+  if (day.gan === tianDe || day.zhi === tianDe) deShen.push('天德');
+  return { day, mZhi, idx, jc, hd, chong, sha, monthZhiName, yueDe, tianDe, deShen };
+}
+
+/* 某日的十二时辰吉时：时支与日支的合/冲/三合/害 + 时干与日干的合 + 黄黑道 */
+function hoursOf(info) {
+  const dayZhi = info.day.zhi;
+  const dayGan = info.day.gan;
+  const HOUR_ZHI = ZHI;
+  const out = [];
+  for (let i = 0; i < 12; i++) {
+    const hz = HOUR_ZHI[i];
+    const hg = GAN[((GAN.indexOf(dayGan) % 5) * 2 + i) % 10];
+    let s = 0;
+    const notes = [];
+    const rels = branchRel(dayZhi, hz);
+    for (const r of rels) { s += r.v; notes.push(r.text); }
+    if (isStemHe(dayGan, hg)) { s += 3; notes.push(`${dayGan}${hg}干合`); }
+    if (isClash(dayZhi, hz)) notes.push('时冲日');
+    out.push({ zhi: hz, gan: hg, s, notes, level: s >= 3 ? '宜' : s <= -3 ? '避' : '平' });
+  }
+  return out;
 }
 
 export function zeri({ date, event, days = 30, birthYear, from }) {
   const ev = EVENTS.find((e) => e.id === event) || EVENTS.find((e) => e.name === event);
 
-  /* 单日查询 */
+  /* 单日查询：给出这一天的完整信息 + 吉时 */
   if (!ev) {
     const [y, m, d] = String(date).split('-').map(Number);
     const info = dayInfo(y, m, d);
+    const hours = hoursOf(info);
     return {
       type: 'ze',
       date,
       ganzhi: info.day.gan + info.day.zhi,
-      monthZhi: ZHI[info.mZhi],
+      monthZhi: info.monthZhiName,
       jianchu: info.jc,
+      huangdao: info.hd,
+      deShen: info.deShen,
       chong: info.chong,
       sha: info.sha,
-      summary: `${y}年${m}月${d}日，${info.day.gan}${info.day.zhi}日，${ZHI[info.mZhi]}月${info.jc.name}日（${info.jc.luck}）。冲${info.chong}，煞${info.sha}。`,
+      goodHours: hours.filter((h) => h.level === '宜').map((h) => `${h.zhi}时`),
+      summary: `${y}年${m}月${d}日，${info.day.gan}${info.day.zhi}日，${info.monthZhiName}月${info.jc.name}日（${info.jc.luck}），${info.hd.name}${info.hd.kind}。冲${info.chong}，煞${info.sha}。${info.deShen.length ? `得${info.deShen.join('、')}。` : ''}`,
     };
   }
 
@@ -474,23 +651,37 @@ export function zeri({ date, event, days = 30, birthYear, from }) {
     const dt = new Date(base.getTime() + i * 86400000);
     const [y, m, d] = ymd(dt).split('-').map(Number);
     const info = dayInfo(y, m, d);
-    const { jc } = info;
+    const { jc, hd } = info;
 
+    /* 打分：建除吉凶 + 事由关键词 + 事由偏好 + 黄黑道 + 德神 + 本命生肖关系 */
     let score = jc.luck === '吉' ? 3 : jc.luck === '凶' ? -4 : 0;
+    const reasons = [];
+    if (jc.luck === '吉') reasons.push(`${jc.name}日属吉`);
+    if (jc.luck === '凶') reasons.push(`${jc.name}日不宜`);
+
     const hitYi = ev.keys.filter((k) => jc.yi.includes(k));
     const hitJi = ev.keys.filter((k) => jc.ji.includes(k));
     score += hitYi.length * 4;
     score -= hitJi.length * 5;
-
-    const chongMe = birthZhi && info.chong === birthZhi;
-    if (chongMe) score -= 6;
-
-    const reasons = [];
-    if (jc.luck === '吉') reasons.push(`${jc.name}日，属吉`);
-    if (jc.luck === '凶') reasons.push(`${jc.name}日，不宜`);
     if (hitYi.length) reasons.push(`宜${hitYi.join('、')}`);
     if (hitJi.length) reasons.push(`忌${hitJi.join('、')}`);
-    if (chongMe) reasons.push(`冲本命${birthZhi}`);
+
+    if (ev.prefer?.includes(jc.name)) { score += 3; reasons.push(`利${ev.name}`); }
+    if (ev.avoid?.includes(jc.name)) { score -= 3; reasons.push(`不宜${ev.name}`); }
+
+    if (hd.kind === '黄道') { score += 2; reasons.push(`${hd.name}黄道`); }
+    else { score -= 2; reasons.push(`${hd.name}黑道`); }
+
+    if (info.deShen.length) { score += 2; reasons.push(`得${info.deShen.join('、')}`); }
+
+    let birthRel = [];
+    if (birthZhi) {
+      birthRel = branchRel(birthZhi, info.day.zhi);
+      birthRel.forEach((r) => { score += r.v; reasons.push(`${r.text}本命`); });
+    }
+
+    const hours = hoursOf(info);
+    const goodHours = hours.filter((h) => h.level === '宜').map((h) => `${h.zhi}时`);
 
     all.push({
       date: ymd(dt),
@@ -498,18 +689,29 @@ export function zeri({ date, event, days = 30, birthYear, from }) {
       ganzhi: info.day.gan + info.day.zhi,
       jianchu: jc.name,
       luck: jc.luck,
+      huangdao: hd.name,
+      hdKind: hd.kind,
+      deShen: info.deShen,
       chong: info.chong,
       sha: info.sha,
       yi: jc.yi,
       ji: jc.ji,
+      birthRel: birthRel.map((r) => r.text),
+      goodHours,
       score,
       reasons,
     });
   }
 
   const picks = all.filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 6);
-  const zeriScore = Math.round(clamp(58 + Math.max(0, picks[0]?.score || 0) * 3, 50, 90));
+  const zeriScore = Math.round(clamp(58 + Math.max(0, picks[0]?.score || 0) * 2.2, 50, 92));
   const avoid = all.filter((x) => x.score <= -4).sort((a, b) => a.score - b.score).slice(0, 5);
+  /* 三维评分：日辰（建除黄道德神）、事由适配、本命相合 */
+  const dims = [
+    { label: '日辰', v: clamp(58 + Math.max(0, picks[0]?.score || 0) * 2, 45, 92) },
+    { label: '事由', v: clamp(56 + Math.max(0, ...all.map((x) => (ev.prefer?.includes(x.jianchu) ? 18 : 0))) , 45, 92) },
+    { label: '本命', v: birthZhi ? clamp(60 + Math.max(0, ...all.map((x) => x.birthRel.reduce((s, r) => s + (r.includes('合') ? 1 : 0), 0) * 8)), 40, 92) : 62 },
+  ];
 
   return {
     type: 'ze',
@@ -519,13 +721,15 @@ export function zeri({ date, event, days = 30, birthYear, from }) {
     days: span,
     overall: zeriScore,
     birthYear: birthYear || null,
+    birthZhi,
     picks,
     avoid,
-    summary: `按「${ev.name}」看未来 ${span} 天：${picks.length ? `建议 ${picks.slice(0, 3).map((x) => `${x.date.slice(5)}（${x.jianchu}）`).join('、')} 等 ${picks.length} 个日子` : '没有明显合适的日子'}；避开 ${avoid.length ? avoid.map((x) => x.date.slice(5)).join('、') : '无特别忌日'}。`,
+    dims,
+    summary: `按「${ev.name}」看未来 ${span} 天：${picks.length ? `建议 ${picks.slice(0, 3).map((x) => `${x.date.slice(5)}（${x.jianchu}·${x.huangdao}）`).join('、')} 等 ${picks.length} 个日子` : '没有明显合适的日子'}；避开 ${avoid.length ? avoid.map((x) => x.date.slice(5)).join('、') : '无特别忌日'}。`,
     advice: [
-      picks.length ? '优先看排在前面的日子，再看当天是否有冲本命、冲主事人。' : '这个区间没有高分日，建议放宽到 60 天，或改看时辰。',
-      '建除只论日辰，不代替对具体事项的判断；婚丧嫁娶等大事请结合双方家庭与实际情况。',
-      '若已知主事人生肖，填出生年可自动避开冲本命的日子。',
+      picks.length ? `首选 ${picks[0].date.slice(5)}：${picks[0].huangdao}${picks[0].hdKind}，${picks[0].jianchu}日${picks[0].goodHours.length ? `，当天${picks[0].goodHours.slice(0, 3).join('、')}较佳` : ''}。` : '这个区间没有高分日，建议放宽到 60 天再挑。',
+      '建除、黄黑道、德神只是选日的几个角度，彼此也会打架；取分数高的日子，再看当天是否冲主事人。',
+      birthZhi ? `已按本命生肖${birthZhi}避开冲害；填出生年只能看生肖，精细到日柱需另排八字。` : '填了出生年，就能自动避开冲、害本命生肖的日子。',
     ],
   };
 }
@@ -713,31 +917,112 @@ export function daily({ birth = {}, days = 7, from } = {}) {
 }
 
 /* ---------------- 合盘 ---------------- */
+const NAYIN_ELEM = (name) => (name || '').slice(-1);
+const ELEM_SHENG = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
+
 export function hepan({ a = {}, b = {} }) {
   const A = paipan(a);
   const B = paipan(b);
-  const rel = [];
-  let score = 60;
+  const relations = [];
+  let core = 60;
+  let shengxiao = 60;
+  let wuxing = 60;
+  let shishenScore = 60;
 
-  if (isStemHe(A.dayMaster, B.dayMaster)) { score += 12; rel.push({ type: '干合', text: `${A.dayMaster} 与 ${B.dayMaster} 相合` }); }
-  if (isHe(A.pillars[2].zhi, B.pillars[2].zhi)) { score += 12; rel.push({ type: '支合', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相合` }); }
-  if (isClash(A.pillars[2].zhi, B.pillars[2].zhi)) { score -= 15; rel.push({ type: '支冲', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相冲` }); }
+  /* 1) 日柱核心：日干合冲、夫妻宫（日支）合冲害刑 */
+  if (isStemHe(A.dayMaster, B.dayMaster)) { core += 12; relations.push({ dim: '性情', type: '日干合', text: `${A.dayMaster} 与 ${B.dayMaster} 相合，性情上容易互相欣赏` }); }
+  if (isHe(A.pillars[2].zhi, B.pillars[2].zhi)) { core += 12; relations.push({ dim: '相处', type: '夫妻宫合', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相合，节奏合拍` }); }
+  if (isClash(A.pillars[2].zhi, B.pillars[2].zhi)) { core -= 15; relations.push({ dim: '相处', type: '夫妻宫冲', text: `夫妻宫 ${A.pillars[2].zhi} 与 ${B.pillars[2].zhi} 相冲，节奏一快一慢` }); }
 
+  /* 2) 四柱逐柱对照 */
+  const pillarNames = ['年柱', '月柱', '日柱', '时柱'];
+  const pillarMeanings = ['根基与家庭', '成长环境', '自身与伴侣宫', '晚年与子女'];
+  const pillarTable = pillarNames.map((label, i) => {
+    const za = A.pillars[i].zhi, zb = B.pillars[i].zhi;
+    const rels = branchRel(za, zb);
+    rels.forEach((r) => {
+      if (i !== 2 || r.type !== '比和') relations.push({ dim: '四柱', type: `${label}${r.type}`, text: `${label} ${za} 与 ${zb} ${r.text}` });
+    });
+    return { label, meaning: pillarMeanings[i], a: A.pillars[i].gan + A.pillars[i].zhi, b: B.pillars[i].gan + B.pillars[i].zhi,
+      rel: rels.map((r) => r.text).join('、') || '无直接冲合' };
+  });
+
+  /* 3) 生肖（年支）关系 */
+  const yearRels = branchRel(A.pillars[0].zhi, B.pillars[0].zhi);
+  yearRels.forEach((r) => {
+    shengxiao += r.v * 2;
+    relations.push({ dim: '生肖', type: r.type, text: `生肖 ${A.pillars[0].zhi} 与 ${B.pillars[0].zhi} ${r.text}` });
+  });
+
+  /* 4) 日柱纳音五行 */
+  const nayinA = A.deep?.nayin?.find((x) => x.label === '日柱')?.name || '';
+  const nayinB = B.deep?.nayin?.find((x) => x.label === '日柱')?.name || '';
+  const neA = NAYIN_ELEM(nayinA), neB = NAYIN_ELEM(nayinB);
+  let nayinText = '纳音无直接生克';
+  if (neA && neB) {
+    if (ELEM_SHENG[neA] === neB) { wuxing += 6; nayinText = `你的纳音${nayinA}生对方的${nayinB}，你更愿意付出`; }
+    else if (ELEM_SHENG[neB] === neA) { wuxing += 6; nayinText = `对方纳音${nayinB}生你的${nayinA}，对方更顾着你`; }
+    else if (neA === neB) { wuxing += 3; nayinText = `两人纳音同属${neA}，气质相近`; }
+  }
+
+  /* 5) 五行互补：一方喜用恰好是对方旺项 */
   const topA = [...A.elems].sort((x, y) => y.v - x.v)[0].e;
   const topB = [...B.elems].sort((x, y) => y.v - x.v)[0].e;
-  if (A.yong.includes(topB)) { score += 8; rel.push({ type: '五行', text: `对方以 ${topB} 为主，正是你的喜用` }); }
-  if (B.yong.includes(topA)) { score += 8; rel.push({ type: '五行', text: `你以 ${topA} 为主，正是对方的喜用` }); }
-  score = clamp(score, 20, 96);
+  const weakA = A.weak, weakB = B.weak;
+  if (A.yong.includes(topB)) { wuxing += 8; relations.push({ dim: '五行', type: '互为喜用', text: `对方以 ${topB} 为主，正是你的喜用` }); }
+  if (B.yong.includes(topA)) { wuxing += 8; relations.push({ dim: '五行', type: '互为喜用', text: `你以 ${topA} 为主，正是对方的喜用` }); }
+  if (topA === weakB || topB === weakA) { wuxing += 4; relations.push({ dim: '五行', type: '补缺', text: `一方偏旺的五行，恰好补上另一方的短板` }); }
+
+  /* 6) 十神互补：对方日主对我是什么十神 */
+  const godOfA = shishen(A.dayMaster, B.dayMaster);
+  const godOfB = shishen(B.dayMaster, A.dayMaster);
+  const HARM_GODS = ['正财', '正官', '正印', '食神'];
+  if (HARM_GODS.includes(godOfA)) shishenScore += 5;
+  if (HARM_GODS.includes(godOfB)) shishenScore += 5;
+  if (['七杀', '伤官', '劫财'].includes(godOfA)) shishenScore -= 4;
+  if (['七杀', '伤官', '劫财'].includes(godOfB)) shishenScore -= 4;
+
+  core = clamp(core, 25, 96);
+  shengxiao = clamp(shengxiao, 25, 96);
+  wuxing = clamp(wuxing, 25, 96);
+  shishenScore = clamp(shishenScore, 25, 96);
+  const overall = Math.round(core * 0.4 + wuxing * 0.25 + shengxiao * 0.2 + shishenScore * 0.15);
+
+  const dims = [
+    { label: '性情相处', v: core, note: '日干与夫妻宫的合冲' },
+    { label: '五行互补', v: wuxing, note: '喜用、纳音、强弱是否互补' },
+    { label: '生肖根基', v: shengxiao, note: '年支（生肖）的生克' },
+    { label: '十神相处', v: shishenScore, note: '两人日主的十神关系' },
+  ];
+
+  const good = relations.filter((r) => /合|相生|喜用|补缺|相合/.test(r.text));
+  const bad = relations.filter((r) => /冲|相刑|相害/.test(r.text));
 
   return {
     type: 'hepan',
-    a: { pillars: A.pillars, dayMaster: A.dayMaster, yong: A.yong, elems: A.elems },
-    b: { pillars: B.pillars, dayMaster: B.dayMaster, yong: B.yong, elems: B.elems },
-    relations: rel,
-    overall: score,
-    summary: rel.length
-      ? `${rel.map((r) => r.text).join('；')}。`
-      : '两人日柱无直接冲合，按五行互补来看。',
+    a: { pillars: A.pillars, dayMaster: A.dayMaster, dayMasterElem: A.dayMasterElem, yong: A.yong, elems: A.elems,
+      weak: A.weak, nayin: nayinA, tenGodToB: godOfB, pattern: A.deep?.pattern?.name || '' },
+    b: { pillars: B.pillars, dayMaster: B.dayMaster, dayMasterElem: B.dayMasterElem, yong: B.yong, elems: B.elems,
+      weak: B.weak, nayin: nayinB, tenGodToA: godOfA, pattern: B.deep?.pattern?.name || '' },
+    relations,
+    pillarTable,
+    nayin: { a: nayinA, b: nayinB, text: nayinText },
+    tenGods: { aToB: godOfB, bToA: godOfA },
+    goodCount: good.length,
+    badCount: bad.length,
+    dims,
+    overall,
+    scores: dims,
+    summary: [
+      core >= 70 ? '日柱与相处上合多冲少，节奏比较对得上。' : core <= 50 ? '日柱有冲，节奏不同，需要多磨合。' : '日柱合冲参半，有合有磕绊，看具体维度。',
+      nayinText + '。',
+      bad.length ? `要留意：${bad.slice(0, 2).map((r) => r.text).join('；')}。` : '四柱与生肖上没有明显的冲刑。',
+    ].join(''),
+    advice: [
+      overall >= 72 ? '底子相合，别把默契当理所当然；把日子过好，比盘上的合更实在。' : overall <= 52 ? '合盘不算顺，不代表不能处；节奏不同就先说清楚，互相留空间。' : '有合有冲，遇到分歧先讲事实、再讲感受，别翻旧账。',
+      `十神上，一方对另一方偏「${godOfB}」「${godOfA}」，相处里容易形成付出与承接的默契，也可能一边倒，留意平衡。`,
+      '合盘只看传统命理的几组关系，不涉及家庭、价值观与现实相处；当个参考，别当成结论。',
+    ],
   };
 }
 
