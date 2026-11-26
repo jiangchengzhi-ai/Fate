@@ -1953,6 +1953,9 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
   .home-title{font-size:21px;margin:2px 0 4px}
   .notice-card{padding:5px 10px}
 }
+
+/* 合盘卡并入六门列表，间距与其余卡一致 */
+.gate-sub{margin-top:0;border-style:dashed}
 </style>
 </head>
 <body>
@@ -4688,16 +4691,15 @@ function homeView() {
           </span>
           <span class="gate-arrow">›</span>
         </a>`).join('')}
+      <a class="gate-card gate-sub" href="#/hepan">
+        <span class="gate-glyph">合</span>
+        <span class="gate-text">
+          <span class="gate-name">看两人合不合</span>
+          <span class="gate-desc">两个人的相处节奏</span>
+        </span>
+        <span class="gate-arrow">›</span>
+      </a>
     </nav>
-
-    <a class="gate-card gate-sub" href="#/hepan">
-      <span class="gate-glyph">合</span>
-      <span class="gate-text">
-        <span class="gate-name">看两人合不合</span>
-        <span class="gate-desc">两个人的相处节奏</span>
-      </span>
-      <span class="gate-arrow">›</span>
-    </a>
 
 ${recentHtml}
 

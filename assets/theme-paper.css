@@ -663,3 +663,6 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
   .home-title{font-size:21px;margin:2px 0 4px}
   .notice-card{padding:5px 10px}
 }
+
+/* 合盘卡并入六门列表，间距与其余卡一致 */
+.gate-sub{margin-top:0;border-style:dashed}

@@ -61,16 +61,15 @@ export function homeView() {
           </span>
           <span class="gate-arrow">›</span>
         </a>`).join('')}
+      <a class="gate-card gate-sub" href="#/hepan">
+        <span class="gate-glyph">合</span>
+        <span class="gate-text">
+          <span class="gate-name">看两人合不合</span>
+          <span class="gate-desc">两个人的相处节奏</span>
+        </span>
+        <span class="gate-arrow">›</span>
+      </a>
     </nav>
-
-    <a class="gate-card gate-sub" href="#/hepan">
-      <span class="gate-glyph">合</span>
-      <span class="gate-text">
-        <span class="gate-name">看两人合不合</span>
-        <span class="gate-desc">两个人的相处节奏</span>
-      </span>
-      <span class="gate-arrow">›</span>
-    </a>
 
 ${recentHtml}
 
