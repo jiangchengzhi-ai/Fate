@@ -580,3 +580,86 @@ body,.lead,.rep-sec p,.rep-list li,.plain-lead,.plain-row span,.auto-note{font-s
 .hour span{font-size:11px}
 /* 「不知道几点出生？按正午 12:00 算」是完整句子，抬到下限 */
 .hour-unknown span{font-size:var(--fs-caption)}
+
+/* ==========================================================================
+   首页一屏：压缩提示、标题与六张卡，390×844 不滚动
+   ========================================================================== */
+.home-brandline{margin:12px 0 0;font-size:13px;letter-spacing:.18em}
+.home-title{font-size:28px;line-height:1.25;margin:10px 0 4px}
+.home-sub{font-size:14px;margin:0 0 12px}
+.notice-card{padding:12px 14px}
+.notice-card p{font-size:13.5px;line-height:1.55;margin:0}
+.notice-card button{height:34px;padding:0 14px;font-size:12.5px;border-radius:999px}
+.gate-list{gap:10px}
+.gate-card{padding:11px 14px;border-radius:18px}
+.gate-glyph{width:46px;height:46px;font-size:27px;line-height:44px;border-radius:12px}
+.gate-name{font-size:17px;letter-spacing:.06em}
+.gate-desc{font-size:13px;line-height:1.5;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gate-arrow{font-size:18px}
+.about-strip{margin-top:14px;font-size:13px}
+@media (max-height:760px){
+  .home-title{font-size:26px;margin-top:6px}
+  .gate-card{padding:9px 14px}
+  .gate-glyph{width:42px;height:42px;font-size:25px;line-height:40px}
+  .notice-card{padding:10px 12px}
+}
+
+/* 首页二压：六张卡全部进 844 */
+.home-brandline{margin:8px 0 0;font-size:12.5px}
+.home-title{font-size:27px;line-height:1.2;margin:8px 0 2px}
+.home-sub{font-size:13.5px;margin:0 0 10px}
+.notice-card{padding:10px 12px}
+.notice-card p{font-size:13px;line-height:1.5}
+.gate-list{gap:9px}
+.gate-card{padding:10px 13px}
+.gate-glyph{width:44px;height:44px;font-size:26px;line-height:42px}
+.gate-name{font-size:16.5px}
+.gate-desc{font-size:12.5px}
+
+/* 小屏与矮屏：优先保证六张卡进一屏 */
+.gate-list{gap:8px}
+@media (max-width:380px){
+  .gate-card{padding:9px 12px}
+  .gate-glyph{width:42px;height:42px;font-size:25px;line-height:40px}
+}
+@media (max-height:780px){
+  .home-brandline{display:none}
+  .home-sub{display:none}
+  .home-title{font-size:24px;margin:6px 0 8px}
+  .notice-card{padding:8px 12px}
+  .notice-card p{font-size:12.5px;line-height:1.45}
+  .gate-list{gap:7px}
+  .gate-card{padding:7px 12px}
+  .gate-glyph{width:40px;height:40px;font-size:24px;line-height:38px}
+  .about-strip{margin-top:10px}
+}
+
+/* 第三压：390/375/360 全部一屏 */
+.gate-card{padding:9px 13px}
+.gate-list{gap:7px}
+@media (max-height:830px){
+  .home-brandline{display:none}
+  .home-sub{display:none}
+  .home-title{font-size:24px;margin:6px 0 8px}
+  .notice-card{padding:8px 12px}
+  .notice-card p{font-size:12.5px;line-height:1.45}
+  .gate-list{gap:6px}
+  .gate-card{padding:6px 12px}
+  .gate-glyph{width:38px;height:38px;font-size:23px;line-height:36px}
+}
+@media (max-height:760px){
+  .home-title{font-size:22px;margin:4px 0 6px}
+  .notice-card{padding:6px 10px}
+}
+
+@media (max-height:760px){
+  .gate-list{gap:5px}
+  .gate-card{padding:5px 12px}
+  .gate-name{font-size:16px}
+  .gate-desc{font-size:12px}
+}
+
+@media (max-height:760px){
+  .home-title{font-size:21px;margin:2px 0 4px}
+  .notice-card{padding:5px 10px}
+}
